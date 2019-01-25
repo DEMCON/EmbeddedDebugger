@@ -1,0 +1,235 @@
+﻿<!--
+Embedded Debugger PC Application which can be used to debug embedded systems at a high level.
+Copyright (C) 2019 DEMCON advanced mechatronics B.V.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<UserControl x:Class="EmbeddedDebugger.View.UserControls.ReadWriteRegistersUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:EmbeddedDebugger.View.UserControls"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
+             xmlns:enums="clr-namespace:EmbeddedDebugger.DebugProtocol.Enums;assembly=EmbeddedDebugger.DebugProtocol"
+             xmlns:customcontrols="clr-namespace:EmbeddedDebugger.View.CustomControls"
+             xmlns:converter="clr-namespace:EmbeddedDebugger.View.Converters"
+             xmlns:model="clr-namespace:EmbeddedDebugger.Model"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="952">
+    <!-- Fetching the enum data -->
+    <UserControl.Resources>
+        <ObjectDataProvider x:Key="channelModeEnumData"
+                MethodName="GetValues" 
+                ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="enums:ChannelMode" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="linecolors"
+                MethodName="GetLineColors" 
+                ObjectType="{x:Type model:Register}">
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="valueDisplayFormatEnumData"
+                MethodName="GetValues" 
+                ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="enums:ValueDisplayFormat" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <converter:BooleanAndConverter x:Key="booleanAndConverter"/>
+        <converter:BooleanOrConverter x:Key="booleanOrConverter"/>
+        <converter:BooleanInverterConverter x:Key="booleanInverterConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <!-- Top bar -->
+        <Grid Grid.Row="0" Margin="3 3 3 3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+            <Label VerticalAlignment="Center" Content="Search" Grid.Column="0" Margin="3 3 3 3" Padding="0"/>
+            <TextBox Name="SearchTextBox" TextChanged="SearchTextBox_TextChanged"  Grid.Column="1" Margin="3 3 3 3" Padding="0" VerticalContentAlignment="Center" ToolTip="Filter by regular expression"/>
+            <Button Name="ExpandAll" Content="Expand all" Click="ExpandAll_Click" Margin="3" Grid.Column="2" Grid.Row="0"/>
+            <Button Name="CollapseAll" Content="Collapse all" Click="CollapseAll_Click"  Margin="3" Grid.Column="3" Grid.Row="0"/>
+            <Button Name="ReadOnceChannels" Content="Request once" Click="ReadOnceChannels_Click" Margin="3" Grid.Column="4" Grid.Row="0"/>
+            <Button Name="RemoveAllChannels" Content="All channels off" Click="RemoveAllChannels_Click"  Margin="3" Grid.Column="5" Grid.Row="0"/>
+            <TextBox x:Name="Decimation" Grid.Column="6" HorizontalAlignment="Left" Height="23" Text="10" Width="50" VerticalContentAlignment="Center" Padding="0" HorizontalContentAlignment="Right" ToolTip="Sample time (ms)"/>
+            <Button Name="ResetTimeButton" Click="ResetTimeButton_Click"  Content="Reset Time" Margin="3 3 3 3" Grid.Column="7" />
+            <Button Name="RefreshAllButton" Click="RefreshAllButton_Click"  Content="Refresh All" Margin="3 3 3 3" Grid.Column="8"/>
+            <Label x:Name="ClearFilter" Content="❌" Grid.Column="1" Margin="0,6,3.6,7.2" VerticalAlignment="Center" HorizontalAlignment="Right" Width="17" VerticalContentAlignment="Center" Padding="0,0,3,0" HorizontalContentAlignment="Center" Foreground="DarkRed" FontWeight="Bold" MouseDown="ClearFilter_MouseDown" FontSize="10"/>
+        </Grid>
+        <!-- Datagrid -->
+        <customcontrols:TreeDataGrid x:Name="RegisterDataGrid" Grid.Row="1" RowHeight="21"
+                  AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                  SelectedCellsChanged="RegisterDataGrid_SelectedCellsChanged"
+                  SelectionUnit="Cell"
+                  ItemsSource="{Binding Path=., Mode=TwoWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" 
+                  HeadersVisibility="Column" CanUserSortColumns="True" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="Silver" BorderThickness="0">
+            <DataGrid.Columns>
+                <!-- CPUID -->
+                <DataGridTemplateColumn Header="CPUID" Width="65" IsReadOnly="True" ClipboardContentBinding="{Binding CpuID}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding CpuID}" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Register ID -->
+                <DataGridTemplateColumn Header="Register ID" Width="43" IsReadOnly="True" SortDirection="Ascending" ClipboardContentBinding="{Binding ID}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding ID}" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Name -->
+                <DataGridTemplateColumn Header="Name" Width="*" IsReadOnly="True" ClipboardContentBinding="{Binding Name}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Type -->
+                <DataGridTemplateColumn Header="Type" Width="60" IsReadOnly="True" ClipboardContentBinding="{Binding VariableTypeString}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding VariableTypeString}" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Format -->
+                <DataGridTemplateColumn Header="Format" Width="70" ClipboardContentBinding="{Binding ValueDisplayFormat}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox SelectedItem="{Binding ValueDisplayFormat, UpdateSourceTrigger=PropertyChanged}"
+                                      ItemsSource="{Binding Source={StaticResource valueDisplayFormatEnumData}}" Padding="3,0" VerticalContentAlignment="Center" >
+                                <ComboBox.IsEnabled>
+                                    <MultiBinding Converter="{StaticResource booleanAndConverter}">
+                                        <Binding Path="IsIntegralValue" />
+                                        <Binding Path="IsVariableSize" Converter="{StaticResource booleanInverterConverter}" />
+                                    </MultiBinding>
+                                </ComboBox.IsEnabled>
+                            </ComboBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Value -->
+                <DataGridTemplateColumn Header="Value" Width="*" ClipboardContentBinding="{Binding ValuePlain}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox BorderThickness="0" MaxHeight="25" Text="{Binding Value, UpdateSourceTrigger=LostFocus}" IsEnabled="{Binding IsWritable}" FontFamily="Consolas" VerticalAlignment="Center" TextAlignment="Right"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Mode -->
+                <DataGridTemplateColumn Header="Channel Mode" Width="100" ClipboardContentBinding="{Binding ChannelMode}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox SelectedItem="{Binding ChannelMode, UpdateSourceTrigger=PropertyChanged}"
+                                      ItemsSource="{Binding Source={StaticResource channelModeEnumData}}" VerticalContentAlignment="Center" Padding="3,0" >
+                                <ComboBox.IsEnabled>
+                                    <MultiBinding Converter="{StaticResource booleanAndConverter}">
+                                        <Binding Path="IsReadable" />
+                                        <Binding Path="IsVariableSize" Converter="{StaticResource booleanInverterConverter}" />
+                                    </MultiBinding>
+                                </ComboBox.IsEnabled>
+                            </ComboBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Plot -->
+                <DataGridTemplateColumn Header="Plot" Width="40">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox Name="PlotCheckBox" VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding Plot, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                      Checked="PlotCheckBox_Checked" Unchecked="PlotCheckBox_Unchecked" VerticalContentAlignment="Center" >
+                                <CheckBox.IsEnabled>
+                                    <MultiBinding Converter="{StaticResource booleanAndConverter}">
+                                        <Binding Path="IsReadable"/>
+                                        <Binding Path="IsIntegralValue" />
+                                        <Binding Path="IsVariableSize" Converter="{StaticResource booleanInverterConverter}"/>
+                                    </MultiBinding>
+                                </CheckBox.IsEnabled>
+                            </CheckBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Line color -->
+                <DataGridTemplateColumn Header="Line color" Width="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox SelectedItem="{Binding LineKnownColor, UpdateSourceTrigger=PropertyChanged}"
+                                      ItemsSource="{Binding Source={StaticResource linecolors}, Mode=OneWay}" VerticalContentAlignment="Center" Padding="3,0">
+                                <ComboBox.IsEnabled>
+                                    <MultiBinding Converter="{StaticResource booleanAndConverter}">
+                                        <Binding Path="IsReadable"/>
+                                        <Binding Path="IsIntegralValue" />
+                                        <Binding Path="IsVariableSize" Converter="{StaticResource booleanInverterConverter}" />
+                                    </MultiBinding>
+                                </ComboBox.IsEnabled>
+                            </ComboBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Log -->
+                <DataGridTemplateColumn Header="Log" Width="40">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding Log, UpdateSourceTrigger=PropertyChanged}" 
+                                      IsEnabled="{Binding IsReadable}" VerticalContentAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Refresh -->
+                <DataGridTemplateColumn Header="Refresh" Width="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Name="RefreshButton" Content="Refresh" Click="RefreshButton_Click" Padding="0" BorderThickness="0">
+                                <Button.IsEnabled>
+                                    <MultiBinding Converter="{StaticResource booleanOrConverter}">
+                                        <Binding Path="IsReadable"/>
+                                        <Binding Path="IsWritable" />
+                                    </MultiBinding>
+                                </Button.IsEnabled>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </customcontrols:TreeDataGrid>
+    </Grid>
+</UserControl>
