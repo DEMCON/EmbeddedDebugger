@@ -7,6 +7,7 @@ used in many projects. This tool allows engineers to write to registers, read fr
 and log values from registers. 
 
 The PC application is developed by a intern at DEMCON. The application is not very stable at the moment.
+The graduation report of the student can be found in ApplicationInformation.pdf
 
 TODO:
 - [ ] Make the application more stable.
