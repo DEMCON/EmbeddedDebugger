@@ -3,3 +3,13 @@
 ################################################################################
 
 /.vs
+/EmbeddedDebugger/bin/Debug
+/EmbeddedDebugger/obj
+/EmbeddedDebugger.Connectors/bin/Debug
+/EmbeddedDebugger.Connectors/obj
+/EmbeddedDebugger.Connectors.ProjectConnectors/bin/Debug
+/EmbeddedDebugger.Connectors.ProjectConnectors/obj
+/EmbeddedDebugger.DebugProtocol/bin/Debug
+/EmbeddedDebugger.DebugProtocol/obj
+/EmbeddedDebugger.UnitTests/obj
+/EmbeddedDebugger.UnitTests/bin/Debug

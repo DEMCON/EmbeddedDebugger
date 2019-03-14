@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="ConfigurationPath" Type="System.String" Scope="User">
-      <Value Profile="(Default)">C:\Configurations</Value>
+      <Value Profile="(Default)">C:\Configurations\</Value>
     </Setting>
     <Setting Name="RPCPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">11000</Value>

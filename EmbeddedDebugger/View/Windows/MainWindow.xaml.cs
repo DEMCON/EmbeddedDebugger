@@ -60,7 +60,7 @@ namespace EmbeddedDebugger.View.Windows
 
             // Set up the RegisterUserControl
             model.NewCPUNodeFound += RegisterUserControl.NewCPUNodeFound;
-            model.ConfigurationCompletelySend += RegisterUserControl.ConfigurationCompletelySend;
+            model.ConfigCompletelyLoaded += RegisterUserControl.ConfigurationCompletelySend;
             RegisterUserControl.Nodes = model.Nodes;
             RegisterUserControl.ResetTime += RegisterUserControl_ResetTime;
             RegisterUserControl.RequestOnce += model.RequestOnce;
