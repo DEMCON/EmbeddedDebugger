@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbeddedDebugger.DebugProto
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbeddedDebugger.UnitTests", "EmbeddedDebugger.UnitTests\EmbeddedDebugger.UnitTests.csproj", "{36C708BC-DD0B-49EF-A46E-2EE3EDD5A909}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbeddedEmulator", "EmbeddedEmulator\EmbeddedEmulator.csproj", "{BF6D5720-97D4-45AA-9306-7E9293D848AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{36C708BC-DD0B-49EF-A46E-2EE3EDD5A909}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36C708BC-DD0B-49EF-A46E-2EE3EDD5A909}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36C708BC-DD0B-49EF-A46E-2EE3EDD5A909}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF6D5720-97D4-45AA-9306-7E9293D848AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF6D5720-97D4-45AA-9306-7E9293D848AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF6D5720-97D4-45AA-9306-7E9293D848AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF6D5720-97D4-45AA-9306-7E9293D848AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
