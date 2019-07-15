@@ -1,0 +1,80 @@
+@startuml
+
+title Classes - Class Diagram
+
+class genericProfile {
+     +bool setRegisterList(QJsonObject register)
+     -medium
+}
+
+class genericTcpProfile{
+
+}
+
+class medium {
+ {abstract} +void connect()
+ {abstract} +void disconnect()
+ {abstract} +void showSettings()
+ +CpuListModel& getCpuList()
+ +RegisterListModel& getRegisterList()
+ -CpuListModel m_cpuListModel
+}
+
+class TCP {
+ +void connect()
+ +void disconnect()
+ +void showSettings()
+ -createDebugProtocolV0Layers()
+ -createDebugProtocolV1Layers()
+ -applicationLayer
+ -presentationLayer
+ -transportLayer
+ -QTcpSocket
+}
+
+class CpuListModel {
+    -QList<CPU*> m_cpuList;
+}
+
+class CPU {
+    -RegisterListModel m_registerListModel
+}
+
+class RegisterListModel{
+    -QList<Register*> m_registerList
+}
+
+class applicationLayerV0{
+    void readRegister(Register&) : slot
+    void writeRegister(Register&) : slot
+    void resetTime(): slot
+    void configDebugChannel(Regsiter&) : slot
+    int getDecimation(): slot
+    void setDecimation(newDecimation): signal
+    void registerUpdated(Register&): signal
+    void cpuFound(CPU) : signal
+    void debugString(QString): signal
+}
+
+class presentationLayerV0{
+    convert signals & Slots from applicationLayer to DebugProtocol commands
+}
+
+class transportLayerV0 {
+    add start/stop byte
+    add uc ID
+    add msgId to protocolMessage
+    add crc to debugProtocol message
+    checks if send messages had a response, else resend message.
+}
+
+
+genericProfile <|-left- genericTcpProfile
+medium  <-down-* genericProfile
+medium <|-down- TCP
+CpuListModel <-down-* medium
+Register <-down-* RegisterListModel
+RegisterListModel <-down-* CPU
+CPU <-down-* CpuListModel
+
+@enduml

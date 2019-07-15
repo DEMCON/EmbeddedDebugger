@@ -1,0 +1,6 @@
+{
+  "Registers": [
+    {"id": 1, "name": "sine", "ReadWrite": "Read", "Type": "uint8_t", "Source": "HandWrittenOffset", "DerefDepth": 0, "Offset":1},
+    {"id": 2, "name": "My red green button", "ReadWrite": "Read", "Type": "bool", "Source": "HandWrittenOffset", "DerefDepth": 0, "Offset": 2}
+  ]
+}
