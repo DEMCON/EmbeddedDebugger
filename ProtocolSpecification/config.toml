@@ -1,0 +1,17 @@
+baseURL = "https://demcon.github.io/EDProtocol/"
+languageCode = "en-us"
+title = "Embedded Debugger"
+theme = "hugo-theme-learn"
+metaDataFormat = "yaml"
+canonifyURLs = true
+
+
+# For search functionality
+[outputs]
+home = [ "HTML", "RSS", "JSON"]
+
+[params]
+  # Change default color scheme with a variant one. Can be "red", "blue", "green".
+  themeVariant = "blue"
+  showVisitedLinks = true
+  disableNextPrev = false

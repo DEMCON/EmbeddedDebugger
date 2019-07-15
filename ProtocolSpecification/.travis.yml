@@ -1,0 +1,19 @@
+install:
+    - wget https://github.com/gohugoio/hugo/releases/download/v0.53/hugo_0.53_Linux-64bit.deb
+    - sudo dpkg -i hugo*.deb
+    - rm -rf public 2> /dev/null
+    - rm *.deb
+
+script:
+    - hugo
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+  keep-history: true
+  verbose: true
+  local-dir: public
+  target_branch: gh-pages
+  on:
+    branch: master
