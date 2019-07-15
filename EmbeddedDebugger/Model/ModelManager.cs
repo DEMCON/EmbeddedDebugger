@@ -51,8 +51,8 @@ namespace EmbeddedDebugger.Model
         public event EventHandler NewCPUNodeFound = delegate { };
         public event EventHandler HasConnected = delegate { };
         public event EventHandler HasDisconnected = delegate { };
+        public event EventHandler ConfigCompletelyLoaded = delegate { };
         public event EventHandler<Register> RegisterQueried = delegate { };
-        public event EventHandler ConfigurationCompletelySend = delegate { };
         #endregion
 
         public ModelManager()
@@ -63,8 +63,13 @@ namespace EmbeddedDebugger.Model
             dp.HasConnected += CoreConnected;
             dp.HasDisconnected += CoreDisconnected;
             dp.RegisterQueried += Dp_RegisterQueried;
-            dp.ConfigurationCompletelySend += Dp_ConfigurationCompletelySend;
+            dp.ConfigLoaded += Dp_ConfigLoaded;
             rpcInterface = new RpcInterface(this, dp);
+        }
+
+        private void Dp_ConfigLoaded(object sender, EventArgs e)
+        {
+            ConfigCompletelyLoaded(this, new EventArgs());
         }
 
         public void RpcChanged(bool enabled)
@@ -82,11 +87,6 @@ namespace EmbeddedDebugger.Model
         public void RequestOnce(object sender, int e)
         {
             dp.ReadChannelData((byte)e, 0x02);
-        }
-
-        private void Dp_ConfigurationCompletelySend(object sender, EventArgs e)
-        {
-            ConfigurationCompletelySend(sender, e);
         }
 
         private void Dp_RegisterQueried(object sender, Register reg)

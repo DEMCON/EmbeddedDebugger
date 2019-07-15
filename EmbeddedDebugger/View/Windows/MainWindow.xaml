@@ -61,7 +61,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <usercontrols:TerminalUserControl x:Name="TerminalUserControl"/>
             </TabItem>
             <TabItem Header="Tracing">
-                <usercontrols:TraceUserControl x:Name="TraceUserControl"/>
+                <Grid>
+                    <Label FontSize="50" Content="Under construction" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <usercontrols:TraceUserControl x:Name="TraceUserControl" IsEnabled="False"/>
+                </Grid>
             </TabItem>
             <TabItem Header="Logging">
                 <usercontrols:LoggingUserControl x:Name="LoggingUserControl"/>

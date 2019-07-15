@@ -22,9 +22,7 @@ using EmbeddedDebugger.DebugProtocol;
 using EmbeddedDebugger.DebugProtocol.Enums;
 using EmbeddedDebugger.DebugProtocol.Messages;
 using EmbeddedDebugger.DebugProtocol.RegisterValues;
-using EmbeddedDebugger.Model.EmbeddedConfiguration;
 using EmbeddedDebugger.Model.Logging;
-using EmbeddedDebugger.Model.Messages;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -51,10 +49,7 @@ namespace EmbeddedDebugger.Model
         private readonly Dictionary<byte, byte> msgIDs;
         private readonly List<ProtocolMessage> messagesWaitingAck;
         private readonly System.Timers.Timer resendsTimer;
-        private Dictionary<System.Timers.Timer, CpuNode> EmbeddedConfigurationTimers;
         private readonly ValueLogger logger;
-        private Dictionary<Command, List<long>> lists;
-        private System.Diagnostics.Stopwatch configStopWatch;
 
         #region Properties
         private IConnector connector;
@@ -74,8 +69,8 @@ namespace EmbeddedDebugger.Model
         public event EventHandler HasConnected = delegate { };
         public event EventHandler HasDisconnected = delegate { };
         public event EventHandler<Register> RegisterQueried = delegate { };
-        public event EventHandler ConfigurationCompletelySend = delegate { };
         public event EventHandler<long> NewReadChannelData = delegate { };
+        public event EventHandler ConfigLoaded = delegate { };
         #endregion
 
         public DebugProtocol(ModelManager core, ValueLogger logger)
@@ -93,6 +88,7 @@ namespace EmbeddedDebugger.Model
                 IsBackground = true
             };
             myThread.Start();
+            // Create a timer for resending the messages
             resendsTimer = new System.Timers.Timer(100)
             {
                 AutoReset = true
@@ -101,14 +97,24 @@ namespace EmbeddedDebugger.Model
             resendsTimer.Start();
         }
 
-        private void Logger_StopLogging(object sender, EventArgs e)
-        {
-            NewReadChannelData -= logger.NewValuesReceived;
-        }
-
+        /// <summary>
+        /// Make sure the eventhandlers are added whenever logging is started
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Logger_StartLogging(object sender, EventArgs e)
         {
             NewReadChannelData += logger.NewValuesReceived;
+        }
+
+        /// <summary>
+        /// Make sure the eventhandlers are removed whenever logging is stopped
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Logger_StopLogging(object sender, EventArgs e)
+        {
+            NewReadChannelData -= logger.NewValuesReceived;
         }
 
         /// <summary>
@@ -158,6 +164,7 @@ namespace EmbeddedDebugger.Model
         {
             connector.ShowDialog();
         }
+
         #region Delegates
         /// <summary>
         /// When the connector actually connects (servers might take a while to have a client connect to it) tell the world and search for CPU nodes
@@ -217,12 +224,6 @@ namespace EmbeddedDebugger.Model
         private void DoWork()
         {
             byte[] remainder = new byte[0];
-            System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-            lists = new Dictionary<Command, List<long>>();
-            foreach (Command c in (Command[])Enum.GetValues(typeof(Command)))
-            {
-                lists.Add(c, new List<long>());
-            }
             while (true)
             {
                 if (incomingBytes.TryDequeue(out byte[] inputByte))
@@ -242,7 +243,6 @@ namespace EmbeddedDebugger.Model
                                     msg.IsAckMessage = true;
                                 }
                             }
-                            stopwatch.Start();
                             switch (msg.Command)
                             {
                                 case Command.GetVersion:
@@ -272,16 +272,7 @@ namespace EmbeddedDebugger.Model
                                 case Command.DebugString:
                                     msg.InvalidReason = DispatchDebugStringMessage(msg);
                                     break;
-                                case Command.EmbeddedConfiguration:
-                                    msg.InvalidReason = DispatchEmbeddedConfiguration(msg);
-                                    break;
-                                case Command.Tracing:
-                                    msg.InvalidReason = DispatchTracing(msg);
-                                    break;
                             }
-                            stopwatch.Stop();
-                            lists[msg.Command].Add(stopwatch.ElapsedMilliseconds);
-                            stopwatch.Reset();
                         }
                         // Get the node this message came from and add it to the message list if it hasn't already been set
                         CpuNode node = core.Nodes.FirstOrDefault(x => x.ID == msg.ControllerID);
@@ -327,6 +318,12 @@ namespace EmbeddedDebugger.Model
             }
         }
 
+        /// <summary>
+        /// This method is called whenever a CpuNode adds a debugchannel
+        /// Whenever the event is called, the channel is configured through these steps
+        /// </summary>
+        /// <param name="sender">The CpuNode</param>
+        /// <param name="r">The register for which the debugchannel is to be set up</param>
         public void AddNewDebugChannel(object sender, Register r)
         {
             if (!r.IsDebugChannel) return;
@@ -334,24 +331,45 @@ namespace EmbeddedDebugger.Model
             ConfigChannel(node.ID, (byte)r.DebugChannel, ChannelMode.LowSpeed, r);
         }
 
+        /// <summary>
+        /// This method is called whenever a CpuNode wants to remove a debugchannel
+        /// The CpuNode (object) is responsible for removing the debugchannel for itself, this is only for the microcontroller
+        /// </summary>
+        /// <param name="sender">The CpuNode</param>
+        /// <param name="r">The register for which the debugchannel is to be removed</param>
         public void RemoveDebugChannel(object sender, Register r)
         {
             CpuNode node = (CpuNode)sender;
             ConfigChannel(node.ID, (byte)r.DebugChannel, ChannelMode.Off);
         }
 
+        /// <summary>
+        /// This method is called whenever a CpuNode wants to update a debugchannel
+        /// </summary>
+        /// <param name="sender">The CpuNode</param>
+        /// <param name="r">The register for which the debugchannel is to be updated</param>
         public void UpdateDebugChannel(object sender, Register r)
         {
             CpuNode node = (CpuNode)sender;
             ConfigChannel(node.ID, (byte)r.DebugChannel, r.ChannelMode, r);
         }
 
+        /// <summary>
+        /// This method is used to query the current value for a register
+        /// </summary>
+        /// <param name="sender">The CpuNode</param>
+        /// <param name="r">The register for which the value is queried</param>
         public void Node_RegisterQueriesValue(object sender, Register r)
         {
             CpuNode node = (CpuNode)sender;
             QueryRegister(node.ID, node, r);
         }
 
+        /// <summary>
+        /// This method is used to change the value for a register
+        /// </summary>
+        /// <param name="sender">The CpuNode</param>
+        /// <param name="r">The register for which the value is to be changed</param>
         private void Node_RegisterValueChanged(object sender, object[] e)
         {
             if (!(sender is CpuNode) && !(e[0] is Register) && !(e[1] is RegisterValue)) return;
@@ -524,11 +542,6 @@ namespace EmbeddedDebugger.Model
             SendMessage(new ProtocolMessage(nodeID, GetMsgID(nodeID), Command.DebugString, Encoding.UTF8.GetBytes(debugString)));
         }
 
-        public void RequestEmbeddedConfiguration(byte nodeID)
-        {
-            SendMessage(new ProtocolMessage(nodeID, GetMsgID(nodeID), Command.EmbeddedConfiguration));
-        }
-
         /// <summary>
         /// This method returns a proper ID for a message, making sure it never gets to 0
         /// If it would be 0x00, the uC would never send a ACK msg
@@ -621,25 +634,20 @@ namespace EmbeddedDebugger.Model
             node.RegisterValueChanged += Node_RegisterValueChanged;
             node.RegisterLoggingChanged += logger.RegisterLoggingChanged;
             // Try to load the configuration from .xml file
-            if (!node.TryToLoadConfiguration(
+            if (
+            node.TryToLoadConfiguration(
                 $"{Properties.Settings.Default.ConfigurationPath}" +
-                $"/{connector.ToString()}" +
+                $"{connector.ToString()}" +
                 $"/{node.Name.Trim()}" +
                 $"/cpu{id.ToString("D2")}" +
                 $"-V{node.ApplicationVersion.Major.ToString("D2")}" +
                 $"_{node.ApplicationVersion.Minor.ToString("D2")}" +
                 $"_{node.ApplicationVersion.Build.ToString("D4")}.xml"))
             {
-                // If this cannot be found, request it from the node
-                node.EmbeddedConfig = new EmbeddedConfig();
-                RequestEmbeddedConfiguration(node.ID);
-            }
-            else
+                ConfigLoaded(this, new EventArgs());
+            } else
             {
-                node.EmbeddedConfig.SetRegisters(node.EmbeddedConfig.Registers.Where(x => x.Show == null || x.Show == true).ToList());
-                node.EmbeddedConfig.ConfigCompletelyLoaded = true;
-                ConfigurationCompletelySend(this, new EventArgs());
-                //node.SetupChannels();
+                // TODO: Implement something to let the user know that no config file was found
             }
             return null;
         }
@@ -722,7 +730,7 @@ namespace EmbeddedDebugger.Model
             }
             else
             {
-                value = msg.CommandData.Skip(6).Take(size).ToArray();                
+                value = msg.CommandData.Skip(6).Take(size).ToArray();
             }
             if (!core.Nodes.Any(x => x.ID == msg.ControllerID))
             {
@@ -742,7 +750,8 @@ namespace EmbeddedDebugger.Model
 
         /// <summary>
         /// This method is used to dispatch a Config Channel message
-        /// Check if the setting up of the channel was done correctly
+        /// Check if the setting up of the channel was done correctly]
+        /// Currently Microcontroller -> Embedded Debugger is not yet supported
         /// </summary>
         /// <param name="msg">The received message</param>
         /// <returns>In case the dispatching failes, a string with explanation is returned</returns>
@@ -815,10 +824,7 @@ namespace EmbeddedDebugger.Model
             uint time = (uint)((0x00 << 24) | (timeArray[2] << 16) | (timeArray[1] << 8) | timeArray[0]);
             ushort mask = BitConverter.ToUInt16(msg.CommandData.Skip(3).Take(2).ToArray(), 0);
             List<byte> value = msg.CommandData.Skip(5).ToList();
-#if DEBUG
-            Console.WriteLine(msg);
-#endif
-            for (int i = node.MaxNumberOfDebugChannels; i >= 0 ; i--)
+            for (int i = node.MaxNumberOfDebugChannels; i >= 0; i--)
             {
                 if ((mask >> i & 1) == 1 && node.DebugChannels.ContainsKey(i))
                 {
@@ -850,177 +856,6 @@ namespace EmbeddedDebugger.Model
             node.NewTerminalData = Encoding.UTF8.GetString(msg.CommandData);
             return null;
         }
-
-        private string DispatchEmbeddedConfiguration(ProtocolMessage msg)
-        {
-#if DEBUG
-            Console.WriteLine(msg);
-#endif
-            if (msg.CommandData.Length < 10 && msg.CommandData.Length != 4 && msg.CommandData.Length != 5) return "Message too short for Configuration Message";
-            if (!core.Nodes.Any(x => x.ID == msg.ControllerID)) return "No such node was found";
-            CpuNode node = core.Nodes.First(x => x.ID == msg.ControllerID);
-            if (msg.CommandData.Length == 4)
-            {
-                Console.WriteLine(BitConverter.ToUInt32(msg.CommandData, 0));
-                if (node.EmbeddedConfig.RegisterCount == BitConverter.ToUInt32(msg.CommandData, 0))
-                {
-                    if (node.EmbeddedConfig.ConfigCompletelyLoaded) return "Config was already send...";
-                    node.EmbeddedConfig.ConfigCompletelyLoaded = true;
-                    ConfigurationCompletelySend(this, new EventArgs());
-                    node.SetupChannels();
-                    ReadChannelData(node.ID, 0x01);
-                }
-                else
-                {
-                    // Since the number of registers did not match the number of register that was told, request the entire list again
-                    RequestEmbeddedConfiguration(node.ID);
-                }
-            }
-            else
-            {
-                uint id = BitConverter.ToUInt32(msg.CommandData, 0);
-                int index = 4;
-                byte nameSize = msg.CommandData[index++];
-                string name = Encoding.UTF8.GetString(msg.CommandData.Skip(index).Take(nameSize).ToArray());
-                index += nameSize;
-                uint offset = BitConverter.ToUInt32(msg.CommandData.Skip(index).Take(4).ToArray(), 0);
-                index += 4;
-                byte size = msg.CommandData.Skip(index++).First();
-                byte type = msg.CommandData.Skip(index++).First();
-                byte ctrl = msg.CommandData.Skip(index).First();
-                Register r = null;
-                try
-                {
-                    MessageCodec.GetControlByteValues(node.ProtocolVersion, ctrl, out ReadWrite readWrite, out Source source, out int derefDepth);
-                    r = new Register()
-                    {
-                        ID = id,
-                        FullName = name,
-                        Offset = offset,
-                        Size = size,
-                        VariableType = (VariableType)type,
-                        DerefDepth = derefDepth,
-                        ReadWrite = readWrite,
-                        Source = source,
-                        Show = true,
-                        CpuNode = node,
-                    };
-                }
-                catch (NotSupportedException e)
-                {
-                    throw;
-                }
-
-
-                // Check if there already is a register with this ID
-                if (node.Registers.Any(x => x.ID == id))
-                {
-                    if (node.Registers.First(x => x.ID == id).Equals(r))
-                    {
-                        // Probably an ACK, since it was the same register
-                        return null;
-                    }
-                    else
-                    {
-                        return "A different register with the same ID has already been assigned";
-                    }
-                }
-                else
-                {
-                    // Determine where the Register is supposed to be placed
-                    Register parent = null;
-                    if (name.ToString().Contains('[') && name.ToString().Contains(']')
-                        && (!name.ToString().Contains('.') || name.ToString().LastIndexOf('.') < name.ToString().LastIndexOf(']'))
-                        && (!name.ToString().Contains('\\') || name.ToString().LastIndexOf('\\') < name.ToString().LastIndexOf(']'))
-                        )
-                    {
-                        parent = GetParent(node.EmbeddedConfig.Registers, name.ToString().Remove(name.ToString().LastIndexOf('[')), null);
-                    }
-                    else if (name.ToString().Contains('.')
-                        && (!name.ToString().Contains('\\') || name.ToString().LastIndexOf('\\') < name.ToString().LastIndexOf('.'))
-                        )
-                    {
-                        parent = GetParent(node.EmbeddedConfig.Registers, name.ToString().Remove(name.ToString().LastIndexOf('.')), null);
-                    }
-                    else if (name.ToString().Contains('\\'))
-                    {
-                        parent = GetParent(node.EmbeddedConfig.Registers, name.ToString().Remove(name.ToString().LastIndexOf('\\')), null);
-                    }
-                    if (parent == null)
-                    {
-                        if (node.EmbeddedConfig.Registers.Any(x => x.ID == r.ID && x.Name.Equals(r.Name))) return null;
-                        node.EmbeddedConfig.AddRegister(r);
-                    }
-                    else
-                    {
-                        if (parent.ChildRegisters.Any(x => x.ID == r.ID && x.Name.Equals(r.Name))) return null;
-                        parent.ChildRegisters.Add(r);
-                    }
-                    r.Parent = parent;
-                    node.AddRegister(r, r.ReadWrite);
-                }
-            }
-            return null;
-        }
-
-        private string DispatchTracing(ProtocolMessage msg)
-        {
-            if (!core.Nodes.Any(x => x.ID == msg.ControllerID) || msg.CommandData.Length == 0) return "Empty string";
-            CpuNode node = core.Nodes.First(x => x.ID == msg.ControllerID);
-            node.TraceMessage = new TraceMessage(msg.CommandData, node.ID);
-            return null;
-        }
-
-        #region Embedded Config Helper methods
-        /// <summary>
-        /// This method is used to find the parent of a node
-        /// This node can be part of a large tree and this method finds the lowest parent for that new node
-        /// Example:
-        /// SomeStruct.ArrayOfStructs[0].ArrayOfIntegers[1]
-        /// This is taken down part by part
-        /// Until finally, ArrayOfIntegers as array is returned as the parent of ArrayOfIntegers[1]
-        /// Yes, recursion is used here.
-        /// "To understand recursion, you must first understand recursion"
-        /// </summary>
-        /// <param name="toSearch">The list to search the parent in</param>
-        /// <param name="parentName">The "path" to the lowest parent, if the parent is not in the child registers, return this</param>
-        /// <param name="parent">The previous parent</param>
-        /// <returns>The parent register</returns>
-        private Register GetParent(IList<Register> toSearch, string parentName, Register parent)
-        {
-            int firstIndexOfDot = parentName.IndexOf('.');
-            int firstIndexOfBracket = parentName.IndexOf('[');
-            Register reg = null;
-
-            // If the complete parent string is present in the list, return that one
-            if (toSearch.Any(x => x.Name.Equals(parentName)))
-            {
-                reg = toSearch.First(x => x.Name.Equals(parentName));
-            }
-            // If the parent string contains a period character, remove all characters after that and search deeper
-            else if (firstIndexOfDot >= 0 && toSearch.Any(x => x.Name.Equals(parentName.Remove(firstIndexOfDot))))
-            {
-                parent = toSearch.First(x => x.Name.Equals(parentName.Remove(firstIndexOfDot)));
-                reg = GetParent(parent.ChildRegisters, parentName.Substring(firstIndexOfDot + 1), parent);
-            }
-            // If the parent string contains a chevron, remove all characters after that and search deeper
-            else if (firstIndexOfBracket >= 0 && toSearch.Any(x => x.Name.Equals(parentName.Remove(firstIndexOfBracket))))
-            {
-                parent = toSearch.First(x => x.Name.Equals(parentName.Remove(firstIndexOfBracket)));
-                reg = GetParent(parent.ChildRegisters, parentName, parent);
-            }
-            // The parent cannot be found, therefore return null
-            else
-            {
-                return null;
-            }
-            if (reg != null)
-            {
-                return reg;
-            }
-            return parent;
-        }
-        #endregion
         #endregion
         #endregion
     }

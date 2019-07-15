@@ -25,7 +25,7 @@ namespace EmbeddedDebugger.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Configurations")]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Configurations\\")]
         public string ConfigurationPath {
             get {
                 return ((string)(this["ConfigurationPath"]));
