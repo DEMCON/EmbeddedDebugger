@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using EmbeddedDebugger.Model;
+using EmbeddedDebugger.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -50,18 +51,18 @@ namespace EmbeddedDebugger.View.UserControls
                 registers = value;
             }
         }
+        private readonly SystemViewModel SystemViewModel;
         #endregion
 
         #region EventHandlers
         public event EventHandler<Register> RegisterPlottingChanged = delegate { };
-        public delegate void ResetTimeHandler(int decimation_ms);
-        public event ResetTimeHandler ResetTime = delegate { };
         public event EventHandler RequestOnce = delegate { };
         #endregion
 
         public ReadWriteRegistersUserControl()
         {
             InitializeComponent();
+            SystemViewModel = ((ViewModelManager)Application.Current.Resources["ViewModelManager"]).SystemViewModel;
         }
 
         public void NewRegisterAdded()
@@ -101,7 +102,7 @@ namespace EmbeddedDebugger.View.UserControls
 
             Decimation.Text = decimation_ms.ToString();
 
-            ResetTime(decimation_ms);
+            SystemViewModel.ResetTime();
         }
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)

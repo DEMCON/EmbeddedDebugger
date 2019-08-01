@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using EmbeddedDebugger.Model;
 using EmbeddedDebugger.Properties;
+using EmbeddedDebugger.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,8 +46,10 @@ namespace EmbeddedDebugger.View.Windows
         {
             InitializeComponent();
 
-            model = new ModelManager();
-
+            //model = new ModelManager();
+            //viewModelManager = new ViewModelManager(model);
+            //viewModelManager = Resources.
+            model = ((ViewModelManager)Application.Current.Resources["ViewModelManager"]).ModelManager;
             // Set up the ConnectUserControl
             model.HasConnected += ConnectUserControl.HasConnected;
             model.HasDisconnected += ConnectUserControl.HasDisconnected;
@@ -62,7 +65,6 @@ namespace EmbeddedDebugger.View.Windows
             model.NewCPUNodeFound += RegisterUserControl.NewCPUNodeFound;
             model.ConfigCompletelyLoaded += RegisterUserControl.ConfigurationCompletelySend;
             RegisterUserControl.Nodes = model.Nodes;
-            RegisterUserControl.ResetTime += RegisterUserControl_ResetTime;
             RegisterUserControl.RequestOnce += model.RequestOnce;
 
             // Set up the TerminalUserControl
@@ -105,11 +107,6 @@ namespace EmbeddedDebugger.View.Windows
                 return;
             }
             ConnectorStatusBarItem.Content = $"Connected over {model.Connector}";
-        }
-
-        private void RegisterUserControl_ResetTime(int decimation_ms)
-        {
-            model.ResetTime(decimation_ms);
         }
 
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)

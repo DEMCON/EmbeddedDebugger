@@ -119,6 +119,8 @@
     <Compile Include="Model\Register.cs" />
     <Compile Include="Model\RPC\RpcInterface.cs" />
     <Compile Include="Model\RPC\RpcResolver.cs" />
+    <Compile Include="ViewModel\SystemViewModel.cs" />
+    <Compile Include="ViewModel\ViewModelManager.cs" />
     <Compile Include="View\Converters\BooleanAndConverter.cs" />
     <Compile Include="View\Converters\BooleanInverterConverter.cs" />
     <Compile Include="View\Converters\BooleanOrConverter.cs" />
@@ -207,7 +209,9 @@
     <Resource Include="DEMCON.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Page Include="View\UserControls\EditXMLUserControl.xaml">
@@ -308,6 +312,8 @@
       <Name>EmbeddedDebugger.DebugProtocol</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Model\NewFolder1\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

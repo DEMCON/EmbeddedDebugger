@@ -16,20 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using EmbeddedDebugger.Model;
+using EmbeddedDebugger.ViewModel;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace EmbeddedDebugger.View.UserControls
 {
@@ -38,11 +28,10 @@ namespace EmbeddedDebugger.View.UserControls
     /// </summary>
     public partial class RegisterUserControl : UserControl
     {
+
         public List<CpuNode> Nodes { get => CpuNodeChooserUserControl.Nodes; set => CpuNodeChooserUserControl.Nodes = value; }
 
         #region EventHandlers
-        public delegate void ResetTimeHandler(int decimation_ms);
-        public event ResetTimeHandler ResetTime = delegate { };
         public event EventHandler<int> RequestOnce = delegate { };
         #endregion
 
@@ -51,7 +40,6 @@ namespace EmbeddedDebugger.View.UserControls
             InitializeComponent();
             CpuNodeChooserUserControl.SelectedCPUChanged += CpuNodeChooserUserControl_SelectedCPUChanged;
             ReadWriteRegisterUserControl.RegisterPlottingChanged += ReadWriteRegisterUserControl_RegisterPlottingChanged;
-            ReadWriteRegisterUserControl.ResetTime += ReadWriteRegisterUserControl_ResetTime;
             ReadWriteRegisterUserControl.RequestOnce += ReadWriteRegisterUserControl_RequestOnce;
         }
 
@@ -63,19 +51,9 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void ReadWriteRegisterUserControl_RequestOnce(object sender, EventArgs e)
         {
-            foreach(CpuNode cpu in CpuNodeChooserUserControl.Nodes)
+            foreach (CpuNode cpu in CpuNodeChooserUserControl.Nodes)
             {
                 RequestOnce(this, cpu.ID);
-            }
-        }
-
-        private void ReadWriteRegisterUserControl_ResetTime(int decimation_ms)
-        {
-            ResetTime(decimation_ms);
-            foreach (Register r in new List<Register>(PlotUserControl.PlotRegisters))
-            {
-                if (!ReadWriteRegisterUserControl.Registers.Contains(r))
-                    PlotUserControl.RemoveRegisterFromPlot(r);
             }
         }
 
