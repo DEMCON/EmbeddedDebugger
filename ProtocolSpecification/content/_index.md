@@ -20,3 +20,5 @@ At application-level we even need more sophisticated debugging-tools. In general
 Production testing is close related to hardware testing. Yet it requires a higher degree of automation with growing production volumes.
 
 This document describes a general debug-protocol that can be used in all areas, being least applicable for software debugging. It needs implementation at both embedded side as PC-side. The debug-protocol can run over several types of busses, like CAN-bus, serial, Ethernet etc. It is a binary protocol with a message structure.
+
+There are several implementations of this protocol, they can be found here: https://github.com/DEMCON/EmbeddedDebugger
