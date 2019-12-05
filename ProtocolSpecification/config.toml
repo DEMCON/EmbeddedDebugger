@@ -3,7 +3,6 @@ languageCode = "en-us"
 title = "Embedded Debugger"
 theme = "hugo-theme-learn"
 metaDataFormat = "yaml"
-canonifyURLs = true
 
 
 # For search functionality

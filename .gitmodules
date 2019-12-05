@@ -1,0 +1,3 @@
+[submodule "ProtocolSpecification/themes/hugo-theme-learn"]
+	path = ProtocolSpecification/themes/hugo-theme-learn
+	url = https://github.com/matcornic/hugo-theme-learn
