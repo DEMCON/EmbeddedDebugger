@@ -46,10 +46,12 @@ namespace EmbeddedDebugger.View.Windows
         {
             InitializeComponent();
 
+            ViewModelManager vmm = new ViewModelManager();
+            this.DataContext = vmm;
             //model = new ModelManager();
             //viewModelManager = new ViewModelManager(model);
             //viewModelManager = Resources.
-            model = ((ViewModelManager)Application.Current.Resources["ViewModelManager"]).ModelManager;
+            model = vmm.ModelManager;
             // Set up the ConnectUserControl
             model.HasConnected += ConnectUserControl.HasConnected;
             model.HasDisconnected += ConnectUserControl.HasDisconnected;

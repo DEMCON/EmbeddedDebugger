@@ -1,24 +1,40 @@
-﻿using EmbeddedDebugger.Model;
-using System;
+﻿using System;
+using System.Timers;
+using EmbeddedDebugger.Model;
 
 namespace EmbeddedDebugger.ViewModel
 {
     public class ViewModelManager
     {
-        private static bool IsInstance = false;
-        public ModelManager ModelManager { get; private set; }
+        private System.Timers.Timer refreshTimer;
+        private int mediumCounter, lowCounter;
 
-        public SystemViewModel SystemViewModel { get; private set; }
+        // TODO: Needs to be set to private, modelmanager should never ever be seen from the View
+        public ModelManager ModelManager { get; }
+
+        public SystemViewModel SystemViewModel { get; }
+
+        public event EventHandler RefreshHigh = delegate { };
+        public event EventHandler RefreshMedium = delegate { };
+        public event EventHandler RefreshLow = delegate { };
 
 
         public ViewModelManager()
         {
-            if (IsInstance) throw new ArgumentException("ViewModelManager already exists");
-            // TODO remove static instance, maybe make it singleton
-            IsInstance = true;
             ModelManager = new ModelManager();
             SystemViewModel = new SystemViewModel(ModelManager);
+            this.refreshTimer = new Timer
+            {
+                Interval = 100
+            };
+            this.refreshTimer.Elapsed += this.RefreshTimer_Elapsed;
+            this.mediumCounter = 0;
+            this.lowCounter
         }
 
+        private void RefreshTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            
+        }
     }
 }

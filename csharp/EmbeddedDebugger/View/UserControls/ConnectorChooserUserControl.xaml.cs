@@ -15,20 +15,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+using EmbeddedDebugger.Connectors.Interfaces;
+using EmbeddedDebugger.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace EmbeddedDebugger.View.UserControls
 {
@@ -37,24 +30,20 @@ namespace EmbeddedDebugger.View.UserControls
     /// </summary>
     public partial class ConnectorChooserUserControl : UserControl
     {
+        private SystemViewModel systemViewModel;
+
         #region Properties
-        private List<object> connectors;
-        public List<object> Connectors
+        private List<IConnector> connectors;
+        public List<IConnector> Connectors
         {
-            get => connectors;
+            get => this.connectors;
             set
             {
-                connectors = value;
+                this.connectors = value;
                 ConnectorChooserComboBox.IsSynchronizedWithCurrentItem = true;
-                ConnectorChooserComboBox.ItemsSource = Connectors.OrderBy(x => x.ToString());
+                ConnectorChooserComboBox.ItemsSource = this.connectors.OrderBy(x => x.ToString());
             }
         }
-
-        private object selectedConnector;
-        public object SelectedConnector { get => selectedConnector; set => selectedConnector = value; }
-
-        private bool connected = false;
-        public bool Connected { get => connected; set => connected = value; }
         #endregion
 
         #region EventHandlers
@@ -71,29 +60,38 @@ namespace EmbeddedDebugger.View.UserControls
 
         public void HasConnected(object sender, EventArgs e)
         {
-            connected = true;
+            this.Connected = true;
             Refresh();
         }
 
         public void HasDisconnected(object sender, EventArgs e)
         {
-            connected = false;
+            this.Connected = false;
             Refresh();
         }
 
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
-            Connect(this, new EventArgs());
+            if (this.ConnectorChooserComboBox.SelectedItem is IConnector connector)
+            {
+                this.systemViewModel.ConnectConnector(connector);
+            }
         }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            ShowSettings(this, new EventArgs());
+            if (this.ConnectorChooserComboBox.SelectedItem is IConnector connector)
+            {
+                this.systemViewModel.ShowConnectorSettings(connector);
+            }
         }
 
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
-            Disconnect(this, new EventArgs());
+            if (this.ConnectorChooserComboBox.SelectedItem is IConnector connector)
+            {
+                this.systemViewModel.DisconnectConnector(connector);
+            }
         }
 
         public void Refresh()
@@ -109,10 +107,12 @@ namespace EmbeddedDebugger.View.UserControls
             ConnectorChooserComboBox.IsEnabled = !connected;
         }
 
-        private void ConnectorChooserComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ConnectorChooserUserControl_OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            selectedConnector = ConnectorChooserComboBox.SelectedItem;
-            SelectedConnectorChanged(this, new EventArgs());
+            if (e.NewValue is ViewModelManager vmm)
+            {
+                this.systemViewModel = vmm.SystemViewModel;
+            }
         }
     }
 }

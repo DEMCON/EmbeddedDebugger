@@ -21,7 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="35" d:DesignWidth="250">
+             d:DesignHeight="35" d:DesignWidth="250"
+             DataContextChanged="CpuNodeChooserUserControl_OnDataContextChanged ">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="125"/>

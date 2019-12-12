@@ -30,6 +30,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using EmbeddedDebugger.ViewModel;
 
 namespace EmbeddedDebugger.View.UserControls
 {
@@ -38,6 +39,7 @@ namespace EmbeddedDebugger.View.UserControls
     /// </summary>
     public partial class CpuNodeChooserUserControl : UserControl
     {
+        private SystemViewModel systemViewModel;  
         private CpuNode SelectedNode;
         private List<CpuNode> nodes;
         private List<Register> registers;
@@ -176,6 +178,14 @@ namespace EmbeddedDebugger.View.UserControls
             // Since this usercontrol does not discriminate between one or multiple cpus selected
             // Just let the world know a different cpud was selected
             SelectedCPUChanged(this, new EventArgs());
+        }
+
+        private void CpuNodeChooserUserControl_OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is ViewModelManager vmm)
+            {
+                this.systemViewModel = vmm.SystemViewModel;
+            }
         }
     }
 }

@@ -20,10 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:EmbeddedDebugger"
              xmlns:dataproviders="clr-namespace:EmbeddedDebugger.View.DataProviders"
-             StartupUri="View/Windows/MainWindow.xaml"
-             xmlns:VM="clr-namespace:EmbeddedDebugger.ViewModel">
+             StartupUri="View/Windows/MainWindow.xaml">
     <Application.Resources>
-        <VM:ViewModelManager x:Key="ViewModelManager" />
         <dataproviders:AboutAssemblyDataProvider x:Key="aboutDataProvider" />
         <XmlDataProvider x:Key="aboutProvider" XPath="ApplicationInfo" IsAsynchronous="False" IsInitialLoadEnabled="True">
             <x:XData>

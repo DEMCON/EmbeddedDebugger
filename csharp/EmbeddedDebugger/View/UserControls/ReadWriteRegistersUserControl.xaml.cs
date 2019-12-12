@@ -62,7 +62,7 @@ namespace EmbeddedDebugger.View.UserControls
         public ReadWriteRegistersUserControl()
         {
             InitializeComponent();
-            SystemViewModel = ((ViewModelManager)Application.Current.Resources["ViewModelManager"]).SystemViewModel;
+            //SystemViewModel = ((ViewModelManager)Application.Current.Resources["ViewModelManager"]).SystemViewModel;
         }
 
         public void NewRegisterAdded()

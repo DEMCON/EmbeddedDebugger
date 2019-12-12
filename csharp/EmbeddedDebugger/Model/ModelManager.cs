@@ -45,6 +45,7 @@ namespace EmbeddedDebugger.Model
         public byte Decimation { get => decimation; set => decimation = value; }
         public ValueLogger Logger { get => logger; }
         public RpcInterface RpcInterface { get => rpcInterface; }
+        public DebugProtocol DebugProtocol { get => dp; }
         #endregion
 
         #region Eventhandlers
@@ -172,7 +173,7 @@ namespace EmbeddedDebugger.Model
         {
             if (decimation_ms > 0)
             {
-                foreach(CpuNode n in Nodes)
+                foreach (CpuNode n in Nodes)
                 {
                     int decimation = decimation_ms * 1000 / n.Sizes[EmbeddedDebugger.DebugProtocol.Enums.VariableType.TimeStamp];
                     if (decimation < 1)
