@@ -637,8 +637,11 @@ namespace EmbeddedDebugger.Model
             node.UpdateDebugChannel += UpdateDebugChannel;
             node.RegisterValueChanged += Node_RegisterValueChanged;
             node.RegisterLoggingChanged += logger.RegisterLoggingChanged;
-            // Try to load the configuration from .xml file
+            // TODO: Add loading of config again
+            // Try to load the configuration from .xml file/
+            /*
             if (
+                
             node.TryToLoadConfiguration(
                 $"{Properties.Settings.Default.ConfigurationPath}" +
                 $"{connector.ToString()}" +
@@ -652,7 +655,7 @@ namespace EmbeddedDebugger.Model
             } else
             {
                 // TODO: Implement something to let the user know that no config file was found
-            }
+            }*/
             return null;
         }
 

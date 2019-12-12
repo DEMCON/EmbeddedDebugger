@@ -60,13 +60,13 @@ namespace EmbeddedDebugger.View.UserControls
 
         public void HasConnected(object sender, EventArgs e)
         {
-            this.Connected = true;
+            //this.Connected = true;
             Refresh();
         }
 
         public void HasDisconnected(object sender, EventArgs e)
         {
-            this.Connected = false;
+            //this.Connected = false;
             Refresh();
         }
 
@@ -101,6 +101,8 @@ namespace EmbeddedDebugger.View.UserControls
                 Dispatcher.Invoke(new Action(Refresh));
                 return;
             }
+
+            bool connected = this.systemViewModel.ConnectorConnected();
             ConnectButton.IsEnabled = !connected;
             SettingsButton.IsEnabled = !connected;
             DisconnectButton.IsEnabled = connected;

@@ -41,9 +41,9 @@ namespace EmbeddedDebugger.View.UserControls
         #region Properties
         private List<CpuNode> nodes;
         public List<CpuNode> Nodes { get => nodes; set => nodes = value; }
-        public List<object> Connectors { get => ConnectorChooserUserControl.Connectors; set => ConnectorChooserUserControl.Connectors = value; }
-        public object SelectedConnector { get => ConnectorChooserUserControl.SelectedConnector; set => ConnectorChooserUserControl.SelectedConnector = value; }
-        public bool connected { get => ConnectorChooserUserControl.Connected; set => ConnectorChooserUserControl.Connected = value; }
+        //public List<object> Connectors { get => ConnectorChooserUserControl.Connectors; set => ConnectorChooserUserControl.Connectors = value; }
+        //public object SelectedConnector { get => ConnectorChooserUserControl.SelectedConnector; set => ConnectorChooserUserControl.SelectedConnector = value; }
+        //public bool connected { get => ConnectorChooserUserControl.Connected; set => ConnectorChooserUserControl.Connected = value; }
         #endregion
 
         #region EventsHandlers

@@ -55,27 +55,27 @@ namespace EmbeddedDebugger.View.Windows
             // Set up the ConnectUserControl
             model.HasConnected += ConnectUserControl.HasConnected;
             model.HasDisconnected += ConnectUserControl.HasDisconnected;
-            model.NewCPUNodeFound += ConnectUserControl.NewCPUNodeFound;
+            //model.NewCPUNodeFound += ConnectUserControl.NewCPUNodeFound;
             ConnectUserControl.Connect += model.ConnectRequest;
             ConnectUserControl.Disconnect += model.DisconnectRequest;
             ConnectUserControl.ShowSettings += model.ShowSettings;
-            ConnectUserControl.SelectedConnectorChanged += model.ConnectorChanged;
-            ConnectUserControl.Connectors = model.Connectors;
+            //ConnectUserControl.SelectedConnectorChanged += model.ConnectorChanged;
+            //ConnectUserControl.Connectors = model.Connectors;
             ConnectUserControl.Nodes = model.Nodes;
 
             // Set up the RegisterUserControl
-            model.NewCPUNodeFound += RegisterUserControl.NewCPUNodeFound;
+            //model.NewCPUNodeFound += RegisterUserControl.NewCPUNodeFound;
             model.ConfigCompletelyLoaded += RegisterUserControl.ConfigurationCompletelySend;
             RegisterUserControl.Nodes = model.Nodes;
             RegisterUserControl.RequestOnce += model.RequestOnce;
 
             // Set up the TerminalUserControl
-            model.NewCPUNodeFound += TerminalUserControl.NewCPUNodeFound;
+            //model.NewCPUNodeFound += TerminalUserControl.NewCPUNodeFound;
             TerminalUserControl.Nodes = model.Nodes;
             TerminalUserControl.NewMessage += model.NewDebugMessageToEmbedded;
 
             // Set up the TraceUserControl
-            model.NewCPUNodeFound += TraceUserControl.NewCPUNodeFound;
+           // model.NewCPUNodeFound += TraceUserControl.NewCPUNodeFound;
             TraceUserControl.Nodes = model.Nodes;
 
             // Set up the LoggingUserControl

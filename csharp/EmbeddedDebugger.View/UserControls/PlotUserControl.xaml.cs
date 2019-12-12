@@ -55,6 +55,8 @@ namespace EmbeddedDebugger.View.UserControls
             Register.EnablePlotUpdate = !paused;
         }
 
+        //TODO Readd logging
+        /*
         public void AddRegisterToPlot(Register register)
         {
             if (register.Line != null && plotModel.Series.Contains(register.Line)) return;
@@ -72,7 +74,7 @@ namespace EmbeddedDebugger.View.UserControls
             register.PlotModel = null;
             plotModel.Series.Remove(register.Line);
             PlotRegisters.Remove(register);
-        }
+        }*/
 
         private void AutoScaleCheckBox_Checked(object sender, RoutedEventArgs e)
         {

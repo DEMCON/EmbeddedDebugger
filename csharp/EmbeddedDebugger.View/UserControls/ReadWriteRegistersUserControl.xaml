@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
              xmlns:enums="clr-namespace:EmbeddedDebugger.DebugProtocol.Enums;assembly=EmbeddedDebugger.DebugProtocol"
              xmlns:customcontrols="clr-namespace:EmbeddedDebugger.View.CustomControls"
              xmlns:converter="clr-namespace:EmbeddedDebugger.View.Converters"
-             xmlns:model="clr-namespace:EmbeddedDebugger.Model"
+             xmlns:model1="clr-namespace:EmbeddedDebugger.Model;assembly=EmbeddedDebugger.Model"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="952">
     <!-- Fetching the enum data -->
@@ -37,10 +37,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <x:Type TypeName="enums:ChannelMode" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <!--
         <ObjectDataProvider x:Key="linecolors"
                 MethodName="GetLineColors" 
-                ObjectType="{x:Type model:Register}">
-        </ObjectDataProvider>
+                ObjectType="{x:Type model1:Register}">
+        </ObjectDataProvider>-->
         <ObjectDataProvider x:Key="valueDisplayFormatEnumData"
                 MethodName="GetValues" 
                 ObjectType="{x:Type System:Enum}">

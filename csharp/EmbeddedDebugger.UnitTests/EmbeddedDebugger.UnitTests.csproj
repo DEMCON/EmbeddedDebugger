@@ -61,9 +61,9 @@
       <Project>{F11AB816-7AB0-448C-B9A3-959C4612C0B7}</Project>
       <Name>EmbeddedDebugger.DebugProtocol</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EmbeddedDebugger\EmbeddedDebugger.csproj">
+    <ProjectReference Include="..\EmbeddedDebugger.View\EmbeddedDebugger.View.csproj">
       <Project>{635e83b6-ae51-466e-9921-7196f72a1465}</Project>
-      <Name>EmbeddedDebugger</Name>
+      <Name>EmbeddedDebugger.View</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />

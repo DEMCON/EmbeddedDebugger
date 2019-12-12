@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{635E83B6-AE51-466E-9921-7196F72A1465}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>EmbeddedDebugger</RootNamespace>
-    <AssemblyName>EmbeddedDebugger</AssemblyName>
+    <RootNamespace>EmbeddedDebugger.View</RootNamespace>
+    <AssemblyName>EmbeddedDebugger.View</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -66,14 +66,6 @@
     <SignManifests>false</SignManifests>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CookComputing.XmlRpcServerV2, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\CookComputing.XmlRpcServerV2.dll</HintPath>
-    </Reference>
-    <Reference Include="CookComputing.XmlRpcV2, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\CookComputing.XmlRpcV2.dll</HintPath>
-    </Reference>
     <Reference Include="OxyPlot, Version=2.0.0.0, Culture=neutral, PublicKeyToken=638079a8f0bd61e9, processorArchitecture=MSIL">
       <HintPath>..\packages\OxyPlot.Core.2.0.0-unstable1035\lib\net45\OxyPlot.dll</HintPath>
     </Reference>
@@ -106,82 +98,67 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Model\CpuNode.cs" />
-    <Compile Include="Model\DebugProtocol.cs" />
-    <Compile Include="Model\EmbeddedConfiguration\ElfParser.cs" />
-    <Compile Include="Model\EmbeddedConfiguration\EmbeddedConfig.cs" />
-    <Compile Include="Model\EmbeddedConfiguration\SimulinkCApiParser.cs" />
-    <Compile Include="Model\EmbeddedConfiguration\XmlConfigurationParser.cs" />
-    <Compile Include="Model\Logging\FileType.cs" />
-    <Compile Include="Model\Logging\TimeStampUsage.cs" />
-    <Compile Include="Model\Logging\ValueLogger.cs" />
-    <Compile Include="Model\ModelManager.cs" />
-    <Compile Include="Model\Register.cs" />
-    <Compile Include="Model\RPC\RpcInterface.cs" />
-    <Compile Include="Model\RPC\RpcResolver.cs" />
-    <Compile Include="ViewModel\SystemViewModel.cs" />
-    <Compile Include="ViewModel\ViewModelManager.cs" />
-    <Compile Include="View\Converters\BooleanAndConverter.cs" />
-    <Compile Include="View\Converters\BooleanInverterConverter.cs" />
-    <Compile Include="View\Converters\BooleanOrConverter.cs" />
-    <Compile Include="View\Converters\BooleanToCollapsedStringConverter.cs" />
-    <Compile Include="View\CustomControls\EmbeddedTerminal.cs" />
-    <Compile Include="View\CustomControls\NumericUpDown.cs" />
-    <Compile Include="View\CustomControls\TraceTerminal.cs" />
-    <Compile Include="View\CustomControls\TreeDataGrid.cs" />
-    <Compile Include="View\DataProviders\AboutAssemblyDataProvider.cs" />
-    <Compile Include="View\DataProviders\IAboutDataProvider.cs" />
-    <Compile Include="View\UserControls\ConnectUserControl.xaml.cs">
+    <Compile Include="Converters\BooleanAndConverter.cs" />
+    <Compile Include="Converters\BooleanInverterConverter.cs" />
+    <Compile Include="Converters\BooleanOrConverter.cs" />
+    <Compile Include="Converters\BooleanToCollapsedStringConverter.cs" />
+    <Compile Include="CustomControls\EmbeddedTerminal.cs" />
+    <Compile Include="CustomControls\NumericUpDown.cs" />
+    <Compile Include="CustomControls\TraceTerminal.cs" />
+    <Compile Include="CustomControls\TreeDataGrid.cs" />
+    <Compile Include="DataProviders\AboutAssemblyDataProvider.cs" />
+    <Compile Include="DataProviders\IAboutDataProvider.cs" />
+    <Compile Include="UserControls\ConnectUserControl.xaml.cs">
       <DependentUpon>ConnectUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\UserControls\ConnectorChooserUserControl.xaml.cs">
+    <Compile Include="UserControls\ConnectorChooserUserControl.xaml.cs">
       <DependentUpon>ConnectorChooserUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\UserControls\CpuNodeChooserUserControl.xaml.cs">
+    <Compile Include="UserControls\CpuNodeChooserUserControl.xaml.cs">
       <DependentUpon>CpuNodeChooserUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\UserControls\EditXMLUserControl.xaml.cs">
+    <Compile Include="UserControls\EditXMLUserControl.xaml.cs">
       <DependentUpon>EditXMLUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\UserControls\LoggingUserControl.xaml.cs">
+    <Compile Include="UserControls\LoggingUserControl.xaml.cs">
       <DependentUpon>LoggingUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\UserControls\ParseUserControl.xaml.cs">
+    <Compile Include="UserControls\ParseUserControl.xaml.cs">
       <DependentUpon>ParseUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\UserControls\PlotUserControl.xaml.cs">
+    <Compile Include="UserControls\PlotUserControl.xaml.cs">
       <DependentUpon>PlotUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\UserControls\ReadWriteRegistersUserControl.xaml.cs">
+    <Compile Include="UserControls\ReadWriteRegistersUserControl.xaml.cs">
       <DependentUpon>ReadWriteRegistersUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\UserControls\RegisterUserControl.xaml.cs">
+    <Compile Include="UserControls\RegisterUserControl.xaml.cs">
       <DependentUpon>RegisterUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\UserControls\TerminalUserControl.xaml.cs">
+    <Compile Include="UserControls\TerminalUserControl.xaml.cs">
       <DependentUpon>TerminalUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\UserControls\TraceUserControl.xaml.cs">
+    <Compile Include="UserControls\TraceUserControl.xaml.cs">
       <DependentUpon>TraceUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Windows\AboutBox.xaml.cs">
+    <Compile Include="Windows\AboutBox.xaml.cs">
       <DependentUpon>AboutBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Windows\EditRegisterWindow.xaml.cs">
+    <Compile Include="Windows\EditRegisterWindow.xaml.cs">
       <DependentUpon>EditRegisterWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Windows\RegisterChooserWindow.xaml.cs">
+    <Compile Include="Windows\RegisterChooserWindow.xaml.cs">
       <DependentUpon>RegisterChooserWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Windows\RPCSettingsWindow.xaml.cs">
+    <Compile Include="Windows\RPCSettingsWindow.xaml.cs">
       <DependentUpon>RPCSettingsWindow.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="View\Windows\LogFileNameHelperWindow.xaml.cs">
+    <Compile Include="Windows\LogFileNameHelperWindow.xaml.cs">
       <DependentUpon>LogFileNameHelperWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Windows\MainWindow.xaml.cs">
+    <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -214,71 +191,71 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="View\UserControls\EditXMLUserControl.xaml">
+    <Page Include="UserControls\EditXMLUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\UserControls\ParseUserControl.xaml">
+    <Page Include="UserControls\ParseUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\UserControls\TraceUserControl.xaml">
+    <Page Include="UserControls\TraceUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Windows\AboutBox.xaml">
+    <Page Include="Windows\AboutBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Windows\EditRegisterWindow.xaml">
+    <Page Include="Windows\EditRegisterWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Windows\LogFileNameHelperWindow.xaml">
+    <Page Include="Windows\LogFileNameHelperWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Windows\MainWindow.xaml">
+    <Page Include="Windows\MainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\UserControls\ConnectUserControl.xaml">
+    <Page Include="UserControls\ConnectUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\UserControls\ConnectorChooserUserControl.xaml">
+    <Page Include="UserControls\ConnectorChooserUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\UserControls\CpuNodeChooserUserControl.xaml">
+    <Page Include="UserControls\CpuNodeChooserUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\UserControls\LoggingUserControl.xaml">
+    <Page Include="UserControls\LoggingUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\UserControls\PlotUserControl.xaml">
+    <Page Include="UserControls\PlotUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\UserControls\ReadWriteRegistersUserControl.xaml">
+    <Page Include="UserControls\ReadWriteRegistersUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\UserControls\RegisterUserControl.xaml">
+    <Page Include="UserControls\RegisterUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\UserControls\TerminalUserControl.xaml">
+    <Page Include="UserControls\TerminalUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Windows\RegisterChooserWindow.xaml">
+    <Page Include="Windows\RegisterChooserWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Windows\RPCSettingsWindow.xaml">
+    <Page Include="Windows\RPCSettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -311,9 +288,15 @@
       <Project>{f11ab816-7ab0-448c-b9a3-959c4612c0b7}</Project>
       <Name>EmbeddedDebugger.DebugProtocol</Name>
     </ProjectReference>
+    <ProjectReference Include="..\EmbeddedDebugger.Model\EmbeddedDebugger.Model.csproj">
+      <Project>{beaef0ec-bb28-46fc-aabf-8c2b2962e321}</Project>
+      <Name>EmbeddedDebugger.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EmbeddedDebugger.ViewModel\EmbeddedDebugger.ViewModel.csproj">
+      <Project>{408bc47b-f9f9-44b3-ab9f-496b1bff63a6}</Project>
+      <Name>EmbeddedDebugger.ViewModel</Name>
+    </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Model\NewFolder1\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

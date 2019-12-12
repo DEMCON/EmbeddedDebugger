@@ -29,7 +29,7 @@ namespace EmbeddedDebugger.ViewModel
             };
             this.refreshTimer.Elapsed += this.RefreshTimer_Elapsed;
             this.mediumCounter = 0;
-            this.lowCounter
+            this.lowCounter = 0;
         }
 
         private void RefreshTimer_Elapsed(object sender, ElapsedEventArgs e)

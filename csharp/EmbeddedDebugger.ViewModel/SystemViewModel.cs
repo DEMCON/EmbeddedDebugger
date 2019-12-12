@@ -1,5 +1,4 @@
 ﻿using EmbeddedDebugger.Model;
-using EmbeddedDebugger.Properties;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -37,6 +36,12 @@ namespace EmbeddedDebugger.ViewModel
         {
             // TODO Add connector to showsettings
             this.debugProtocol.ShowSettings();
+        }
+
+        public bool ConnectorConnected()
+        {
+            // TODO: Add possibility to do this on connector level?
+            return this.debugProtocol.IsConnected;
         }
 
 

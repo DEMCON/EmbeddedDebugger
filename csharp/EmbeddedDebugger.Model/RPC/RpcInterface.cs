@@ -42,7 +42,8 @@ namespace EmbeddedDebugger.Model.RPC
         public RpcInterface(ModelManager mm, DebugProtocol dp)
         {
             hostName = "127.0.0.1";
-            port = Properties.Settings.Default.RPCPort;
+            // TODO Add port
+            //port = Properties.Settings.Default.RPCPort;
             resolver = new RpcResolver(mm, dp);
         }
 

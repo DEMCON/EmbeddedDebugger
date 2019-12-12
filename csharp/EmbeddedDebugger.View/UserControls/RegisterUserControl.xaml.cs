@@ -59,6 +59,8 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void ReadWriteRegisterUserControl_RegisterPlottingChanged(object sender, Register e)
         {
+            // TODO: Check if still needed
+            /*
             if (e.Plot)
             {
                 PlotUserControl.AddRegisterToPlot(e);
@@ -67,6 +69,7 @@ namespace EmbeddedDebugger.View.UserControls
             {
                 PlotUserControl.RemoveRegisterFromPlot(e);
             }
+            */
         }
 
         private void CpuNodeChooserUserControl_SelectedCPUChanged(object sender, EventArgs e)

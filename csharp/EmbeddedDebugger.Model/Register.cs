@@ -17,16 +17,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using EmbeddedDebugger.DebugProtocol.Enums;
 using EmbeddedDebugger.DebugProtocol.RegisterValues;
-using EmbeddedDebugger.Properties;
-using OxyPlot;
-using OxyPlot.Series;
+//using OxyPlot;
+//using OxyPlot.Series;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
+using System.Windows.Forms;
 
 namespace EmbeddedDebugger.Model
 {
@@ -43,8 +41,9 @@ namespace EmbeddedDebugger.Model
         private VariableType variableType;
         private string variableTypeName;
         private bool plot;
-        private LineSeries myLine;
-        private PlotModel plotModel;
+        // TODO: Remove the plotting done here
+        //private LineSeries myLine;
+        //private PlotModel plotModel;
         private int maxNumberOfValues;
         private double numberOfSeconds;
         private int size;
@@ -56,7 +55,7 @@ namespace EmbeddedDebugger.Model
         private byte? debugChannel;
         private ChannelMode channelMode;
         private bool log;
-        private Color lineColor;
+        //private Color lineColor;
         private CpuNode cpuNode;
         private ValueDisplayFormat valueDisplayFormat;
         private bool isCollapsed = true;
@@ -133,10 +132,10 @@ namespace EmbeddedDebugger.Model
                 {
                     return $"\"{variableTypeName}\"";
                 }
-                if (Settings.Default.CPPVariableTypes)
-                {
-                    return GetCPPVariableTypes(variableType);
-                }
+                //if (Settings.Default.CPPVariableTypes)
+                //{
+                //   return GetCPPVariableTypes(variableType);
+                //}
                 else
                 {
                     return variableType.ToString().ToLower();
@@ -159,6 +158,7 @@ namespace EmbeddedDebugger.Model
                 variableTypeName = value;
             }
         }
+        /*
         public bool Plot
         {
             get => plot;
@@ -216,6 +216,7 @@ namespace EmbeddedDebugger.Model
         public LineSeries Line { get => myLine; }
         private object plotModelLock = new object();
         public PlotModel PlotModel { get => plotModel; set { lock (plotModelLock) { plotModel = value; } } }
+        */
         public int MaxNumberOfValues { get => maxNumberOfValues; set => maxNumberOfValues = value; }
         public double NumberOfSeconds { get => numberOfSeconds; set => numberOfSeconds = value; }
         public int Size { get => size; set => size = value; }
@@ -256,7 +257,7 @@ namespace EmbeddedDebugger.Model
                     channelMode = value;
                     ChannelModeUpdated(this, new EventArgs());
                 }
-                catch(ArgumentException)
+                catch (ArgumentException)
                 {
                     channelMode = ChannelMode.Off;
                     try
@@ -288,7 +289,7 @@ namespace EmbeddedDebugger.Model
             set
             {
                 valueDisplayFormat = value;
-                if(EnableValueUpdates)
+                if (EnableValueUpdates)
                     PropertyChanged(this, new PropertyChangedEventArgs("Value"));
             }
         }
@@ -350,7 +351,8 @@ namespace EmbeddedDebugger.Model
         }
         #endregion
 
-        public static IEnumerable<KnownColor> GetLineColors()
+        // TODO: Make sure this is not done in the register
+        /*public static IEnumerable<KnownColor> GetLineColors()
         {
             yield return KnownColor.Black;
             yield return KnownColor.Blue;
@@ -373,7 +375,7 @@ namespace EmbeddedDebugger.Model
             yield return KnownColor.Navy;
             yield return KnownColor.Purple;
             yield return KnownColor.Red;
-        }
+        }*/
         /// <summary>
         /// Add a value to the register, also adds it to the plotmodel, this is used for plotting
         /// TODO: check if there is a more elegant way.
@@ -386,6 +388,7 @@ namespace EmbeddedDebugger.Model
                 regValue = RegisterValue.GetRegisterValueByVariableType(variableType, regValue.ValueByteArray, regValue.TimeStamp);
             }
             registerValue = regValue;
+            /*
             if (plot && plotModel != null && regValue.TimeStamp.HasValue)
             {
                 double time = (double)regValue.TimeStamp / (uint)timeStampUnits;
@@ -419,6 +422,7 @@ namespace EmbeddedDebugger.Model
                 UpdatePlot();
 
             }
+            &*/
             NewValueAdded(this, new EventArgs());
             if (EnableValueUpdates)
                 PropertyChanged(this, new PropertyChangedEventArgs("Value"));
@@ -434,12 +438,13 @@ namespace EmbeddedDebugger.Model
             updatePlotRequest = true;
             await Task.Delay(100);
             updatePlotRequest = false;
-
+            /*
             lock (plotModelLock)
             {
-                if(plotModel != null && EnablePlotUpdate)
+                if (plotModel != null && EnablePlotUpdate)
                     plotModel.InvalidatePlot(true);
             }
+            */
         }
 
         public void RequestNewValue()
@@ -490,7 +495,7 @@ namespace EmbeddedDebugger.Model
                 ReadWrite = (ReadWrite)Enum.Parse(typeof(ReadWrite), old.ReadWrite.ToString()),
                 VariableType = (VariableType)Enum.Parse(typeof(VariableType), old.VariableType.ToString()),
                 VariableTypeName = old.VariableTypeName.ToString(),
-                Plot = Convert.ToBoolean(old.Plot),
+                //Plot = Convert.ToBoolean(old.Plot),
                 MaxNumberOfValues = Convert.ToInt32(old.MaxNumberOfValues),
                 NumberOfSeconds = Convert.ToDouble(old.NumberOfSeconds),
                 Size = Convert.ToInt32(old.Size),
@@ -500,7 +505,7 @@ namespace EmbeddedDebugger.Model
                 Source = (Source)Enum.Parse(typeof(Source), old.Source.ToString()),
                 TimeStampUnits = Convert.ToInt32(old.TimeStampUnits),
                 DebugChannel = null,
-                Log = Convert.ToBoolean(old.Plot),
+                //Log = Convert.ToBoolean(old.Plot),
                 CpuNode = old.CpuNode,
             };
         }
@@ -533,8 +538,8 @@ namespace EmbeddedDebugger.Model
             hashCode = hashCode * -1521134295 + variableType.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(variableTypeName);
             hashCode = hashCode * -1521134295 + plot.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<LineSeries>.Default.GetHashCode(myLine);
-            hashCode = hashCode * -1521134295 + EqualityComparer<PlotModel>.Default.GetHashCode(plotModel);
+            //hashCode = hashCode * -1521134295 + EqualityComparer<LineSeries>.Default.GetHashCode(myLine);
+            //hashCode = hashCode * -1521134295 + EqualityComparer<PlotModel>.Default.GetHashCode(plotModel);
             hashCode = hashCode * -1521134295 + maxNumberOfValues.GetHashCode();
             hashCode = hashCode * -1521134295 + numberOfSeconds.GetHashCode();
             hashCode = hashCode * -1521134295 + size.GetHashCode();

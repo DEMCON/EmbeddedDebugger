@@ -17,7 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using EmbeddedDebugger.Model.Logging;
 using EmbeddedDebugger.Model.RPC;
-using EmbeddedDebugger.View.UserControls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,7 +48,6 @@ namespace EmbeddedDebugger.Model
         #endregion
 
         #region Eventhandlers
-        public event EventHandler NewCPUNodeFound = delegate { };
         public event EventHandler HasConnected = delegate { };
         public event EventHandler HasDisconnected = delegate { };
         public event EventHandler ConfigCompletelyLoaded = delegate { };
@@ -131,16 +129,7 @@ namespace EmbeddedDebugger.Model
 
         public void NewCPUFound()
         {
-            NewCPUNodeFound(this, new EventArgs());
-        }
-
-        public void ConnectorChanged(object sender, EventArgs e)
-        {
-            if (sender is ConnectUserControl)
-            {
-                ConnectUserControl cuc = sender as ConnectUserControl;
-                dp.NewConnector = cuc.SelectedConnector;
-            }
+            //NewCPUNodeFound(this, new EventArgs());
         }
 
         public void ShowSettings(object sender, EventArgs e)
