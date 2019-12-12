@@ -51,7 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Model\DebugProtocol.cs" />
+    <Compile Include="Model\DebugProtocolServer.cs" />
     <Compile Include="Model\EmbeddedConfig.cs" />
     <Compile Include="Model\Register.cs" />
     <Compile Include="View\CustomComponents\EmbeddedTerminal.cs">

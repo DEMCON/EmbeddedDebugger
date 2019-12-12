@@ -30,7 +30,13 @@ using EmbeddedDebugger.Model.Messages;
 
 namespace EmbeddedEmulator.Model
 {
-    public class DebugProtocol
+    /// <summary>
+    /// Implementation of the uController side of the debug protocol.
+    /// 
+    /// This will listen to commands, and send out trace data when configured to
+    /// do so.
+    /// </summary>
+    public class DebugProtocolServer
     {
         private EmbeddedConfig embeddedConfig;
         private byte[] remainder;
@@ -67,9 +73,7 @@ namespace EmbeddedEmulator.Model
         public event EventHandler<ProtocolMessage> NewWriteMessage = delegate { };
         public event EventHandler<string> NewDebugString = delegate { };
 
-
-
-        public DebugProtocol(EmbeddedConfig embeddedConfig)
+        public DebugProtocolServer(EmbeddedConfig embeddedConfig)
         {
             connectors = GetConnectorTypes().ToList();
             foreach(IConnector ic in connectors)
@@ -88,7 +92,7 @@ namespace EmbeddedEmulator.Model
             timer.Elapsed += Timer_Elapsed;
         }
 
-        ~DebugProtocol()
+        ~DebugProtocolServer()
         {
             timer.Stop();
             timer.Dispose();
@@ -158,19 +162,19 @@ namespace EmbeddedEmulator.Model
             }
             data.Insert(3, (byte)mask);
             data.Insert(4, (byte)(mask >> 8));
+
             if (multipleNodes)
             {
                 for (byte i = 0; i < numberOfNodesToSimulate; i++)
                 {
                     SendTrace(EmbeddedDebugger.DebugProtocol.Enums.TraceLevel.Trace, "SendingChannelData has been called", i);
-                    connector.SendMessage(MessageCodec.EncodeMessage(TemplateProvider.GetReadChannelDataMessage(data.ToArray(), i)));
+                    SendMessage(TemplateProvider.GetReadChannelDataMessage(data.ToArray(), i));
                 }
             }
             else
             {
-                connector.SendMessage(MessageCodec.EncodeMessage(TemplateProvider.GetReadChannelDataMessage(data.ToArray(), 0x01)));
+                SendMessage(TemplateProvider.GetReadChannelDataMessage(data.ToArray(), 0x01));
             }
-
         }
 
         /// <summary>
@@ -193,7 +197,10 @@ namespace EmbeddedEmulator.Model
             foreach (ProtocolMessage msg in msgs)
             {
                 //Console.WriteLine(msg);
-                if (!autoRespond) { connector.SendMessage(MessageCodec.EncodeMessage(TemplateProvider.GetAccMsg(msg))); }
+                if (!autoRespond)
+                {
+                    SendMessage(TemplateProvider.GetAccMsg(msg));
+                }
                 else if (msg.Valid)
                 {
                     //Console.WriteLine(msg.Command.ToString());
@@ -205,38 +212,46 @@ namespace EmbeddedEmulator.Model
                                 for (byte i = 0; i < numberOfNodesToSimulate; i++)
                                 {
                                     SendTrace(EmbeddedDebugger.DebugProtocol.Enums.TraceLevel.Fatal, "Version has been called", i);
-                                    connector.SendMessage(MessageCodec.EncodeMessage(TemplateProvider.GetVersionMessage(msg.MsgID, embeddedConfig, i)));
+                                    SendMessage(TemplateProvider.GetVersionMessage(msg.MsgID, embeddedConfig, i));
                                 }
                             }
-                            connector.SendMessage(MessageCodec.EncodeMessage(TemplateProvider.GetVersionMessage(msg.MsgID, embeddedConfig, 0x01)));
+                            SendMessage(TemplateProvider.GetVersionMessage(msg.MsgID, embeddedConfig, 0x01));
                             break;
+
                         case Command.GetInfo:
                             SendTrace(EmbeddedDebugger.DebugProtocol.Enums.TraceLevel.Error, "Info has been called");
-                            connector.SendMessage(MessageCodec.EncodeMessage(TemplateProvider.GetInfoMessage(msg.MsgID, msg.ControllerID)));
+                            SendMessage(TemplateProvider.GetInfoMessage(msg.MsgID, msg.ControllerID));
                             break;
+
                         case Command.EmbeddedConfiguration:
                             SendTrace(EmbeddedDebugger.DebugProtocol.Enums.TraceLevel.Warning, "EmbeddedConfig has been called");
                             DispatchEmbeddedConfigurationMessage(msg);
                             break;
+
                         case Command.ConfigChannel:
                             SendTrace(EmbeddedDebugger.DebugProtocol.Enums.TraceLevel.Info, "ConfigChannel has been called");
                             DispatchConfigChannelMessage(msg);
                             break;
+
                         case Command.DebugString:
-                            connector.SendMessage(MessageCodec.EncodeMessage(TemplateProvider.GetAccMsg(msg)));
+                            SendMessage(TemplateProvider.GetAccMsg(msg));
                             DispatchDebugStringMessage(msg);
                             break;
+
                         case Command.WriteRegister:
                             DispatchWriteRegisterMessage(msg);
-                            connector.SendMessage(MessageCodec.EncodeMessage(new ProtocolMessage(msg.ControllerID, msg.MsgID, msg.Command, new byte[] { 0x00 })));
+                            SendMessage(new ProtocolMessage(msg.ControllerID, msg.MsgID, msg.Command, new byte[] { 0x00 }));
                             break;
+
                         case Command.QueryRegister:
                             DispatchQueryRegisterMessage(msg);
                             break;
+
                         case Command.Decimation:
                         case Command.ResetTime:
                             DispatchResetTimeMessage(msg);
                             break;
+
                         case Command.ReadChannelData:
                             DispatchReadChannelDataMessage(msg);
                             break;
@@ -274,7 +289,13 @@ namespace EmbeddedEmulator.Model
         private void DispatchConfigChannelMessage(ProtocolMessage msg)
         {
             ProtocolMessage returnMsg = new ProtocolMessage(msg.ControllerID, msg.MsgID, Command.ConfigChannel, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
-            if (msg.ControllerID != 0x01) { connector.SendMessage(MessageCodec.EncodeMessage(returnMsg)); return; }
+
+            if (msg.ControllerID != 0x01)
+            {
+                SendMessage(returnMsg);
+                return;
+            }
+
             if (msg.CommandData.Length < 1)
             {
                 returnMsg = new ProtocolMessage(msg.ControllerID, msg.MsgID, Command.ConfigChannel);
@@ -327,7 +348,8 @@ namespace EmbeddedEmulator.Model
                     }
                 }
             }
-            connector.SendMessage(MessageCodec.EncodeMessage(returnMsg));
+
+            SendMessage(returnMsg);
         }
 
         private void DispatchQueryRegisterMessage(ProtocolMessage msg)
@@ -353,11 +375,11 @@ namespace EmbeddedEmulator.Model
                     x.Source == source &&
                     x.Size == size
                     ).Value.ValueByteArray);
-                connector.SendMessage(MessageCodec.EncodeMessage(new ProtocolMessage(msg.ControllerID, msg.MsgID, msg.Command, data.ToArray())));
+                SendMessage(new ProtocolMessage(msg.ControllerID, msg.MsgID, msg.Command, data.ToArray()));
             }
             else
             {
-                connector.SendMessage(MessageCodec.EncodeMessage(new ProtocolMessage(msg.ControllerID, msg.MsgID, msg.Command, msg.CommandData)));
+                SendMessage(new ProtocolMessage(msg.ControllerID, msg.MsgID, msg.Command, msg.CommandData));
             }
         }
 
@@ -367,14 +389,14 @@ namespace EmbeddedEmulator.Model
             {
                 foreach (ProtocolMessage config in TemplateProvider.GetConfiguration(msg.MsgID, embeddedConfig, msg.ControllerID))
                 {
-                    connector.SendMessage(MessageCodec.EncodeMessage(config));
+                    SendMessage(config);
                 }
             }
             else if (msg.CommandData.Length == 4)
             {
                 foreach (ProtocolMessage config in TemplateProvider.GetConfiguration(msg.MsgID, embeddedConfig, msg.ControllerID, BitConverter.ToUInt32(msg.CommandData, 0)))
                 {
-                    connector.SendMessage(MessageCodec.EncodeMessage(config));
+                    SendMessage(config);
                 }
             }
         }
@@ -383,18 +405,18 @@ namespace EmbeddedEmulator.Model
         {
             if (msg.CommandData.Length != 1)
             {
-                connector.SendMessage(MessageCodec.EncodeMessage(new ProtocolMessage(msg.ControllerID, msg.MsgID, msg.Command)));
+                SendMessage(new ProtocolMessage(msg.ControllerID, msg.MsgID, msg.Command));
                 return;
             }
             if (msg.CommandData[0] == 0x00)
             {
                 timer.Stop();
-                connector.SendMessage(MessageCodec.EncodeMessage(TemplateProvider.GetAccMsg(msg)));
+                SendMessage(TemplateProvider.GetAccMsg(msg));
             }
             else if (msg.CommandData[0] == 0x01)
             {
                 timer.Start();
-                connector.SendMessage(MessageCodec.EncodeMessage(TemplateProvider.GetAccMsg(msg)));
+                SendMessage(TemplateProvider.GetAccMsg(msg));
             }
             else if (msg.CommandData[0] == 0x02)
             {
@@ -412,11 +434,11 @@ namespace EmbeddedEmulator.Model
                 }
                 data.Insert(3, (byte)mask);
                 data.Insert(4, (byte)(mask >> 8));
-                connector.SendMessage(MessageCodec.EncodeMessage(new ProtocolMessage(msg.ControllerID, msg.MsgID, msg.Command, data.ToArray())));
+                SendMessage(new ProtocolMessage(msg.ControllerID, msg.MsgID, msg.Command, data.ToArray()));
             }
             else
             {
-                connector.SendMessage(MessageCodec.EncodeMessage(TemplateProvider.GetAccMsg(msg)));
+                SendMessage(TemplateProvider.GetAccMsg(msg));
             }
         }
 
@@ -433,12 +455,23 @@ namespace EmbeddedEmulator.Model
 
         private void SendTrace(EmbeddedDebugger.DebugProtocol.Enums.TraceLevel level, string message)
         {
-            connector.SendMessage(MessageCodec.EncodeMessage(TemplateProvider.GetTraceMessage(new TraceMessage() { TraceLevel = level, Message = message })));
+            var protocol_message = TemplateProvider.GetTraceMessage(new TraceMessage() { TraceLevel = level, Message = message });
+            SendMessage(protocol_message);
         }
 
         private void SendTrace(EmbeddedDebugger.DebugProtocol.Enums.TraceLevel level, string message, byte nodeID)
         {
-            connector.SendMessage(MessageCodec.EncodeMessage(TemplateProvider.GetTraceMessage(new TraceMessage() { TraceLevel = level, Message = message, NodeID = nodeID })));
+            var protocol_message = TemplateProvider.GetTraceMessage(new TraceMessage() { TraceLevel = level, Message = message, NodeID = nodeID });
+            SendMessage(protocol_message);
+        }
+
+        /// <summary>
+        /// Encode and send the message.
+        /// </summary>
+        /// <param name="message"></param>
+        private void SendMessage(ProtocolMessage message)
+        {
+            connector.SendMessage(MessageCodec.EncodeMessage(message));
         }
     }
 }

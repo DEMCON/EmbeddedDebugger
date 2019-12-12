@@ -40,7 +40,7 @@ namespace EmbeddedEmulator.View
         private EmbeddedConfig embeddedConfig;
         private bool sendSine = true;
         private Stopwatch stopwatch;
-        private DebugProtocol dp;
+        private DebugProtocolServer dp;
 
         private IConnector connector;
         public bool Bool { get => (bool)embeddedConfig.WriteRegisters.First(x => x.Offset == 2).Value.Value; }
@@ -54,7 +54,7 @@ namespace EmbeddedEmulator.View
 
             embeddedConfig = new EmbeddedConfig();
             FillConfig();
-            dp = new DebugProtocol(embeddedConfig);
+            dp = new DebugProtocolServer(embeddedConfig);
             dp.NewWriteMessage += Dp_NewWriteMessage;
             dp.NewDebugString += Dp_NewDebugString;
             messages = new List<ProtocolMessage>();
