@@ -37,7 +37,7 @@ namespace EmbeddedDebugger.Model
         private int invalidMessageCounter = 0;
         private readonly string serialNumber;
         private readonly string name;
-        private readonly byte[] protocolVersion;
+        private readonly Version protocolVersion;
         private readonly Version applicationVersion;
         private EmbeddedConfig embeddedConfig;
         private readonly Dictionary<VariableType, int> sizes;
@@ -71,8 +71,8 @@ namespace EmbeddedDebugger.Model
         [DisplayName("Name")]
         public string Name { get => name; }
         [DisplayName("Protocol version")]
-        public string ProtocolVersionString { get => $"V {(int)protocolVersion[0]}.{(int)protocolVersion[1]}.{(protocolVersion[3] << 8 | protocolVersion[2])}"; }
-        public Version ProtocolVersion { get => new Version((int)protocolVersion[0], (int)protocolVersion[1], (protocolVersion[3] << 8 | protocolVersion[2])); }
+        public string ProtocolVersionString { get => $"V {protocolVersion.Major}.{protocolVersion.Minor}.{protocolVersion.Build}"; }
+        public Version ProtocolVersion { get => protocolVersion; }
         [DisplayName("Application version")]
         public string ApplicationVersionString { get => $"V {applicationVersion.Major}.{applicationVersion.Minor}.{applicationVersion.Build}"; }
         public Version ApplicationVersion { get => applicationVersion; }
@@ -124,12 +124,12 @@ namespace EmbeddedDebugger.Model
         public event EventHandler<TraceMessage> NewTraceMessageAdded = delegate { };
         #endregion
 
-        public CpuNode(byte id, byte[] protocolVersion, byte[] applicationVersion, string name, string serialNumber)
+        public CpuNode(byte id, Version protocolVersion, Version applicationVersion, string name, string serialNumber)
         {
             this.id = id;
             this.name = name;
             this.protocolVersion = protocolVersion;
-            this.applicationVersion = new Version(applicationVersion[0], applicationVersion[1], applicationVersion[3] << 8 | applicationVersion[2]);
+            this.applicationVersion = applicationVersion;
             this.serialNumber = serialNumber;
             traceMessages = new List<TraceMessage>();
             debugChannels = new Dictionary<int, Register>();

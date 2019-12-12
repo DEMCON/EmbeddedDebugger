@@ -53,25 +53,15 @@ namespace EmbeddedEmulator.Model
 
         public static ProtocolMessage GetVersionMessage(byte msgID, EmbeddedConfig ec, byte localControllerID)
         {
-            List<byte> data = new List<byte>
+            var versionMessage = new VersionMessage()
             {
-                (byte)ec.ProtocolVersion.Major,
-                (byte)ec.ProtocolVersion.Minor,
-                (byte)ec.ProtocolVersion.Build,
-                (byte)(ec.ProtocolVersion.Build >> 8),
-                (byte)ec.ApplicationVersion.Major,
-                (byte)ec.ApplicationVersion.Minor,
-                (byte)ec.ApplicationVersion.Build,
-                (byte)(ec.ApplicationVersion.Build >> 8),
-                (byte)ec.CpuName.Length,
+                ProtocolVersion = ec.ProtocolVersion,
+                ApplicationVersion = ec.ApplicationVersion,
+                Name = ec.CpuName,
+                SerialNumber = ec.SerialNumber,
             };
-            data.AddRange(Encoding.ASCII.GetBytes(ec.CpuName));
-            if (!string.IsNullOrEmpty(ec.SerialNumber))
-            {
-                data.Add((byte)ec.SerialNumber.Length);
-                data.AddRange(Encoding.ASCII.GetBytes(ec.SerialNumber));
-            }
-            return new ProtocolMessage(localControllerID, msgID, Command.GetVersion, data.ToArray());
+
+            return new ProtocolMessage(localControllerID, msgID, Command.GetVersion, versionMessage.ToBytes());
         }
 
         public static ProtocolMessage GetInfoMessage(byte msgID, byte controllerID)

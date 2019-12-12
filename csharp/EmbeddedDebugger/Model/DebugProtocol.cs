@@ -601,19 +601,23 @@ namespace EmbeddedDebugger.Model
         /// <returns>In case the dispatching failes, a string with explanation is returned</returns>
         private string DispatchVersionMessage(ProtocolMessage msg)
         {
-            // Check if message is too small
-            if (msg.CommandData.Length < 9) return "Message too short for Version Message";
-            // If the node is already known, don't re-add it 
-            if (core.Nodes.Any(x => x.ID == msg.ControllerID)) return "CPUNode already known!";
             // Gather all information from the message
             byte id = msg.ControllerID;
-            byte[] protVersion = msg.CommandData.Take(4).ToArray();
-            byte[] appVersion = msg.CommandData.Skip(4).Take(4).ToArray();
-            string name = Encoding.UTF8.GetString(msg.CommandData.Skip(9).Take(msg.CommandData[8]).ToArray()).Replace("\n", "").Replace("\r", "").Replace("\t", "");
+            VersionMessage version_message;
+            try
+            {
+                version_message = new VersionMessage(msg);
+            }
+            catch (ArgumentException ex)
+            {
+                return ex.Message;
+            }
 
-            string serialNumber = msg.CommandData.Length > 9 + msg.CommandData[8] ? Encoding.UTF8.GetString(msg.CommandData.Skip(9 + msg.CommandData[8] + 1).ToArray()).Replace("\n", "").Replace("\r", "").Replace("\t", "") : "";
+            // If the node is already known, don't re-add it 
+            if (core.Nodes.Any(x => x.ID == msg.ControllerID)) return "CPUNode already known!";
+
             // Create a new node with the information that was gathered
-            CpuNode node = new CpuNode(id, protVersion, appVersion, name, serialNumber);
+            CpuNode node = new CpuNode(id, version_message.ProtocolVersion, version_message.ApplicationVersion, version_message.Name, version_message.SerialNumber);
             // Create a msgID, to be used whenever a msg is send
             msgIDs.Add(node.ID, 0);
             // Add the node to the list of nodes in the modelmanager

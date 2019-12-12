@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Crc.cs" />
     <Compile Include="Enums\ChannelMode.cs" />
     <Compile Include="Enums\Command.cs" />
     <Compile Include="Enums\ReadWrite.cs" />
@@ -51,6 +52,7 @@
     <Compile Include="Enums\VariableType.cs" />
     <Compile Include="MessageCodec.cs" />
     <Compile Include="Messages\TraceMessage.cs" />
+    <Compile Include="Messages\VersionMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Messages\ProtocolMessage.cs" />
     <Compile Include="RegisterValues\RegisterValue.cs" />

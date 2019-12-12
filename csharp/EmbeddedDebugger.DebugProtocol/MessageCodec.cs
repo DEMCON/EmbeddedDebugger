@@ -35,26 +35,6 @@ namespace EmbeddedDebugger.DebugProtocol
         private const byte ETX = 0xAA;
         private const byte ESC = 0x66;
 
-        private static readonly byte[] crcTable =
-        {
-             0,  94, 188, 226,  97,  63, 221, 131, 194, 156, 126,  32, 163, 253,  31,  65,
-           157, 195,  33, 127, 252, 162,  64,  30,  95,   1, 227, 189,  62,  96, 130, 220,
-            35, 125, 159, 193,  66,  28, 254, 160, 225, 191,  93,   3, 128, 222,  60,  98,
-           190, 224,   2,  92, 223, 129,  99,  61, 124,  34, 192, 158,  29,  67, 161, 255,
-            70,  24, 250, 164,  39, 121, 155, 197, 132, 218,  56, 102, 229, 187,  89,   7,
-           219, 133, 103,  57, 186, 228,   6,  88,  25,  71, 165, 251, 120,  38, 196, 154,
-           101,  59, 217, 135,   4,  90, 184, 230, 167, 249,  27,  69, 198, 152, 122,  36,
-           248, 166,  68,  26, 153, 199,  37, 123,  58, 100, 134, 216,  91,   5, 231, 185,
-           140, 210,  48, 110, 237, 179,  81,  15,  78,  16, 242, 172,  47, 113, 147, 205,
-            17,  79, 173, 243, 112,  46, 204, 146, 211, 141, 111,  49, 178, 236,  14,  80,
-           175, 241,  19,  77, 206, 144, 114,  44, 109,  51, 209, 143,  12,  82, 176, 238,
-            50, 108, 142, 208,  83,  13, 239, 177, 240, 174,  76,  18, 145, 207,  45, 115,
-           202, 148, 118,  40, 171, 245,  23,  73,   8,  86, 180, 234, 105,  55, 213, 139,
-            87,   9, 235, 181,  54, 104, 138, 212, 149, 203,  41, 119, 244, 170,  72,  22,
-           233, 183,  85,  11, 136, 214,  52, 106,  43, 117, 151, 201,  74,  20, 246, 168,
-           116,  42, 200, 150,  21,  75, 169, 247, 182, 232,  10,  84, 215, 137, 107,  53
-        };
-
         /// <summary>
         /// Takes a message and turns it into a byte array
         /// Can be seen as serialization
@@ -65,18 +45,13 @@ namespace EmbeddedDebugger.DebugProtocol
         {
             List<byte> data = new List<byte>
             {
-                0x00,
                 message.ControllerID,
                 message.MsgID,
                 (byte)message.Command
             };
             data.AddRange(message.CommandData);
-            data.Add(0x00);
-            data.Add(0x00);
-            data.Add(CalculateCRC(data.ToArray()));
-            data.RemoveAt(0);
-            data.RemoveAt(data.Count - 2);
-            data.RemoveAt(data.Count - 2);
+            data.Add(Crc.Calculate(data.ToArray()));
+
             data = AddEscapeCharacters(data);
             data.Insert(0, STX);
             data.Add(ETX);
@@ -120,6 +95,7 @@ namespace EmbeddedDebugger.DebugProtocol
                         break;
                     }
                 }
+
                 if (STXindex >= 0 && ETXindex >= 0 && STXindex < data.Length && ETXindex < data.Length && STXindex + 4 < ETXindex)
                 {
                     msgBytes = ReplaceEscapeCharacters(data.Skip(STXindex).Take(ETXindex - STXindex + 1).ToList()).ToArray();
@@ -146,6 +122,7 @@ namespace EmbeddedDebugger.DebugProtocol
                 {
                     break;
                 }
+
                 data = data.Skip(ETXindex + 1).ToArray();
                 STXindex = -1;
                 ETXindex = -1;
@@ -163,38 +140,46 @@ namespace EmbeddedDebugger.DebugProtocol
             {
                 return "Message too short";
             }
+
             if (msg[0] != STX)
             {
                 return "Message didn't start with STX";
             }
+
             if (msg[msg.Length - 1] != ETX)
             {
                 return "Message didn't end with ETX";
             }
+
             if (!Enum.IsDefined(typeof(Command), msg[3]))
             {
                 return "Unknown command";
             }
+
             if (msg[msg.Length - 2] != CalculateCRC(msg))
             {
                 return "CRC failed";
             }
+
             return null;
         }
 
         /// <summary>
-        /// Calculate the CRC (Cyclic Redundancy Check)
+        /// Calculate the CRC of a message, skipping start and end markers, and the actual CRC in the message.
         /// </summary>
-        /// <param name="data">Data to add to the crc</param>
-        /// <returns>CRC value</returns>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public static byte CalculateCRC(byte[] data)
         {
-            byte returnable = 0x00;
-            for (int i = 1; i < data.Length - 2; i++)
+            if (data.Length < 3)
             {
-                returnable = crcTable[returnable ^ data[i]];
+                return 0;
             }
-            return returnable;
+            else
+            {
+                var payload_data = new ArraySegment<byte>(data, 1, data.Length - 3);
+                return Crc.Calculate(payload_data.ToArray());
+            }
         }
 
         /// <summary>
