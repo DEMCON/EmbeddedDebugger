@@ -30,11 +30,23 @@ namespace EmbeddedDebugger.ViewModel
             this.refreshTimer.Elapsed += this.RefreshTimer_Elapsed;
             this.mediumCounter = 0;
             this.lowCounter = 0;
+            this.refreshTimer.Start();
         }
 
         private void RefreshTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            
+            this.RefreshHigh(this, e);
+            if (this.mediumCounter++ > 5)
+            {
+                this.mediumCounter = 0;
+                this.RefreshMedium(this, e);
+            }
+
+            if (this.lowCounter++ > 10)
+            {
+                this.lowCounter = 0;
+                this.RefreshLow(this, e);
+            }
         }
     }
 }

@@ -53,15 +53,15 @@ namespace EmbeddedDebugger.View.Windows
             //viewModelManager = Resources.
             model = vmm.ModelManager;
             // Set up the ConnectUserControl
-            model.HasConnected += ConnectUserControl.HasConnected;
-            model.HasDisconnected += ConnectUserControl.HasDisconnected;
+            //model.HasConnected += ConnectUserControl.HasConnected;
+            //model.HasDisconnected += ConnectUserControl.HasDisconnected;
             //model.NewCPUNodeFound += ConnectUserControl.NewCPUNodeFound;
-            ConnectUserControl.Connect += model.ConnectRequest;
-            ConnectUserControl.Disconnect += model.DisconnectRequest;
-            ConnectUserControl.ShowSettings += model.ShowSettings;
+           // ConnectUserControl.Connect += model.ConnectRequest;
+            //ConnectUserControl.Disconnect += model.DisconnectRequest;
+            //ConnectUserControl.ShowSettings += model.ShowSettings;
             //ConnectUserControl.SelectedConnectorChanged += model.ConnectorChanged;
             //ConnectUserControl.Connectors = model.Connectors;
-            ConnectUserControl.Nodes = model.Nodes;
+            //ConnectUserControl.Nodes = model.Nodes;
 
             // Set up the RegisterUserControl
             //model.NewCPUNodeFound += RegisterUserControl.NewCPUNodeFound;

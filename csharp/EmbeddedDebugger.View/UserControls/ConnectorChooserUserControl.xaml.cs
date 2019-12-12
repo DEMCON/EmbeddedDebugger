@@ -46,28 +46,9 @@ namespace EmbeddedDebugger.View.UserControls
         }
         #endregion
 
-        #region EventHandlers
-        public event EventHandler Connect = delegate { };
-        public event EventHandler Disconnect = delegate { };
-        public event EventHandler ShowSettings = delegate { };
-        public event EventHandler SelectedConnectorChanged = delegate { };
-        #endregion
-
         public ConnectorChooserUserControl()
         {
             InitializeComponent();
-        }
-
-        public void HasConnected(object sender, EventArgs e)
-        {
-            //this.Connected = true;
-            Refresh();
-        }
-
-        public void HasDisconnected(object sender, EventArgs e)
-        {
-            //this.Connected = false;
-            Refresh();
         }
 
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
@@ -96,25 +77,40 @@ namespace EmbeddedDebugger.View.UserControls
 
         public void Refresh()
         {
-            if (!Dispatcher.CheckAccess())
+            if (!this.Dispatcher.CheckAccess())
             {
-                Dispatcher.Invoke(new Action(Refresh));
+                this.Dispatcher.Invoke(this.Refresh);
                 return;
             }
 
             bool connected = this.systemViewModel.ConnectorConnected();
-            ConnectButton.IsEnabled = !connected;
-            SettingsButton.IsEnabled = !connected;
-            DisconnectButton.IsEnabled = connected;
-            ConnectorChooserComboBox.IsEnabled = !connected;
+            this.ConnectButton.IsEnabled = !connected;
+            this.SettingsButton.IsEnabled = !connected;
+            this.DisconnectButton.IsEnabled = connected;
+            this.ConnectorChooserComboBox.IsEnabled = !connected;
+        }
+
+        public void Update(object o, EventArgs e)
+        {
+            this.Refresh();
         }
 
         private void ConnectorChooserUserControl_OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            if (e.OldValue is ViewModelManager vmmOld)
+            {
+                vmmOld.RefreshLow -= this.Update;
+            }
             if (e.NewValue is ViewModelManager vmm)
             {
                 this.systemViewModel = vmm.SystemViewModel;
+                vmm.RefreshLow += this.Update;
             }
+        }
+
+        private void ConnectorChooserUserControl_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            this.Connectors = this.systemViewModel.GetConnectors();
         }
     }
 }

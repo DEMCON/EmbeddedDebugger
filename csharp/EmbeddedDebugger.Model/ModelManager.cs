@@ -20,6 +20,7 @@ using EmbeddedDebugger.Model.RPC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using EmbeddedDebugger.Connectors.Interfaces;
 
 namespace EmbeddedDebugger.Model
 {
@@ -38,7 +39,7 @@ namespace EmbeddedDebugger.Model
         private readonly List<CpuNode> nodes;
         public List<CpuNode> Nodes { get => nodes; }
         // By making this a list of objects, the view never has to have the assembly information of the connectors
-        public List<object> Connectors { get => dp.Connectors.Cast<object>().ToList(); }
+        public List<IConnector> Connectors { get => dp.Connectors; }
         public bool IsConnected { get => dp.IsConnected; }
         public object Connector { get => dp.Connector; }
         public byte Decimation { get => decimation; set => decimation = value; }
@@ -132,10 +133,10 @@ namespace EmbeddedDebugger.Model
             //NewCPUNodeFound(this, new EventArgs());
         }
 
-        public void ShowSettings(object sender, EventArgs e)
-        {
-            dp.ShowSettings();
-        }
+        //public void ShowSettings(object sender, EventArgs e)
+       // {
+        //    dp.ShowSettings();
+       // }
 
         public void NewDebugMessageToEmbedded(object sender, string e)
         {

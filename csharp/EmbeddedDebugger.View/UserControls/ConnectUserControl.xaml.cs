@@ -30,6 +30,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using EmbeddedDebugger.ViewModel;
 
 namespace EmbeddedDebugger.View.UserControls
 {
@@ -38,78 +39,41 @@ namespace EmbeddedDebugger.View.UserControls
     /// </summary>
     public partial class ConnectUserControl : UserControl
     {
-        #region Properties
-        private List<CpuNode> nodes;
-        public List<CpuNode> Nodes { get => nodes; set => nodes = value; }
-        //public List<object> Connectors { get => ConnectorChooserUserControl.Connectors; set => ConnectorChooserUserControl.Connectors = value; }
-        //public object SelectedConnector { get => ConnectorChooserUserControl.SelectedConnector; set => ConnectorChooserUserControl.SelectedConnector = value; }
-        //public bool connected { get => ConnectorChooserUserControl.Connected; set => ConnectorChooserUserControl.Connected = value; }
-        #endregion
-
-        #region EventsHandlers
-        public event EventHandler Connect = delegate { };
-        public event EventHandler Disconnect = delegate { };
-        public event EventHandler ShowSettings = delegate { };
-        public event EventHandler SelectedConnectorChanged = delegate { };
-        #endregion
+        private SystemViewModel systemViewModel;
 
         public ConnectUserControl()
         {
             InitializeComponent();
-            ConnectorChooserUserControl.Connect += ConnectorChooserUserControl_Connect;
-            ConnectorChooserUserControl.Disconnect += ConnectorChooserUserControl_Disconnect;
-            ConnectorChooserUserControl.ShowSettings += ConnectorChooserUserControl_ShowSettings;
-            ConnectorChooserUserControl.SelectedConnectorChanged += ConnectorChooserUserControl_SelectedConnectorChanged;
         }
 
-        #region delegates
-        public void HasConnected(object sender, EventArgs e)
+        public void Refresh()
         {
-            ConnectorChooserUserControl.HasConnected(sender, e);
-        }
-
-        public void HasDisconnected(object sender, EventArgs e)
-        {
-            ConnectorChooserUserControl.HasDisconnected(sender, e);
-        }
-
-        public void NewCPUNodeFound(object sender, EventArgs e)
-        {
-            if (!Dispatcher.CheckAccess())
+            if (!this.Dispatcher.CheckAccess())
             {
-                Dispatcher.Invoke(delegate { NewCPUNodeFound(sender, e); });
+                this.Dispatcher.Invoke(this.Refresh);
+                return;
             }
-            else
+
+            this.NodesDataGrid.ItemsSource = null;
+            this.NodesDataGrid.ItemsSource = this.systemViewModel.GetCpuNodes();
+        }
+
+        public void Update(object o, EventArgs e)
+        {
+            this.Refresh();
+        }
+
+        private void ConnectUserControl_OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is ViewModelManager vmmOld)
             {
-                NodesDataGrid.ItemsSource = nodes;
-                NodesDataGrid.Items.Refresh();
+                vmmOld.RefreshLow -= this.Update;
+            }
+            if (e.NewValue is ViewModelManager vmm)
+            {
+                this.systemViewModel = vmm.SystemViewModel;
+                vmm.RefreshLow += this.Update;
             }
         }
-
-        private void ConnectorChooserUserControl_SelectedConnectorChanged(object sender, EventArgs e)
-        {
-            SelectedConnectorChanged(this, e);
-        }
-
-        private void ConnectorChooserUserControl_ShowSettings(object sender, EventArgs e)
-        {
-            ShowSettings(sender, e);
-        }
-
-        private void ConnectorChooserUserControl_Disconnect(object sender, EventArgs e)
-        {
-            Disconnect(sender, e);
-        }
-
-        private void ConnectorChooserUserControl_Connect(object sender, EventArgs e)
-        {
-            Connect(sender, e);
-        }
-
-        //public void UpdateGuiValues()
-        //{
-        //    NodesDataGrid.Items.Refresh();
-        //}
-        #endregion
     }
 }

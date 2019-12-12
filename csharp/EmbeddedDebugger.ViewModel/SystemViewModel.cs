@@ -1,11 +1,6 @@
-﻿using EmbeddedDebugger.Model;
-using System;
+﻿using EmbeddedDebugger.Connectors.Interfaces;
+using EmbeddedDebugger.Model;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EmbeddedDebugger.Connectors.Interfaces;
 
 namespace EmbeddedDebugger.ViewModel
 {
@@ -21,6 +16,21 @@ namespace EmbeddedDebugger.ViewModel
             this.debugProtocol = modelManager.DebugProtocol;
         }
 
+        #region Nodes
+
+        public List<CpuNode> GetCpuNodes()
+        {
+            return this.modelManager.Nodes;
+        }
+
+        #endregion
+
+        #region Connector
+        public List<IConnector> GetConnectors()
+        {
+            return this.modelManager.Connectors;
+        }
+
         public void ConnectConnector(IConnector connector)
         {
             this.debugProtocol.Connector = connector;
@@ -34,8 +44,7 @@ namespace EmbeddedDebugger.ViewModel
 
         public void ShowConnectorSettings(IConnector connector)
         {
-            // TODO Add connector to showsettings
-            this.debugProtocol.ShowSettings();
+            this.debugProtocol.ShowSettings(connector);
         }
 
         public bool ConnectorConnected()
@@ -43,7 +52,7 @@ namespace EmbeddedDebugger.ViewModel
             // TODO: Add possibility to do this on connector level?
             return this.debugProtocol.IsConnected;
         }
-
+        #endregion
 
         public void ResetTime(CpuNode cpuNode = null)
         {

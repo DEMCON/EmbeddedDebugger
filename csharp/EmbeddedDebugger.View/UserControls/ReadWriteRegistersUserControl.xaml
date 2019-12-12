@@ -188,9 +188,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 </DataGridTemplateColumn>
 
                 <!-- Line color -->
+                <!--
                 <DataGridTemplateColumn Header="Line color" Width="100">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
+                            
                             <ComboBox SelectedItem="{Binding LineKnownColor, UpdateSourceTrigger=PropertyChanged}"
                                       ItemsSource="{Binding Source={StaticResource linecolors}, Mode=OneWay}" VerticalContentAlignment="Center" Padding="3,0">
                                 <ComboBox.IsEnabled>
@@ -203,7 +205,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                             </ComboBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                </DataGridTemplateColumn>-->
 
                 <!-- Log -->
                 <DataGridTemplateColumn Header="Log" Width="40">

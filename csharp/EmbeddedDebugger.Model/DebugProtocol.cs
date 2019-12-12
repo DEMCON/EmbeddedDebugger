@@ -160,7 +160,7 @@ namespace EmbeddedDebugger.Model
         /// <summary>
         /// Show a form with the settings of the connector
         /// </summary>
-        public void ShowSettings()
+        public void ShowSettings(IConnector connector)
         {
             connector.ShowDialog();
         }
@@ -574,6 +574,8 @@ namespace EmbeddedDebugger.Model
                     messagesWaitingAck.Add(msg);
                 }
             }
+
+            Console.WriteLine(msg);
             connector.SendMessage(MessageCodec.EncodeMessage(msg));
         }
         #endregion

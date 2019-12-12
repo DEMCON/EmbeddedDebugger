@@ -22,7 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="35" d:DesignWidth="600" Background="White" 
-             DataContextChanged="ConnectorChooserUserControl_OnDataContextChanged ">
+             DataContextChanged="ConnectorChooserUserControl_OnDataContextChanged"
+             Loaded="ConnectorChooserUserControl_OnLoaded ">
     <Grid Margin="3 3 3 3">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="75"/>
