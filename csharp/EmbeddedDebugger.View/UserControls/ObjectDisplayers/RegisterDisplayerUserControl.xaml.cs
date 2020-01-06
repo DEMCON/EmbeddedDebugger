@@ -1,7 +1,10 @@
-﻿using EmbeddedDebugger.DebugProtocol.RegisterValues;
+﻿using EmbeddedDebugger.DebugProtocol.Enums;
+using EmbeddedDebugger.DebugProtocol.RegisterValues;
 using EmbeddedDebugger.Model;
 using EmbeddedDebugger.ViewModel;
 using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -72,14 +75,14 @@ namespace EmbeddedDebugger.View.UserControls.ObjectDisplayers
             }
         }
 
-        public void Refresh()
+        public void Refresh(bool force = false)
         {
             this.Dispatcher.Invoke(() =>
             {
-                if (this.Register != null && this.Register.RegisterValue != this.currentValue)
+                if (this.Register != null && (this.Register.RegisterValue != this.currentValue || force && this.Register.RegisterValue != null))
                 {
                     this.currentValue = this.Register.RegisterValue;
-                    this.ValueTextBox.Text = this.Register.Value;
+                    this.ValueTextBox.Text = this.Register.RegisterValue.ValueAsFormattedString((ValueDisplayFormat)this.ValueDisplayFormatComboBox.SelectedItem);
                 }
             });
         }
@@ -93,14 +96,51 @@ namespace EmbeddedDebugger.View.UserControls.ObjectDisplayers
         {
             if (e.OldValue is ViewModelManager vmmOld)
             {
-                vmmOld.RefreshLow -= this.Update;
+                vmmOld.RefreshMedium -= this.Update;
             }
             if (e.NewValue is ViewModelManager vmm)
             {
                 this.systemViewModel = vmm.SystemViewModel;
-                vmm.RefreshLow += this.Update;
+                vmm.RefreshMedium += this.Update;
             }
         }
 
+        public static IEnumerable<KnownColor> LineColors
+        {
+            get => new List<KnownColor>()
+                {
+                    KnownColor.Black,
+                    KnownColor.Blue,
+                    KnownColor.BlueViolet,
+                    KnownColor.Brown,
+                    KnownColor.CadetBlue,
+                    KnownColor.Chartreuse,
+                    KnownColor.Chocolate,
+                    KnownColor.CornflowerBlue,
+                    KnownColor.Crimson,
+                    KnownColor.DarkBlue,
+                    KnownColor.DarkGreen,
+                    KnownColor.DarkMagenta,
+                    KnownColor.DarkRed,
+                    KnownColor.DarkViolet,
+                    KnownColor.ForestGreen,
+                    KnownColor.Green,
+                    KnownColor.Indigo,
+                    KnownColor.MediumBlue,
+                    KnownColor.Navy,
+                    KnownColor.Purple,
+                    KnownColor.Red,
+                };
+        }
+
+        private void ValueDisplayFormatComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            this.Refresh(true);
+        }
+
+        private void ChannelModeComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            this.systemViewModel?.UpdateChannelMode(this.Register, (ChannelMode)this.ChannelModeComboBox.SelectedItem);
+        }
     }
 }

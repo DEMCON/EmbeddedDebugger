@@ -15,12 +15,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+using EmbeddedDebugger.Connectors.Interfaces;
 using EmbeddedDebugger.Model.Logging;
 using EmbeddedDebugger.Model.RPC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using EmbeddedDebugger.Connectors.Interfaces;
 
 namespace EmbeddedDebugger.Model
 {
@@ -32,20 +32,20 @@ namespace EmbeddedDebugger.Model
     {
         private readonly DebugProtocol dp;
         private readonly ValueLogger logger;
-        private byte decimation;
         private RpcInterface rpcInterface;
 
         #region Properties
         private readonly List<CpuNode> nodes;
-        public List<CpuNode> Nodes { get => nodes; }
+        public List<CpuNode> Nodes => nodes;
         // By making this a list of objects, the view never has to have the assembly information of the connectors
-        public List<IConnector> Connectors { get => dp.Connectors; }
-        public bool IsConnected { get => dp.IsConnected; }
-        public object Connector { get => dp.Connector; }
-        public byte Decimation { get => decimation; set => decimation = value; }
-        public ValueLogger Logger { get => logger; }
-        public RpcInterface RpcInterface { get => rpcInterface; }
-        public DebugProtocol DebugProtocol { get => dp; }
+        public List<IConnector> Connectors => dp.Connectors;
+        public bool IsConnected => dp.IsConnected;
+        public object Connector => dp.Connector;
+        public byte Decimation { get; set; }
+        public ValueLogger Logger { get; private set; }
+        public RpcInterface RpcInterface { get; private set; }
+        public DebugProtocol DebugProtocol => dp;
+        public Dictionary<byte, Register> DebugChannels;
         #endregion
 
         #region Eventhandlers
@@ -57,14 +57,15 @@ namespace EmbeddedDebugger.Model
 
         public ModelManager()
         {
-            logger = new ValueLogger();
-            dp = new DebugProtocol(this, logger);
-            nodes = new List<CpuNode>();
-            dp.HasConnected += CoreConnected;
-            dp.HasDisconnected += CoreDisconnected;
-            dp.RegisterQueried += Dp_RegisterQueried;
-            dp.ConfigLoaded += Dp_ConfigLoaded;
-            rpcInterface = new RpcInterface(this, dp);
+            this.logger = new ValueLogger();
+            this.dp = new DebugProtocol(this, logger);
+            this.nodes = new List<CpuNode>();
+            this.dp.HasConnected += CoreConnected;
+            this.dp.HasDisconnected += CoreDisconnected;
+            this.dp.RegisterQueried += Dp_RegisterQueried;
+            this.dp.ConfigLoaded += Dp_ConfigLoaded;
+            this.rpcInterface = new RpcInterface(this, dp);
+            this.DebugChannels = new Dictionary<byte, Register>();
         }
 
         private void Dp_ConfigLoaded(object sender, EventArgs e)
@@ -128,35 +129,9 @@ namespace EmbeddedDebugger.Model
             }
         }
 
-        public void NewCPUFound()
-        {
-            //NewCPUNodeFound(this, new EventArgs());
-        }
-
-        //public void ShowSettings(object sender, EventArgs e)
-       // {
-        //    dp.ShowSettings();
-       // }
-
         public void NewDebugMessageToEmbedded(object sender, string e)
         {
             dp.SendDebugString(((CpuNode)sender).ID, e);
-        }
-
-        public void WriteRegisterValueUpdated(object sender, Register reg)
-        {
-            dp.WriteToRegister(0x01, reg.RegisterValue.ValueByteArray, reg);
-        }
-
-        // TODO: Add the correct CPU number!!!
-        public void RefreshRegister(object sender, Register reg)
-        {
-            dp.QueryRegister(0x01, nodes.First(x => x.ID == 0x01), reg);
-        }
-
-        public void DebugChannelModeUpdated(object sender, Register reg)
-        {
-            dp.ConfigChannel(0x01, (byte)reg.DebugChannel, reg.ChannelMode);
         }
 
         public void ResetTime(int decimation_ms = 0)

@@ -7,9 +7,9 @@
              xmlns:converters="clr-namespace:EmbeddedDebugger.View.Converters"
              xmlns:enums="clr-namespace:EmbeddedDebugger.DebugProtocol.Enums;assembly=EmbeddedDebugger.DebugProtocol"
              xmlns:System="clr-namespace:System;assembly=mscorlib"
-             xmlns:model="clr-namespace:EmbeddedDebugger.Model;assembly=EmbeddedDebugger.Model"
+             xmlns:ViewModel="clr-namespace:EmbeddedDebugger.ViewModel;assembly=EmbeddedDebugger.ViewModel"
              mc:Ignorable="d" 
-             d:DesignHeight="30" d:DesignWidth="965" Background="White"
+             d:DesignHeight="30" d:DesignWidth="950" Background="White"
              x:Name="rduc"
              HorizontalAlignment="Left"
              DataContextChanged="RegisterDisplayerUserControl_OnDataContextChanged">
@@ -20,9 +20,6 @@
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="enums:ChannelMode" />
             </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-        <ObjectDataProvider x:Key="Linecolors"
-                                ObjectType="{x:Type model:Register}">
         </ObjectDataProvider>
         <ObjectDataProvider x:Key="ValueDisplayFormatEnumData"
                                 MethodName="GetValues" 
@@ -40,79 +37,93 @@
             <RowDefinition Height="30"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Border BorderThickness="1" BorderBrush="Black" Height="30" Width="965" HorizontalAlignment="Left">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="30"/>
-                    <ColumnDefinition Width="65"/>
-                    <ColumnDefinition Width="43"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="60"/>
-                    <ColumnDefinition Width="70"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="40"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="40"/>
-                    <ColumnDefinition Width="100"/>
-                </Grid.ColumnDefinitions>
-                <Button Name="CollapseButton" Background="Transparent" BorderThickness="0" Content="{Binding ElementName=rduc, Path=Collapsed, Converter={StaticResource booleanToCollapsedConverter}}" Visibility="{Binding ElementName=rduc, Path=Register.HasChildren, Converter={StaticResource booleanToVisibilityConverter}}"  Click="CollapseButton_OnClick "/>
-                <TextBlock Grid.Column="1" Text="{Binding ElementName=rduc, Path=Register.CpuID}" VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="2" Text="{Binding ElementName=rduc, Path=Register.ID}" VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="3" Text="{Binding ElementName=rduc, Path=Register.Name}" VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="4" Text="{Binding ElementName=rduc, Path=Register.VariableTypeString}" VerticalAlignment="Center"/>
-                <ComboBox Grid.Column="5" Margin="3" SelectedItem="{Binding ElementName=rduc, Path=Register.ValueDisplayFormat, UpdateSourceTrigger=PropertyChanged}"
-                  ItemsSource="{Binding Source={StaticResource ValueDisplayFormatEnumData}}" Padding="3,0" VerticalContentAlignment="Center" >
-                    <ComboBox.IsEnabled>
-                        <MultiBinding Converter="{StaticResource BooleanAndConverter}">
-                            <Binding ElementName="rduc" Path="Register.IsIntegralValue" />
-                            <Binding ElementName="rduc" Path="Register.IsVariableSize" Converter="{StaticResource BooleanInverterConverter}" />
-                        </MultiBinding>
-                    </ComboBox.IsEnabled>
-                </ComboBox>
-                <TextBox Grid.Column="6" BorderThickness="0" Margin="3" Name="ValueTextBox" IsEnabled="{Binding ElementName=rduc, Path=Register.IsWritable}" FontFamily="Consolas" VerticalAlignment="Center" TextAlignment="Right"/>
-                <ComboBox Grid.Column="7" Margin="3" SelectedItem="{Binding ElementName=rduc, Path=Register.ChannelMode, UpdateSourceTrigger=PropertyChanged}"
-                  ItemsSource="{Binding Source={StaticResource ChannelModeEnumData}}" VerticalContentAlignment="Center" Padding="3,0" >
-                    <ComboBox.IsEnabled>
-                        <MultiBinding Converter="{StaticResource BooleanAndConverter}">
-                            <Binding ElementName="rduc" Path="Register.IsReadable" />
-                            <Binding ElementName="rduc" Path="Register.IsVariableSize" Converter="{StaticResource BooleanInverterConverter}" />
-                        </MultiBinding>
-                    </ComboBox.IsEnabled>
-                </ComboBox>
-                <CheckBox Grid.Column="8" Name="PlotCheckBox" VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding ElementName=rduc, Path=Register.Plot, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-                  Checked="PlotCheckBox_OnChecked "  Unchecked="PlotCheckBox_OnUnchecked" VerticalContentAlignment="Center" >
-                    <CheckBox.IsEnabled>
-                        <MultiBinding Converter="{StaticResource BooleanAndConverter}">
-                            <Binding ElementName="rduc" Path="Register.IsReadable"/>
-                            <Binding ElementName="rduc" Path="Register.IsIntegralValue" />
-                            <Binding ElementName="rduc" Path="Register.IsVariableSize" Converter="{StaticResource BooleanInverterConverter}"/>
-                        </MultiBinding>
-                    </CheckBox.IsEnabled>
-                </CheckBox>
-                <!--SelectedItem="{Binding LineKnownColor, UpdateSourceTrigger=PropertyChanged}"-->
-                <ComboBox Grid.Column="9" Margin="3"
-                  ItemsSource="{Binding Source={StaticResource Linecolors}, Mode=OneWay}" VerticalContentAlignment="Center" Padding="3,0">
-                    <ComboBox.IsEnabled>
-                        <MultiBinding Converter="{StaticResource BooleanAndConverter}">
-                            <Binding ElementName="rduc" Path="Register.IsReadable"/>
-                            <Binding ElementName="rduc" Path="Register.IsIntegralValue" />
-                            <Binding ElementName="rduc" Path="Register.IsVariableSize" Converter="{StaticResource BooleanInverterConverter}" />
-                        </MultiBinding>
-                    </ComboBox.IsEnabled>
-                </ComboBox>
-                <CheckBox Grid.Column="10" VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding ElementName=rduc, Path=Register.Log, UpdateSourceTrigger=PropertyChanged}" 
-                  IsEnabled="{Binding ElementName=rduc, Path=Register.IsReadable}" VerticalContentAlignment="Center"/>
-                <Button Grid.Column="11" Margin="3" Name="RefreshButton" Content="Refresh" Click="RefreshButton_OnClick" Padding="0" BorderThickness="0">
-                    <Button.IsEnabled>
-                        <MultiBinding Converter="{StaticResource BooleanOrConverter}">
-                            <Binding ElementName="rduc" Path="Register.IsReadable"/>
-                            <Binding ElementName="rduc" Path="Register.IsWritable" />
-                        </MultiBinding>
-                    </Button.IsEnabled>
-                </Button>
-            </Grid>
-        </Border>
+        <!--<Border BorderThickness="1" BorderBrush="Black" Height="30" Width="950" HorizontalAlignment="Left">-->
+        <Grid Height="30" Width="950" HorizontalAlignment="Left">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="25"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="43"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="70"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="87"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
+            <Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
+            <Border Grid.Column="2" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
+            <Border Grid.Column="3" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
+            <Border Grid.Column="4" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
+            <Border Grid.Column="5" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
+            <Border Grid.Column="6" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
+            <Border Grid.Column="7" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
+            <Border Grid.Column="8" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
+            <Border Grid.Column="9" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
+            <Border Grid.Column="10" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
+            <Border Grid.Column="11" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
+            <Border Grid.Column="12" BorderBrush="Gray" BorderThickness="1,0,1,0" Height="30" Background="{x:Null}" />
+            <Border Grid.Column="0" Grid.ColumnSpan="12" BorderBrush="Gray" BorderThickness="0,0,0,1" Background="{x:Null}" />
+
+            <Button Name="CollapseButton" Background="Transparent" BorderThickness="0" Content="{Binding ElementName=rduc, Path=Collapsed, Converter={StaticResource booleanToCollapsedConverter}}" Visibility="{Binding ElementName=rduc, Path=Register.HasChildren, Converter={StaticResource booleanToVisibilityConverter}}"  Click="CollapseButton_OnClick "/>
+            <TextBlock Grid.Column="1" Margin="3" Text="{Binding ElementName=rduc, Path=Register.CpuID}" VerticalAlignment="Center" TextAlignment="Left"/>
+            <TextBlock Grid.Column="2" Margin="3" Text="{Binding ElementName=rduc, Path=Register.ID}" VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="3" Margin="3" Text="{Binding ElementName=rduc, Path=Register.Name}" VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="4" Margin="3" Text="{Binding ElementName=rduc, Path=Register.VariableTypeString}" VerticalAlignment="Center"/>
+            <ComboBox Grid.Column="5" Margin="3" Name="ValueDisplayFormatComboBox"  SelectedItem="{Binding ElementName=rduc, Path=Register.ValueDisplayFormat}" ItemsSource="{Binding Source={StaticResource ValueDisplayFormatEnumData}}" Padding="3,0" VerticalContentAlignment="Center" SelectionChanged="ValueDisplayFormatComboBox_OnSelectionChanged ">
+                <ComboBox.IsEnabled>
+                    <MultiBinding Converter="{StaticResource BooleanAndConverter}">
+                        <Binding ElementName="rduc" Path="Register.IsIntegralValue" />
+                        <Binding ElementName="rduc" Path="Register.IsVariableSize" Converter="{StaticResource BooleanInverterConverter}" />
+                    </MultiBinding>
+                </ComboBox.IsEnabled>
+            </ComboBox>
+            <TextBox Grid.Column="6" BorderThickness="0" Margin="3" Name="ValueTextBox" IsEnabled="{Binding ElementName=rduc, Path=Register.IsWritable}" FontFamily="Consolas" VerticalAlignment="Center" TextAlignment="Right"/>
+            <ComboBox Grid.Column="7" Margin="3" SelectedItem="{Binding ElementName=rduc, Path=Register.ChannelMode}" Name="ChannelModeComboBox"
+              ItemsSource="{Binding Source={StaticResource ChannelModeEnumData}}" VerticalContentAlignment="Center" Padding="3,0" SelectionChanged="ChannelModeComboBox_OnSelectionChanged ">
+                <ComboBox.IsEnabled>
+                    <MultiBinding Converter="{StaticResource BooleanAndConverter}">
+                        <Binding ElementName="rduc" Path="Register.IsReadable" />
+                        <Binding ElementName="rduc" Path="Register.IsVariableSize" Converter="{StaticResource BooleanInverterConverter}" />
+                    </MultiBinding>
+                </ComboBox.IsEnabled>
+            </ComboBox>
+            <CheckBox Grid.Column="8" Name="PlotCheckBox" VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding ElementName=rduc, Path=Register.Plot}" 
+              Checked="PlotCheckBox_OnChecked "  Unchecked="PlotCheckBox_OnUnchecked" VerticalContentAlignment="Center" >
+                <CheckBox.IsEnabled>
+                    <MultiBinding Converter="{StaticResource BooleanAndConverter}">
+                        <Binding ElementName="rduc" Path="Register.IsReadable"/>
+                        <Binding ElementName="rduc" Path="Register.IsIntegralValue" />
+                        <Binding ElementName="rduc" Path="Register.IsVariableSize" Converter="{StaticResource BooleanInverterConverter}"/>
+                    </MultiBinding>
+                </CheckBox.IsEnabled>
+            </CheckBox>
+            <!--SelectedItem="{Binding LineKnownColor, UpdateSourceTrigger=PropertyChanged}"-->
+            <ComboBox Grid.Column="9" Margin="3"
+              ItemsSource="{Binding ElementName=rduc, Path=LineColors, Mode=OneWay}" VerticalContentAlignment="Center" Padding="3,0">
+                <ComboBox.IsEnabled>
+                    <MultiBinding Converter="{StaticResource BooleanAndConverter}">
+                        <Binding ElementName="rduc" Path="Register.IsReadable"/>
+                        <Binding ElementName="rduc" Path="Register.IsIntegralValue" />
+                        <Binding ElementName="rduc" Path="Register.IsVariableSize" Converter="{StaticResource BooleanInverterConverter}" />
+                    </MultiBinding>
+                </ComboBox.IsEnabled>
+            </ComboBox>
+            <CheckBox Grid.Column="10" VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding ElementName=rduc, Path=Register.Log}" 
+              IsEnabled="{Binding ElementName=rduc, Path=Register.IsReadable}" VerticalContentAlignment="Center"/>
+            <Button Grid.Column="11" Margin="3" Name="RefreshButton" Content="Refresh" Click="RefreshButton_OnClick" Padding="0" BorderThickness="0">
+                <Button.IsEnabled>
+                    <MultiBinding Converter="{StaticResource BooleanOrConverter}">
+                        <Binding ElementName="rduc" Path="Register.IsReadable"/>
+                        <Binding ElementName="rduc" Path="Register.IsWritable" />
+                    </MultiBinding>
+                </Button.IsEnabled>
+            </Button>
+        </Grid>
+        <!--</Border>-->
         <StackPanel Grid.Row="1" Margin="30,0,0,0" Name="ChildrenStackPanel" Visibility="{Binding ElementName=rduc, Path=Collapsed, Converter={StaticResource booleanToVisibilityConverter}, ConverterParameter=Visibility.Collapsed}"/>
     </Grid>
 </UserControl>

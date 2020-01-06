@@ -115,16 +115,11 @@ namespace EmbeddedDebugger.View.UserControls
             }
             if (this.nodes == null || !this.nodes.SequenceEqual(this.systemViewModel.GetCpuNodes()))
             {
-                try
-                {
-                    this.CpuNodeComboBox.ItemsSource = null;
-                    this.nodes = this.systemViewModel.GetCpuNodes();
-                    this.CpuNodeComboBox.ItemsSource = this.nodes;
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"{e.Message} | {e.Data} | {e.StackTrace}");
-                }
+                int selectedIndex = this.CpuNodeComboBox.SelectedIndex;
+                this.CpuNodeComboBox.ItemsSource = null;
+                this.nodes = this.systemViewModel.GetCpuNodes().ToList();
+                this.CpuNodeComboBox.ItemsSource = this.nodes;
+                if (this.nodes.Count > 0) this.CpuNodeComboBox.SelectedIndex = selectedIndex >= 0 ? selectedIndex : 0;
             }
         }
 

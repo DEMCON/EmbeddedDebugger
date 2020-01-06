@@ -624,7 +624,6 @@ namespace EmbeddedDebugger.Model
             msgIDs.Add(node.ID, 0);
             // Add the node to the list of nodes in the modelmanager
             core.Nodes.Add(node);
-            core.NewCPUFound();
             // Ask the node to send over its information
             GetNodeInfo(node.ID);
             // Turn off all channels
