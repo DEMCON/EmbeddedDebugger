@@ -54,6 +54,7 @@
     <Compile Include="Model\DebugProtocolServer.cs" />
     <Compile Include="Model\EmbeddedConfig.cs" />
     <Compile Include="Model\Register.cs" />
+    <Compile Include="Model\XmlConfigurationParser.cs" />
     <Compile Include="View\CustomComponents\EmbeddedTerminal.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -104,6 +105,10 @@
     <ProjectReference Include="..\EmbeddedDebugger.DebugProtocol\EmbeddedDebugger.DebugProtocol.csproj">
       <Project>{f11ab816-7ab0-448c-b9a3-959c4612c0b7}</Project>
       <Name>EmbeddedDebugger.DebugProtocol</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EmbeddedDebugger.Model\EmbeddedDebugger.Model.csproj">
+      <Project>{beaef0ec-bb28-46fc-aabf-8c2b2962e321}</Project>
+      <Name>EmbeddedDebugger.Model</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

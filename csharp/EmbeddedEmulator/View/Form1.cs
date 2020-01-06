@@ -26,6 +26,7 @@ using System.Diagnostics;
 using EmbeddedDebugger.DebugProtocol.Messages;
 using EmbeddedDebugger.DebugProtocol;
 using System.Drawing;
+using System.IO;
 using EmbeddedEmulator.Model;
 using EmbeddedDebugger.DebugProtocol.Enums;
 using EmbeddedDebugger.DebugProtocol.RegisterValues;
@@ -245,7 +246,7 @@ namespace EmbeddedEmulator.View
 
         private void FillConfig()
         {
-            embeddedConfig.CpuName = "Foitn";
+            embeddedConfig.CpuName = "EmbeddedDebugger";
             embeddedConfig.ApplicationVersion = new Version(0, 0, 1);
             embeddedConfig.ProtocolVersion = new Version(1, 0, 0);
             embeddedConfig.SerialNumber = "0.1.2.3.4";
@@ -254,7 +255,7 @@ namespace EmbeddedEmulator.View
             //embeddedConfig.ReadRegisters.Add(
             //    new Register(1, "myBlob", ReadWrite.ReadWrite, VariableType.Blob, Source.ElfParsed, 0, 1, 0) { Value = new RegisterValueBlob() { ValueByteArray = (byte[])(new ImageConverter()).ConvertTo(Image.FromFile(@"C:/Temp/TestImage.jpg"), typeof(byte[])) } });
             embeddedConfig.ReadRegisters.Add(
-                new Register(1, "Sine", ReadWrite.Read, VariableType.UChar, Source.ElfParsed, 0, 0, 1) { Value = new RegisterValueUChar() });
+                new Register(1, "Sine", ReadWrite.Read, VariableType.UChar, Source.ElfParsed, 0, 1, 1) { Value = new RegisterValueUChar() });
             //embeddedConfig.ReadRegisters.Add(
             //    new Register(1, "Cosine", ReadWrite.Read, VariableType.Double, Source.ElfParsed, 0, 1, 8) { Value = new RegisterValueDouble() });
             embeddedConfig.WriteRegisters.Add(
@@ -315,6 +316,11 @@ namespace EmbeddedEmulator.View
         private void StringTextBox_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void SaveConfigFileButton_Click(object sender, EventArgs e)
+        {
+            new XmlConfigurationParser().ToFile(Path.Combine( @"C:\Configurations\","TCP",this.embeddedConfig.CpuName, "cpu01-V00_00_0001.xml"), this.embeddedConfig);
         }
     }
 }

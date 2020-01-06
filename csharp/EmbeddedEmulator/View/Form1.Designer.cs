@@ -59,6 +59,7 @@ namespace EmbeddedEmulator.View
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.sendingGroupBox = new System.Windows.Forms.GroupBox();
+            this.SaveConfigFileButton = new System.Windows.Forms.Button();
             this.MultipleNodesConfigGroupBox = new System.Windows.Forms.GroupBox();
             this.label3 = new System.Windows.Forms.Label();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
@@ -87,10 +88,9 @@ namespace EmbeddedEmulator.View
             // 
             // openServerButton
             // 
-            this.openServerButton.Location = new System.Drawing.Point(8, 23);
-            this.openServerButton.Margin = new System.Windows.Forms.Padding(4);
+            this.openServerButton.Location = new System.Drawing.Point(6, 19);
             this.openServerButton.Name = "openServerButton";
-            this.openServerButton.Size = new System.Drawing.Size(137, 28);
+            this.openServerButton.Size = new System.Drawing.Size(81, 23);
             this.openServerButton.TabIndex = 0;
             this.openServerButton.Text = "Open server";
             this.openServerButton.UseVisualStyleBackColor = true;
@@ -98,10 +98,9 @@ namespace EmbeddedEmulator.View
             // 
             // closeServerButton
             // 
-            this.closeServerButton.Location = new System.Drawing.Point(153, 23);
-            this.closeServerButton.Margin = new System.Windows.Forms.Padding(4);
+            this.closeServerButton.Location = new System.Drawing.Point(93, 19);
             this.closeServerButton.Name = "closeServerButton";
-            this.closeServerButton.Size = new System.Drawing.Size(137, 28);
+            this.closeServerButton.Size = new System.Drawing.Size(74, 23);
             this.closeServerButton.TabIndex = 3;
             this.closeServerButton.Text = "Close server";
             this.closeServerButton.UseVisualStyleBackColor = true;
@@ -109,10 +108,9 @@ namespace EmbeddedEmulator.View
             // 
             // sendVersionButton
             // 
-            this.sendVersionButton.Location = new System.Drawing.Point(8, 21);
-            this.sendVersionButton.Margin = new System.Windows.Forms.Padding(4);
+            this.sendVersionButton.Location = new System.Drawing.Point(6, 17);
             this.sendVersionButton.Name = "sendVersionButton";
-            this.sendVersionButton.Size = new System.Drawing.Size(137, 28);
+            this.sendVersionButton.Size = new System.Drawing.Size(103, 23);
             this.sendVersionButton.TabIndex = 5;
             this.sendVersionButton.Text = "Send Version";
             this.sendVersionButton.UseVisualStyleBackColor = true;
@@ -120,10 +118,9 @@ namespace EmbeddedEmulator.View
             // 
             // sendInfoButton
             // 
-            this.sendInfoButton.Location = new System.Drawing.Point(8, 57);
-            this.sendInfoButton.Margin = new System.Windows.Forms.Padding(4);
+            this.sendInfoButton.Location = new System.Drawing.Point(6, 46);
             this.sendInfoButton.Name = "sendInfoButton";
-            this.sendInfoButton.Size = new System.Drawing.Size(137, 28);
+            this.sendInfoButton.Size = new System.Drawing.Size(103, 23);
             this.sendInfoButton.TabIndex = 6;
             this.sendInfoButton.Text = "Send Info";
             this.sendInfoButton.UseVisualStyleBackColor = true;
@@ -131,10 +128,9 @@ namespace EmbeddedEmulator.View
             // 
             // sendValueButton
             // 
-            this.sendValueButton.Location = new System.Drawing.Point(8, 23);
-            this.sendValueButton.Margin = new System.Windows.Forms.Padding(4);
+            this.sendValueButton.Location = new System.Drawing.Point(6, 19);
             this.sendValueButton.Name = "sendValueButton";
-            this.sendValueButton.Size = new System.Drawing.Size(137, 28);
+            this.sendValueButton.Size = new System.Drawing.Size(103, 23);
             this.sendValueButton.TabIndex = 7;
             this.sendValueButton.Text = "Send Value";
             this.sendValueButton.UseVisualStyleBackColor = true;
@@ -144,10 +140,9 @@ namespace EmbeddedEmulator.View
             // 
             this.connectionChooserComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.connectionChooserComboBox.FormattingEnabled = true;
-            this.connectionChooserComboBox.Location = new System.Drawing.Point(8, 23);
-            this.connectionChooserComboBox.Margin = new System.Windows.Forms.Padding(4);
+            this.connectionChooserComboBox.Location = new System.Drawing.Point(6, 19);
             this.connectionChooserComboBox.Name = "connectionChooserComboBox";
-            this.connectionChooserComboBox.Size = new System.Drawing.Size(219, 24);
+            this.connectionChooserComboBox.Size = new System.Drawing.Size(165, 21);
             this.connectionChooserComboBox.Sorted = true;
             this.connectionChooserComboBox.TabIndex = 8;
             this.connectionChooserComboBox.SelectedIndexChanged += new System.EventHandler(this.ConnectionChooserComboBox_SelectedIndexChanged);
@@ -155,10 +150,9 @@ namespace EmbeddedEmulator.View
             // settingsButton
             // 
             this.settingsButton.AutoSize = true;
-            this.settingsButton.Location = new System.Drawing.Point(236, 22);
-            this.settingsButton.Margin = new System.Windows.Forms.Padding(4);
+            this.settingsButton.Location = new System.Drawing.Point(177, 18);
             this.settingsButton.Name = "settingsButton";
-            this.settingsButton.Size = new System.Drawing.Size(137, 33);
+            this.settingsButton.Size = new System.Drawing.Size(103, 27);
             this.settingsButton.TabIndex = 9;
             this.settingsButton.Text = "Settings";
             this.settingsButton.UseVisualStyleBackColor = true;
@@ -166,10 +160,9 @@ namespace EmbeddedEmulator.View
             // 
             // stopSendingButton
             // 
-            this.stopSendingButton.Location = new System.Drawing.Point(8, 59);
-            this.stopSendingButton.Margin = new System.Windows.Forms.Padding(4);
+            this.stopSendingButton.Location = new System.Drawing.Point(6, 48);
             this.stopSendingButton.Name = "stopSendingButton";
-            this.stopSendingButton.Size = new System.Drawing.Size(137, 28);
+            this.stopSendingButton.Size = new System.Drawing.Size(103, 23);
             this.stopSendingButton.TabIndex = 10;
             this.stopSendingButton.Text = "Stop sending";
             this.stopSendingButton.UseVisualStyleBackColor = true;
@@ -180,35 +173,30 @@ namespace EmbeddedEmulator.View
             this.groupBox1.Controls.Add(this.groupBox4);
             this.groupBox1.Controls.Add(this.connectionChooserComboBox);
             this.groupBox1.Controls.Add(this.settingsButton);
-            this.groupBox1.Location = new System.Drawing.Point(16, 15);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox1.Size = new System.Drawing.Size(381, 62);
+            this.groupBox1.Size = new System.Drawing.Size(286, 50);
             this.groupBox1.TabIndex = 11;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Connector";
             // 
             // groupBox4
             // 
-            this.groupBox4.Location = new System.Drawing.Point(389, 0);
-            this.groupBox4.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBox4.Location = new System.Drawing.Point(292, 0);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox4.Size = new System.Drawing.Size(211, 134);
+            this.groupBox4.Size = new System.Drawing.Size(158, 109);
             this.groupBox4.TabIndex = 14;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "groupBox4";
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.SaveConfigFileButton);
             this.groupBox2.Controls.Add(this.openServerButton);
             this.groupBox2.Controls.Add(this.closeServerButton);
-            this.groupBox2.Location = new System.Drawing.Point(16, 84);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBox2.Location = new System.Drawing.Point(12, 68);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox2.Size = new System.Drawing.Size(381, 65);
+            this.groupBox2.Size = new System.Drawing.Size(286, 53);
             this.groupBox2.TabIndex = 12;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Server status";
@@ -221,25 +209,31 @@ namespace EmbeddedEmulator.View
             this.sendingGroupBox.Controls.Add(this.AutoRespondCheckbox);
             this.sendingGroupBox.Controls.Add(this.groupBox3);
             this.sendingGroupBox.Enabled = false;
-            this.sendingGroupBox.Location = new System.Drawing.Point(16, 156);
-            this.sendingGroupBox.Margin = new System.Windows.Forms.Padding(4);
+            this.sendingGroupBox.Location = new System.Drawing.Point(12, 127);
             this.sendingGroupBox.Name = "sendingGroupBox";
-            this.sendingGroupBox.Padding = new System.Windows.Forms.Padding(4);
-            this.sendingGroupBox.Size = new System.Drawing.Size(600, 193);
+            this.sendingGroupBox.Size = new System.Drawing.Size(450, 157);
             this.sendingGroupBox.TabIndex = 13;
             this.sendingGroupBox.TabStop = false;
             this.sendingGroupBox.Text = "Sending";
+            // 
+            // SaveConfigFileButton
+            // 
+            this.SaveConfigFileButton.Location = new System.Drawing.Point(177, 19);
+            this.SaveConfigFileButton.Name = "SaveConfigFileButton";
+            this.SaveConfigFileButton.Size = new System.Drawing.Size(103, 23);
+            this.SaveConfigFileButton.TabIndex = 17;
+            this.SaveConfigFileButton.Text = "Save config";
+            this.SaveConfigFileButton.UseVisualStyleBackColor = true;
+            this.SaveConfigFileButton.Click += new System.EventHandler(this.SaveConfigFileButton_Click);
             // 
             // MultipleNodesConfigGroupBox
             // 
             this.MultipleNodesConfigGroupBox.Controls.Add(this.label3);
             this.MultipleNodesConfigGroupBox.Controls.Add(this.numericUpDown1);
             this.MultipleNodesConfigGroupBox.Enabled = false;
-            this.MultipleNodesConfigGroupBox.Location = new System.Drawing.Point(220, 52);
-            this.MultipleNodesConfigGroupBox.Margin = new System.Windows.Forms.Padding(4);
+            this.MultipleNodesConfigGroupBox.Location = new System.Drawing.Point(165, 42);
             this.MultipleNodesConfigGroupBox.Name = "MultipleNodesConfigGroupBox";
-            this.MultipleNodesConfigGroupBox.Padding = new System.Windows.Forms.Padding(4);
-            this.MultipleNodesConfigGroupBox.Size = new System.Drawing.Size(181, 134);
+            this.MultipleNodesConfigGroupBox.Size = new System.Drawing.Size(136, 109);
             this.MultipleNodesConfigGroupBox.TabIndex = 16;
             this.MultipleNodesConfigGroupBox.TabStop = false;
             this.MultipleNodesConfigGroupBox.Text = "Multiple nodes config";
@@ -247,19 +241,17 @@ namespace EmbeddedEmulator.View
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(8, 27);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Location = new System.Drawing.Point(6, 22);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(75, 17);
+            this.label3.Size = new System.Drawing.Size(58, 13);
             this.label3.TabIndex = 1;
             this.label3.Text = "# of nodes";
             // 
             // numericUpDown1
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(93, 25);
-            this.numericUpDown1.Margin = new System.Windows.Forms.Padding(4);
+            this.numericUpDown1.Location = new System.Drawing.Point(70, 20);
             this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(80, 22);
+            this.numericUpDown1.Size = new System.Drawing.Size(60, 20);
             this.numericUpDown1.TabIndex = 0;
             this.numericUpDown1.Value = new decimal(new int[] {
             2,
@@ -271,10 +263,9 @@ namespace EmbeddedEmulator.View
             // SimulateMultipleNodes
             // 
             this.SimulateMultipleNodes.AutoSize = true;
-            this.SimulateMultipleNodes.Location = new System.Drawing.Point(220, 23);
-            this.SimulateMultipleNodes.Margin = new System.Windows.Forms.Padding(4);
+            this.SimulateMultipleNodes.Location = new System.Drawing.Point(165, 19);
             this.SimulateMultipleNodes.Name = "SimulateMultipleNodes";
-            this.SimulateMultipleNodes.Size = new System.Drawing.Size(179, 21);
+            this.SimulateMultipleNodes.Size = new System.Drawing.Size(136, 17);
             this.SimulateMultipleNodes.TabIndex = 15;
             this.SimulateMultipleNodes.Text = "Simulate multiple nodes";
             this.SimulateMultipleNodes.UseVisualStyleBackColor = true;
@@ -286,21 +277,18 @@ namespace EmbeddedEmulator.View
             this.ResponsesGroupBox.Controls.Add(this.sendInfoButton);
             this.ResponsesGroupBox.Controls.Add(this.SendConfigButton);
             this.ResponsesGroupBox.Enabled = false;
-            this.ResponsesGroupBox.Location = new System.Drawing.Point(8, 52);
-            this.ResponsesGroupBox.Margin = new System.Windows.Forms.Padding(4);
+            this.ResponsesGroupBox.Location = new System.Drawing.Point(6, 42);
             this.ResponsesGroupBox.Name = "ResponsesGroupBox";
-            this.ResponsesGroupBox.Padding = new System.Windows.Forms.Padding(4);
-            this.ResponsesGroupBox.Size = new System.Drawing.Size(159, 134);
+            this.ResponsesGroupBox.Size = new System.Drawing.Size(119, 109);
             this.ResponsesGroupBox.TabIndex = 14;
             this.ResponsesGroupBox.TabStop = false;
             this.ResponsesGroupBox.Text = "Responses";
             // 
             // SendConfigButton
             // 
-            this.SendConfigButton.Location = new System.Drawing.Point(8, 95);
-            this.SendConfigButton.Margin = new System.Windows.Forms.Padding(4);
+            this.SendConfigButton.Location = new System.Drawing.Point(6, 77);
             this.SendConfigButton.Name = "SendConfigButton";
-            this.SendConfigButton.Size = new System.Drawing.Size(137, 28);
+            this.SendConfigButton.Size = new System.Drawing.Size(103, 23);
             this.SendConfigButton.TabIndex = 11;
             this.SendConfigButton.Text = "Send Config";
             this.SendConfigButton.UseVisualStyleBackColor = true;
@@ -311,10 +299,9 @@ namespace EmbeddedEmulator.View
             this.AutoRespondCheckbox.AutoSize = true;
             this.AutoRespondCheckbox.Checked = true;
             this.AutoRespondCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.AutoRespondCheckbox.Location = new System.Drawing.Point(16, 23);
-            this.AutoRespondCheckbox.Margin = new System.Windows.Forms.Padding(4);
+            this.AutoRespondCheckbox.Location = new System.Drawing.Point(12, 19);
             this.AutoRespondCheckbox.Name = "AutoRespondCheckbox";
-            this.AutoRespondCheckbox.Size = new System.Drawing.Size(116, 21);
+            this.AutoRespondCheckbox.Size = new System.Drawing.Size(89, 17);
             this.AutoRespondCheckbox.TabIndex = 13;
             this.AutoRespondCheckbox.Text = "Auto-respond";
             this.AutoRespondCheckbox.UseVisualStyleBackColor = true;
@@ -324,11 +311,9 @@ namespace EmbeddedEmulator.View
             // 
             this.groupBox3.Controls.Add(this.sendValueButton);
             this.groupBox3.Controls.Add(this.stopSendingButton);
-            this.groupBox3.Location = new System.Drawing.Point(440, 49);
-            this.groupBox3.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBox3.Location = new System.Drawing.Point(330, 40);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox3.Size = new System.Drawing.Size(152, 102);
+            this.groupBox3.Size = new System.Drawing.Size(114, 83);
             this.groupBox3.TabIndex = 12;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Sine";
@@ -341,58 +326,55 @@ namespace EmbeddedEmulator.View
             this.groupBox5.Controls.Add(this.label2);
             this.groupBox5.Controls.Add(this.BoolButton);
             this.groupBox5.Controls.Add(this.label1);
-            this.groupBox5.Location = new System.Drawing.Point(413, 15);
-            this.groupBox5.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBox5.Location = new System.Drawing.Point(310, 12);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox5.Size = new System.Drawing.Size(203, 134);
+            this.groupBox5.Size = new System.Drawing.Size(152, 109);
             this.groupBox5.TabIndex = 14;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "My Values";
             // 
             // StringTextBox
             // 
-            this.StringTextBox.Location = new System.Drawing.Point(88, 78);
+            this.StringTextBox.Location = new System.Drawing.Point(66, 63);
+            this.StringTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.StringTextBox.Name = "StringTextBox";
-            this.StringTextBox.Size = new System.Drawing.Size(99, 22);
+            this.StringTextBox.Size = new System.Drawing.Size(75, 20);
             this.StringTextBox.TabIndex = 5;
             this.StringTextBox.TextChanged += new System.EventHandler(this.StringTextBox_TextChanged);
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(7, 81);
+            this.label4.Location = new System.Drawing.Point(5, 66);
+            this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(45, 17);
+            this.label4.Size = new System.Drawing.Size(34, 13);
             this.label4.TabIndex = 4;
             this.label4.Text = "String";
             // 
             // IntTextBox
             // 
             this.IntTextBox.Enabled = false;
-            this.IntTextBox.Location = new System.Drawing.Point(88, 49);
-            this.IntTextBox.Margin = new System.Windows.Forms.Padding(4);
+            this.IntTextBox.Location = new System.Drawing.Point(66, 40);
             this.IntTextBox.Name = "IntTextBox";
-            this.IntTextBox.Size = new System.Drawing.Size(99, 22);
+            this.IntTextBox.Size = new System.Drawing.Size(75, 20);
             this.IntTextBox.TabIndex = 3;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(8, 53);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Location = new System.Drawing.Point(6, 43);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(23, 17);
+            this.label2.Size = new System.Drawing.Size(18, 13);
             this.label2.TabIndex = 2;
             this.label2.Text = "int";
             // 
             // BoolButton
             // 
             this.BoolButton.BackColor = System.Drawing.Color.Red;
-            this.BoolButton.Location = new System.Drawing.Point(88, 14);
-            this.BoolButton.Margin = new System.Windows.Forms.Padding(4);
+            this.BoolButton.Location = new System.Drawing.Point(66, 11);
             this.BoolButton.Name = "BoolButton";
-            this.BoolButton.Size = new System.Drawing.Size(100, 28);
+            this.BoolButton.Size = new System.Drawing.Size(75, 23);
             this.BoolButton.TabIndex = 1;
             this.BoolButton.UseVisualStyleBackColor = false;
             this.BoolButton.Click += new System.EventHandler(this.BoolButton_Click);
@@ -400,10 +382,9 @@ namespace EmbeddedEmulator.View
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(8, 20);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(6, 16);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(59, 17);
+            this.label1.Size = new System.Drawing.Size(45, 13);
             this.label1.TabIndex = 0;
             this.label1.Text = "boolean";
             // 
@@ -415,29 +396,27 @@ namespace EmbeddedEmulator.View
             | System.Windows.Forms.AnchorStyles.Right)));
             this.embeddedTerminal1.BackColor = System.Drawing.Color.Black;
             this.embeddedTerminal1.ForeColor = System.Drawing.Color.White;
-            this.embeddedTerminal1.Location = new System.Drawing.Point(17, 357);
-            this.embeddedTerminal1.Margin = new System.Windows.Forms.Padding(4);
+            this.embeddedTerminal1.Location = new System.Drawing.Point(13, 290);
             this.embeddedTerminal1.Multiline = true;
             this.embeddedTerminal1.Name = "embeddedTerminal1";
             this.embeddedTerminal1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.embeddedTerminal1.Size = new System.Drawing.Size(597, 112);
+            this.embeddedTerminal1.Size = new System.Drawing.Size(449, 92);
             this.embeddedTerminal1.TabIndex = 15;
             this.embeddedTerminal1.Text = "To:\t";
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(632, 478);
+            this.ClientSize = new System.Drawing.Size(474, 388);
             this.Controls.Add(this.embeddedTerminal1);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.sendingGroupBox);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Form1";
@@ -490,6 +469,7 @@ namespace EmbeddedEmulator.View
         private System.Windows.Forms.CheckBox SimulateMultipleNodes;
         private System.Windows.Forms.TextBox StringTextBox;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button SaveConfigFileButton;
     }
 }
 
