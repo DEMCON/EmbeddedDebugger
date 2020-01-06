@@ -42,12 +42,10 @@ namespace EmbeddedDebugger.View.UserControls
     {
         private List<CpuNode> registeredNodes;
         #region Properties
-        public List<CpuNode> Nodes { get => CpuNodeChooser.Nodes; set => CpuNodeChooser.Nodes = value; }
         #endregion
         public TraceUserControl()
         {
             InitializeComponent();
-            CpuNodeChooser.SelectedCPUChanged += CpuNodeChooser_SelectedCPUChanged;
             registeredNodes = new List<CpuNode>();
         }
 
@@ -62,12 +60,10 @@ namespace EmbeddedDebugger.View.UserControls
             {
                 node.NewTraceMessageAdded -= Node_NewTraceMessageAdded;
             }
-            registeredNodes = CpuNodeChooser.Nodes.ToList();
             foreach (CpuNode node in registeredNodes)
             {
                 node.NewTraceMessageAdded += Node_NewTraceMessageAdded; ;
             }
-            TraceTerminal.MultipleNodes = CpuNodeChooser.Nodes.Count > 1;
             TraceTerminal.SetMessages(registeredNodes.SelectMany(x => x.TraceMessages).OrderBy(x => x.DateTime).ToList());
         }
 
@@ -110,7 +106,6 @@ namespace EmbeddedDebugger.View.UserControls
         private void RefreshMessages()
         {
             if (registeredNodes == null) return;
-            TraceTerminal.MultipleNodes = CpuNodeChooser.Nodes.Count > 1;
             TraceTerminal.SetMessages(registeredNodes.SelectMany(x => x.TraceMessages)
                 .Where(x=> 
                     TraceCheckBox.IsChecked == true && x.TraceLevel == TraceLevel.Trace ||

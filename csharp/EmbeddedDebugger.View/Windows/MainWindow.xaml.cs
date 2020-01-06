@@ -65,18 +65,18 @@ namespace EmbeddedDebugger.View.Windows
 
             // Set up the RegisterUserControl
             //model.NewCPUNodeFound += RegisterUserControl.NewCPUNodeFound;
-            model.ConfigCompletelyLoaded += RegisterUserControl.ConfigurationCompletelySend;
-            RegisterUserControl.Nodes = model.Nodes;
-            RegisterUserControl.RequestOnce += model.RequestOnce;
+            //model.ConfigCompletelyLoaded += RegisterUserControl.ConfigurationCompletelySend;
+            //RegisterUserControl.Nodes = model.Nodes;
+            //RegisterUserControl.RequestOnce += model.RequestOnce;
 
             // Set up the TerminalUserControl
             //model.NewCPUNodeFound += TerminalUserControl.NewCPUNodeFound;
-            TerminalUserControl.Nodes = model.Nodes;
+            //TerminalUserControl.Nodes = model.Nodes;
             TerminalUserControl.NewMessage += model.NewDebugMessageToEmbedded;
 
             // Set up the TraceUserControl
            // model.NewCPUNodeFound += TraceUserControl.NewCPUNodeFound;
-            TraceUserControl.Nodes = model.Nodes;
+            //TraceUserControl.Nodes = model.Nodes;
 
             // Set up the LoggingUserControl
             LoggingUserControl.Logger = model.Logger;
@@ -160,14 +160,14 @@ namespace EmbeddedDebugger.View.Windows
         {
             Settings.Default.CPPVariableTypes = true;
             Settings.Default.Save();
-            RegisterUserControl.ReadWriteRegisterUserControl.RegisterDataGrid.Items.Refresh();
+            //RegisterUserControl.ReadWriteRegisterUserControl.RegisterDataGrid.Items.Refresh();
         }
 
         private void VariableTypeAsCPP_Unchecked(object sender, RoutedEventArgs e)
         {
             Settings.Default.CPPVariableTypes = false;
             Settings.Default.Save();
-            RegisterUserControl.ReadWriteRegisterUserControl.RegisterDataGrid.Items.Refresh();
+            //RegisterUserControl.ReadWriteRegisterUserControl.RegisterDataGrid.Items.Refresh();
         }
 
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e)

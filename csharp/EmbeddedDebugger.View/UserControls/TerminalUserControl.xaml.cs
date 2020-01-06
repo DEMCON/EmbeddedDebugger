@@ -40,9 +40,6 @@ namespace EmbeddedDebugger.View.UserControls
     {
         private List<CpuNode> registeredNodes;
         private bool enabled;
-        #region Properties
-        public List<CpuNode> Nodes { get => CpuNodeChooser.Nodes; set => CpuNodeChooser.Nodes = value; }
-        #endregion
 
         #region Events
         public event EventHandler<string> NewMessage = delegate { };
@@ -51,24 +48,11 @@ namespace EmbeddedDebugger.View.UserControls
         public TerminalUserControl()
         {
             InitializeComponent();
-            EmbeddedTerminal.NewMessage += EmbeddedTerminal_NewMessage;
-            CpuNodeChooser.SelectedCPUChanged += CpuNodeChooser_SelectedCPUChanged;
             registeredNodes = new List<CpuNode>();
             enabled = true;
         }
 
-        private void CpuNodeChooser_SelectedCPUChanged(object sender, EventArgs e)
-        {
-                foreach (CpuNode node in registeredNodes)
-                {
-                    node.NewTerminalDataAdded -= Node_NewTerminalDataAdded;
-                }
-                registeredNodes = CpuNodeChooser.Nodes.ToList();
-                foreach (CpuNode node in registeredNodes)
-                {
-                    node.NewTerminalDataAdded += Node_NewTerminalDataAdded;
-                }
-        }
+
 
         private void Node_NewTerminalDataAdded(CpuNode node, string s)
         {
@@ -86,13 +70,6 @@ namespace EmbeddedDebugger.View.UserControls
 
         }
 
-        private void EmbeddedTerminal_NewMessage(object sender, string e)
-        {
-            foreach (CpuNode node in CpuNodeChooser.Nodes)
-            {
-                NewMessage(node, e);
-            }
-        }
 
         public void NewCPUNodeFound(object sender, EventArgs e)
         {

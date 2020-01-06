@@ -73,7 +73,7 @@ namespace EmbeddedDebugger.View.CustomControls
             DataTemplate dataTemplate = new DataTemplate();
             var buttonBlockFactory = new FrameworkElementFactory(typeof(Button));
             dataTemplate.VisualTree = buttonBlockFactory;
-            buttonBlockFactory.SetBinding(Button.VisibilityProperty, new Binding("HasChildren") { Converter = new BooleanToVisibilityConverter() });
+            buttonBlockFactory.SetBinding(Button.VisibilityProperty, new Binding("HasChildren") { Converter = new System.Windows.Controls.BooleanToVisibilityConverter() });
             buttonBlockFactory.SetBinding(Button.ContentProperty, new Binding("IsCollapsed") { Converter = new BooleanToCollapsedStringConverter() });
             buttonBlockFactory.SetValue(Button.BackgroundProperty, Brushes.Transparent);
             buttonBlockFactory.SetValue(Button.BorderThicknessProperty, new Thickness(0));

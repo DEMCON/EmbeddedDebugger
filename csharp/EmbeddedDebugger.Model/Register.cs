@@ -94,7 +94,7 @@ namespace EmbeddedDebugger.Model
         }
         public string ValuePlain { get { return this.Value.Trim(); } }
         public List<Register> ChildRegisters { get => childRegisters; set => childRegisters = value; }
-        public bool HasChildren { get => childRegisters.Count > 0; }
+        public bool HasChildren { get => this.childRegisters != null && childRegisters.Count > 0; }
         public Register Parent { get => parent; set => parent = value; }
         [DisplayName("ID")]
         public uint ID { get => id; set => id = value; }
@@ -158,13 +158,14 @@ namespace EmbeddedDebugger.Model
                 variableTypeName = value;
             }
         }
-        /*
+        
         public bool Plot
         {
             get => plot;
             set
             {
                 plot = value;
+                /*
                 if (value)
                 {
                     if (lineColor.IsEmpty)
@@ -180,10 +181,10 @@ namespace EmbeddedDebugger.Model
                         Color = OxyColor.FromArgb(lineColor.A, lineColor.R, lineColor.G, lineColor.B)
                     };
                 }
-                PropertyChanged(this, new PropertyChangedEventArgs("Plot"));
+                PropertyChanged(this, new PropertyChangedEventArgs("Plot"));*/
             }
         }
-
+        /*
         public KnownColor LineKnownColor
         {
             get

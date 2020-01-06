@@ -1,13 +1,17 @@
-﻿using EmbeddedDebugger.Connectors.Interfaces;
+﻿using System;
+using EmbeddedDebugger.Connectors.Interfaces;
 using EmbeddedDebugger.Model;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace EmbeddedDebugger.ViewModel
 {
     public class SystemViewModel
     {
         private readonly ModelManager modelManager;
-        private readonly Model.DebugProtocol debugProtocol;
+        private readonly DebugProtocol debugProtocol;
+
+        public CpuNode SelectedCpuNode { get; set; }
 
 
         public SystemViewModel(ModelManager modelManager)
@@ -54,9 +58,27 @@ namespace EmbeddedDebugger.ViewModel
         }
         #endregion
 
+        public IList<Register> GetRegisters()
+        {
+            if (SelectedCpuNode == null)
+            {
+                return null; this.GetCpuNodes().SelectMany(x=> x.Registers).ToList();
+            }
+            else
+            {
+                Console.WriteLine(this.SelectedCpuNode);
+                return SelectedCpuNode.Registers;
+            }
+        }
+
         public void ResetTime(CpuNode cpuNode = null)
         {
             modelManager.ResetTime();
+        }
+
+        public void RequestNewValue(Register register)
+        {
+            this.modelManager.DebugProtocol.QueryRegister(register.CpuID, register.CpuNode, register);
         }
     }
 }

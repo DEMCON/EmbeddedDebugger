@@ -16,21 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using EmbeddedDebugger.Model;
+using EmbeddedDebugger.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using EmbeddedDebugger.ViewModel;
 
 namespace EmbeddedDebugger.View.UserControls
 {
@@ -39,88 +30,12 @@ namespace EmbeddedDebugger.View.UserControls
     /// </summary>
     public partial class CpuNodeChooserUserControl : UserControl
     {
-        private SystemViewModel systemViewModel;  
-        private CpuNode SelectedNode;
+        private SystemViewModel systemViewModel;
         private List<CpuNode> nodes;
-        private List<Register> registers;
-
-        #region Properties
-        /// <summary>
-        /// The list of nodes, if the checkbox is checked, return all, otherwise return a list with only the selected cpunode
-        /// </summary>
-        public List<CpuNode> Nodes
-        {
-            get
-            {
-                if (ShowAllCheckBox.IsChecked.HasValue && (bool)ShowAllCheckBox.IsChecked)
-                {
-                    return nodes;
-                }
-                else
-                {
-                    if (SelectedNode == null) return new List<CpuNode>();
-                    List<CpuNode> returnable = new List<CpuNode>() { SelectedNode };
-                    return returnable;
-                }
-            }
-            set
-            {
-                nodes = value;
-            }
-        }
-        /// <summary>
-        /// The registers of the selected cpunodes, keeping in mind that not all have to be returned when showall is not checked
-        /// </summary>
-        public List<Register> Registers
-        {
-            get
-            {
-                if (!Dispatcher.CheckAccess())
-                {
-                    Dispatcher.Invoke(delegate
-                    {
-                        if ((bool)ShowAllCheckBox.IsChecked)
-                        {
-                            registers = SelectedNode.Registers.ToList();
-                        }
-                        else
-                        {
-                            registers.Clear();
-                            foreach (CpuNode node in nodes)
-                            {
-                                registers.AddRange(node.Registers);
-                            }
-                        }
-                    });
-                }
-                else
-                {
-                    if ((bool)ShowAllCheckBox.IsChecked)
-                    {
-                        registers = SelectedNode.Registers.ToList();
-                    }
-                    else
-                    {
-                        registers.Clear();
-                        foreach (CpuNode node in nodes)
-                        {
-                            registers.AddRange(node.Registers);
-                        }
-                    }
-                }
-                return registers;
-            }
-        }
-        #endregion
-
-        #region EventHandlers
-        public event EventHandler SelectedCPUChanged = delegate { };
-        #endregion
 
         public CpuNodeChooserUserControl()
         {
             InitializeComponent();
-            registers = new List<Register>();
         }
 
         public void RefreshCPUNodeList(object sender, EventArgs e)
@@ -131,6 +46,8 @@ namespace EmbeddedDebugger.View.UserControls
             }
             else
             {
+                // TODO Add functionality to keep the existing item "selected"
+                /*
                 object selected = CpuNodeComboBox.SelectedItem;
                 int selectedIndex = CpuNodeComboBox.SelectedIndex;
                 CpuNodeComboBox.Items.Clear();
@@ -149,43 +66,71 @@ namespace EmbeddedDebugger.View.UserControls
                 else if (CpuNodeComboBox.Items.Count > 0)
                 {
                     CpuNodeComboBox.SelectedIndex = 0;
-                }
+                }*/
             }
         }
 
         private void CpuNodeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Tell the rest of the world a different CPU was selected
-            SelectedNode = (CpuNode)CpuNodeComboBox.SelectedItem;
-            SelectedCPUChanged(this, new EventArgs());
+            if (this.ShowAllCheckBox.IsChecked == false)
+            {
+                if (this.CpuNodeComboBox.SelectedItem is CpuNode cpu)
+                {
+                    this.systemViewModel.SelectedCpuNode = cpu;
+                }
+            }
         }
 
         private void ShowAllCheckBox_Checked(object sender, RoutedEventArgs e)
         {
-            registers.Clear();
-            foreach (CpuNode node in nodes)
-            {
-                registers.AddRange(node.Registers);
-            }
-            // Since this usercontrol does not discriminate between one or multiple cpus selected
-            // Just let the world know a different cpud was selected
-            SelectedCPUChanged(this, new EventArgs());
+            this.systemViewModel.SelectedCpuNode = null;
         }
 
         private void ShowAllCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-            registers = SelectedNode.Registers.ToList();
-            // Since this usercontrol does not discriminate between one or multiple cpus selected
-            // Just let the world know a different cpud was selected
-            SelectedCPUChanged(this, new EventArgs());
+            if (this.CpuNodeComboBox.SelectedItem is CpuNode cpu)
+            {
+                this.systemViewModel.SelectedCpuNode = cpu;
+            }
         }
 
         private void CpuNodeChooserUserControl_OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            if (e.OldValue is ViewModelManager oldVmm)
+            {
+                oldVmm.RefreshLow -= this.Vmm_RefreshLow;
+            }
             if (e.NewValue is ViewModelManager vmm)
             {
                 this.systemViewModel = vmm.SystemViewModel;
+                vmm.RefreshLow += this.Vmm_RefreshLow;
             }
+        }
+        public void Refresh()
+        {
+            if (!this.Dispatcher.CheckAccess())
+            {
+                this.Dispatcher.Invoke(this.Refresh);
+                return;
+            }
+            if (this.nodes == null || !this.nodes.SequenceEqual(this.systemViewModel.GetCpuNodes()))
+            {
+                try
+                {
+                    this.CpuNodeComboBox.ItemsSource = null;
+                    this.nodes = this.systemViewModel.GetCpuNodes();
+                    this.CpuNodeComboBox.ItemsSource = this.nodes;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message} | {e.Data} | {e.StackTrace}");
+                }
+            }
+        }
+
+        private void Vmm_RefreshLow(object sender, EventArgs ea)
+        {
+            this.Refresh();
         }
     }
 }

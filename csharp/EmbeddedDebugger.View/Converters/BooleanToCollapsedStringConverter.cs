@@ -31,11 +31,11 @@ namespace EmbeddedDebugger.View.Converters
         {
             if ((bool)value)
             {
-                return "▶";
+                return "▼";
             }
             else
             {
-                return "▼";
+                return "▶";
             }
         }
 

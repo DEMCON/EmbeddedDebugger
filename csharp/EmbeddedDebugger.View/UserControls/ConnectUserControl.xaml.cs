@@ -44,6 +44,7 @@ namespace EmbeddedDebugger.View.UserControls
         public ConnectUserControl()
         {
             InitializeComponent();
+            
         }
 
         public void Refresh()
@@ -53,9 +54,7 @@ namespace EmbeddedDebugger.View.UserControls
                 this.Dispatcher.Invoke(this.Refresh);
                 return;
             }
-
-            this.NodesDataGrid.ItemsSource = null;
-            this.NodesDataGrid.ItemsSource = this.systemViewModel.GetCpuNodes();
+            this.NodesDataGrid.Items.Refresh();
         }
 
         public void Update(object o, EventArgs e)
@@ -73,6 +72,7 @@ namespace EmbeddedDebugger.View.UserControls
             {
                 this.systemViewModel = vmm.SystemViewModel;
                 vmm.RefreshLow += this.Update;
+                this.NodesDataGrid.ItemsSource = this.systemViewModel.GetCpuNodes();
             }
         }
     }

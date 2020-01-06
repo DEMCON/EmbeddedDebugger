@@ -16,23 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using EmbeddedDebugger.Model;
+using EmbeddedDebugger.View.UserControls.ObjectDisplayers;
 using EmbeddedDebugger.ViewModel;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace EmbeddedDebugger.View.UserControls
 {
@@ -41,39 +33,15 @@ namespace EmbeddedDebugger.View.UserControls
     /// </summary>
     public partial class ReadWriteRegistersUserControl : UserControl
     {
-        #region Properties
-        private IList<Register> registers;
-        public IList<Register> Registers
-        {
-            get => registers;
-            set
-            {
-                registers = value;
-            }
-        }
-        private readonly SystemViewModel SystemViewModel;
-        #endregion
+        private SystemViewModel systemViewModel;
 
-        #region EventHandlers
-        public event EventHandler<Register> RegisterPlottingChanged = delegate { };
-        public event EventHandler RequestOnce = delegate { };
-        #endregion
+        private IList<Register> registers;
 
         public ReadWriteRegistersUserControl()
         {
             InitializeComponent();
-            //SystemViewModel = ((ViewModelManager)Application.Current.Resources["ViewModelManager"]).SystemViewModel;
         }
 
-        public void NewRegisterAdded()
-        {
-            if (!RegisterDataGrid.Dispatcher.CheckAccess())
-            {
-                RegisterDataGrid.Dispatcher.Invoke(delegate { NewRegisterAdded(); });
-                return;
-            }
-            RegisterDataGrid.TreeItemsDataSource = registers;
-        }
 
         private void RefreshAllButton_Click(object sender, RoutedEventArgs e)
         {
@@ -90,8 +58,8 @@ namespace EmbeddedDebugger.View.UserControls
             int startLength = tb.Text.Length;
 
             await Task.Delay(300);
-            if (startLength == tb.Text.Length)
-                RegisterDataGrid.SearchValue = SearchTextBox.Text;
+            //if (startLength == tb.Text.Length)
+            //RegisterDataGrid.SearchValue = SearchTextBox.Text;
         }
 
         private void ResetTimeButton_Click(object sender, RoutedEventArgs e)
@@ -102,27 +70,8 @@ namespace EmbeddedDebugger.View.UserControls
 
             Decimation.Text = decimation_ms.ToString();
 
-            SystemViewModel.ResetTime();
         }
 
-        private void RefreshButton_Click(object sender, RoutedEventArgs e)
-        {
-            ((Register)RegisterDataGrid.CurrentItem).RequestNewValue();
-        }
-
-        private void PlotCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            Register r = (Register)RegisterDataGrid.CurrentItem;
-            if (r == null) return;
-            RegisterPlottingChanged(this, r);
-        }
-
-        private void PlotCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            Register r = (Register)RegisterDataGrid.CurrentItem;
-            if (r == null) return;
-            RegisterPlottingChanged(this, r);
-        }
 
         private void RemoveAllChannels_Click(object sender, RoutedEventArgs e)
         {
@@ -132,19 +81,14 @@ namespace EmbeddedDebugger.View.UserControls
             }
         }
 
-        private void ReadOnceChannels_Click(object sender, RoutedEventArgs e)
-        {
-            RequestOnce(sender, e);
-        }
-
         private void ExpandAll_Click(object sender, RoutedEventArgs e)
         {
-            RegisterDataGrid.ExpandAll();
+            // RegisterDataGrid.ExpandAll();
         }
 
         private void CollapseAll_Click(object sender, RoutedEventArgs e)
         {
-            RegisterDataGrid.CollapseAll();
+            //    RegisterDataGrid.CollapseAll();
         }
 
         private void RegisterDataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
@@ -165,9 +109,9 @@ namespace EmbeddedDebugger.View.UserControls
                     continue;
 
                 Register r = (Register)di.Item;
-                if (r != null && r.IsWritable &&
-                    RegisterDataGrid.CurrentColumn != null &&
-                    RegisterDataGrid.CurrentColumn.Header != null && RegisterDataGrid.CurrentColumn.Header.Equals("Value"))
+                // if (r != null && r.IsWritable &&
+                //         RegisterDataGrid.CurrentColumn != null &&
+                //          RegisterDataGrid.CurrentColumn.Header != null && RegisterDataGrid.CurrentColumn.Header.Equals("Value"))
                 {
                     r.EnableValueUpdates = false;
                 }
@@ -177,6 +121,45 @@ namespace EmbeddedDebugger.View.UserControls
         private void ClearFilter_MouseDown(object sender, MouseButtonEventArgs e)
         {
             SearchTextBox.Clear();
+        }
+
+        public void Refresh()
+        {
+            if (this.registers == null || !this.registers.SequenceEqual(this.systemViewModel.GetRegisters()))
+            {
+                this.registers = this.systemViewModel.GetRegisters();
+                if (this.registers != null)
+                {
+                    this.Dispatcher.Invoke(() => { this.RegistersStackPanel.Children.Clear(); });
+                    foreach (Register r in this.registers)
+                    {
+                        this.Dispatcher.Invoke(() => { this.RegistersStackPanel.Children.Add(new RegisterDisplayerUserControl() { Register = r }); });
+                    }
+                }
+            }
+        }
+
+        public void Update(object o, EventArgs e)
+        {
+            this.Refresh();
+        }
+
+        private void ReadWriteRegistersUserControl_OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is ViewModelManager vmmOld)
+            {
+                vmmOld.RefreshLow -= this.Update;
+            }
+            if (e.NewValue is ViewModelManager vmm)
+            {
+                this.systemViewModel = vmm.SystemViewModel;
+                vmm.RefreshLow += this.Update;
+            }
+        }
+
+        private void ReadOnceChannels_OnClick(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
     }
 }

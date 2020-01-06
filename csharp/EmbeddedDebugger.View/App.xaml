@@ -20,8 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:EmbeddedDebugger"
              xmlns:dataproviders="clr-namespace:EmbeddedDebugger.View.DataProviders"
+             xmlns:converters="clr-namespace:EmbeddedDebugger.View.Converters"
              StartupUri="Windows/MainWindow.xaml">
     <Application.Resources>
+        <converters:NullableBooleanConverter x:Key="booleanConverter" />
+        <converters:BooleanToVisibilityConverter x:Key="booleanToVisibilityConverter" />
+        <converters:BooleanToCollapsedStringConverter x:Key="booleanToCollapsedConverter" />
         <dataproviders:AboutAssemblyDataProvider x:Key="aboutDataProvider" />
         <XmlDataProvider x:Key="aboutProvider" XPath="ApplicationInfo" IsAsynchronous="False" IsInitialLoadEnabled="True">
             <x:XData>

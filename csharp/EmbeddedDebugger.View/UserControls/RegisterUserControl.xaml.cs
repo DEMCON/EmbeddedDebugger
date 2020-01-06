@@ -29,57 +29,9 @@ namespace EmbeddedDebugger.View.UserControls
     public partial class RegisterUserControl : UserControl
     {
 
-        public List<CpuNode> Nodes { get => CpuNodeChooserUserControl.Nodes; set => CpuNodeChooserUserControl.Nodes = value; }
-
-        #region EventHandlers
-        public event EventHandler<int> RequestOnce = delegate { };
-        #endregion
-
         public RegisterUserControl()
         {
             InitializeComponent();
-            CpuNodeChooserUserControl.SelectedCPUChanged += CpuNodeChooserUserControl_SelectedCPUChanged;
-            ReadWriteRegisterUserControl.RegisterPlottingChanged += ReadWriteRegisterUserControl_RegisterPlottingChanged;
-            ReadWriteRegisterUserControl.RequestOnce += ReadWriteRegisterUserControl_RequestOnce;
-        }
-
-        public void ConfigurationCompletelySend(object sender, EventArgs e)
-        {
-            ReadWriteRegisterUserControl.Registers = CpuNodeChooserUserControl.Registers;
-            ReadWriteRegisterUserControl.NewRegisterAdded();
-        }
-
-        private void ReadWriteRegisterUserControl_RequestOnce(object sender, EventArgs e)
-        {
-            foreach (CpuNode cpu in CpuNodeChooserUserControl.Nodes)
-            {
-                RequestOnce(this, cpu.ID);
-            }
-        }
-
-        private void ReadWriteRegisterUserControl_RegisterPlottingChanged(object sender, Register e)
-        {
-            // TODO: Check if still needed
-            /*
-            if (e.Plot)
-            {
-                PlotUserControl.AddRegisterToPlot(e);
-            }
-            else
-            {
-                PlotUserControl.RemoveRegisterFromPlot(e);
-            }
-            */
-        }
-
-        private void CpuNodeChooserUserControl_SelectedCPUChanged(object sender, EventArgs e)
-        {
-            ReadWriteRegisterUserControl.Registers = CpuNodeChooserUserControl.Registers;
-        }
-
-        public void NewCPUNodeFound(object sender, EventArgs e)
-        {
-            CpuNodeChooserUserControl.RefreshCPUNodeList(sender, e);
         }
     }
 }

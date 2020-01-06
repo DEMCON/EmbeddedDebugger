@@ -27,7 +27,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
              xmlns:converter="clr-namespace:EmbeddedDebugger.View.Converters"
              xmlns:model1="clr-namespace:EmbeddedDebugger.Model;assembly=EmbeddedDebugger.Model"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="952">
+             d:DesignHeight="450" d:DesignWidth="952"
+             DataContextChanged="ReadWriteRegistersUserControl_OnDataContextChanged ">
     <!-- Fetching the enum data -->
     <UserControl.Resources>
         <ObjectDataProvider x:Key="channelModeEnumData"
@@ -75,7 +76,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <TextBox Name="SearchTextBox" TextChanged="SearchTextBox_TextChanged"  Grid.Column="1" Margin="3 3 3 3" Padding="0" VerticalContentAlignment="Center" ToolTip="Filter by regular expression"/>
             <Button Name="ExpandAll" Content="Expand all" Click="ExpandAll_Click" Margin="3" Grid.Column="2" Grid.Row="0"/>
             <Button Name="CollapseAll" Content="Collapse all" Click="CollapseAll_Click"  Margin="3" Grid.Column="3" Grid.Row="0"/>
-            <Button Name="ReadOnceChannels" Content="Request once" Click="ReadOnceChannels_Click" Margin="3" Grid.Column="4" Grid.Row="0"/>
+            <Button Name="ReadOnceChannels" Content="Request once" Click="ReadOnceChannels_OnClick" Margin="3" Grid.Column="4" Grid.Row="0"/>
             <Button Name="RemoveAllChannels" Content="All channels off" Click="RemoveAllChannels_Click"  Margin="3" Grid.Column="5" Grid.Row="0"/>
             <TextBox x:Name="Decimation" Grid.Column="6" HorizontalAlignment="Left" Height="23" Text="10" Width="50" VerticalContentAlignment="Center" Padding="0" HorizontalContentAlignment="Right" ToolTip="Sample time (ms)"/>
             <Button Name="ResetTimeButton" Click="ResetTimeButton_Click"  Content="Reset Time" Margin="3 3 3 3" Grid.Column="7" />
@@ -83,156 +84,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <Label x:Name="ClearFilter" Content="❌" Grid.Column="1" Margin="0,6,3.6,7.2" VerticalAlignment="Center" HorizontalAlignment="Right" Width="17" VerticalContentAlignment="Center" Padding="0,0,3,0" HorizontalContentAlignment="Center" Foreground="DarkRed" FontWeight="Bold" MouseDown="ClearFilter_MouseDown" FontSize="10"/>
         </Grid>
         <!-- Datagrid -->
-        <customcontrols:TreeDataGrid x:Name="RegisterDataGrid" Grid.Row="1" RowHeight="21"
-                  AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
-                  SelectedCellsChanged="RegisterDataGrid_SelectedCellsChanged"
-                  SelectionUnit="Cell"
-                  ItemsSource="{Binding Path=., Mode=TwoWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" 
-                  HeadersVisibility="Column" CanUserSortColumns="True" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="Silver" BorderThickness="0">
-            <DataGrid.Columns>
-                <!-- CPUID -->
-                <DataGridTemplateColumn Header="CPUID" Width="65" IsReadOnly="True" ClipboardContentBinding="{Binding CpuID}">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding CpuID}" VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!-- Register ID -->
-                <DataGridTemplateColumn Header="Register ID" Width="43" IsReadOnly="True" SortDirection="Ascending" ClipboardContentBinding="{Binding ID}">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding ID}" VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!-- Name -->
-                <DataGridTemplateColumn Header="Name" Width="*" IsReadOnly="True" ClipboardContentBinding="{Binding Name}">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!-- Type -->
-                <DataGridTemplateColumn Header="Type" Width="60" IsReadOnly="True" ClipboardContentBinding="{Binding VariableTypeString}">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding VariableTypeString}" VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!-- Format -->
-                <DataGridTemplateColumn Header="Format" Width="70" ClipboardContentBinding="{Binding ValueDisplayFormat}">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <ComboBox SelectedItem="{Binding ValueDisplayFormat, UpdateSourceTrigger=PropertyChanged}"
-                                      ItemsSource="{Binding Source={StaticResource valueDisplayFormatEnumData}}" Padding="3,0" VerticalContentAlignment="Center" >
-                                <ComboBox.IsEnabled>
-                                    <MultiBinding Converter="{StaticResource booleanAndConverter}">
-                                        <Binding Path="IsIntegralValue" />
-                                        <Binding Path="IsVariableSize" Converter="{StaticResource booleanInverterConverter}" />
-                                    </MultiBinding>
-                                </ComboBox.IsEnabled>
-                            </ComboBox>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!-- Value -->
-                <DataGridTemplateColumn Header="Value" Width="*" ClipboardContentBinding="{Binding ValuePlain}">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBox BorderThickness="0" MaxHeight="25" Text="{Binding Value, UpdateSourceTrigger=LostFocus}" IsEnabled="{Binding IsWritable}" FontFamily="Consolas" VerticalAlignment="Center" TextAlignment="Right"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!-- Mode -->
-                <DataGridTemplateColumn Header="Channel Mode" Width="100" ClipboardContentBinding="{Binding ChannelMode}">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <ComboBox SelectedItem="{Binding ChannelMode, UpdateSourceTrigger=PropertyChanged}"
-                                      ItemsSource="{Binding Source={StaticResource channelModeEnumData}}" VerticalContentAlignment="Center" Padding="3,0" >
-                                <ComboBox.IsEnabled>
-                                    <MultiBinding Converter="{StaticResource booleanAndConverter}">
-                                        <Binding Path="IsReadable" />
-                                        <Binding Path="IsVariableSize" Converter="{StaticResource booleanInverterConverter}" />
-                                    </MultiBinding>
-                                </ComboBox.IsEnabled>
-                            </ComboBox>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!-- Plot -->
-                <DataGridTemplateColumn Header="Plot" Width="40">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <CheckBox Name="PlotCheckBox" VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding Plot, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-                                      Checked="PlotCheckBox_Checked" Unchecked="PlotCheckBox_Unchecked" VerticalContentAlignment="Center" >
-                                <CheckBox.IsEnabled>
-                                    <MultiBinding Converter="{StaticResource booleanAndConverter}">
-                                        <Binding Path="IsReadable"/>
-                                        <Binding Path="IsIntegralValue" />
-                                        <Binding Path="IsVariableSize" Converter="{StaticResource booleanInverterConverter}"/>
-                                    </MultiBinding>
-                                </CheckBox.IsEnabled>
-                            </CheckBox>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!-- Line color -->
-                <!--
-                <DataGridTemplateColumn Header="Line color" Width="100">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            
-                            <ComboBox SelectedItem="{Binding LineKnownColor, UpdateSourceTrigger=PropertyChanged}"
-                                      ItemsSource="{Binding Source={StaticResource linecolors}, Mode=OneWay}" VerticalContentAlignment="Center" Padding="3,0">
-                                <ComboBox.IsEnabled>
-                                    <MultiBinding Converter="{StaticResource booleanAndConverter}">
-                                        <Binding Path="IsReadable"/>
-                                        <Binding Path="IsIntegralValue" />
-                                        <Binding Path="IsVariableSize" Converter="{StaticResource booleanInverterConverter}" />
-                                    </MultiBinding>
-                                </ComboBox.IsEnabled>
-                            </ComboBox>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>-->
-
-                <!-- Log -->
-                <DataGridTemplateColumn Header="Log" Width="40">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding Log, UpdateSourceTrigger=PropertyChanged}" 
-                                      IsEnabled="{Binding IsReadable}" VerticalContentAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!-- Refresh -->
-                <DataGridTemplateColumn Header="Refresh" Width="100">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Button Name="RefreshButton" Content="Refresh" Click="RefreshButton_Click" Padding="0" BorderThickness="0">
-                                <Button.IsEnabled>
-                                    <MultiBinding Converter="{StaticResource booleanOrConverter}">
-                                        <Binding Path="IsReadable"/>
-                                        <Binding Path="IsWritable" />
-                                    </MultiBinding>
-                                </Button.IsEnabled>
-                            </Button>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </customcontrols:TreeDataGrid>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <StackPanel Background="White" Margin="5" Name="RegistersStackPanel" />
+        </ScrollViewer>
     </Grid>
 </UserControl>

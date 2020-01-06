@@ -102,6 +102,8 @@
     <Compile Include="Converters\BooleanInverterConverter.cs" />
     <Compile Include="Converters\BooleanOrConverter.cs" />
     <Compile Include="Converters\BooleanToCollapsedStringConverter.cs" />
+    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\NullableBooleanConverter.cs" />
     <Compile Include="CustomControls\EmbeddedTerminal.cs" />
     <Compile Include="CustomControls\NumericUpDown.cs" />
     <Compile Include="CustomControls\TraceTerminal.cs" />
@@ -122,6 +124,9 @@
     </Compile>
     <Compile Include="UserControls\LoggingUserControl.xaml.cs">
       <DependentUpon>LoggingUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ObjectDisplayers\RegisterDisplayerUserControl.xaml.cs">
+      <DependentUpon>RegisterDisplayerUserControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\ParseUserControl.xaml.cs">
       <DependentUpon>ParseUserControl.xaml</DependentUpon>
@@ -192,6 +197,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="UserControls\EditXMLUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\ObjectDisplayers\RegisterDisplayerUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

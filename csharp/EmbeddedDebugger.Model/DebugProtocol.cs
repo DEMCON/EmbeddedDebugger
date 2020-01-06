@@ -641,11 +641,11 @@ namespace EmbeddedDebugger.Model
             node.RegisterLoggingChanged += logger.RegisterLoggingChanged;
             // TODO: Add loading of config again
             // Try to load the configuration from .xml file/
-            /*
+            
             if (
                 
             node.TryToLoadConfiguration(
-                $"{Properties.Settings.Default.ConfigurationPath}" +
+                $"C:/Configurations/" +
                 $"{connector.ToString()}" +
                 $"/{node.Name.Trim()}" +
                 $"/cpu{id.ToString("D2")}" +
@@ -657,7 +657,7 @@ namespace EmbeddedDebugger.Model
             } else
             {
                 // TODO: Implement something to let the user know that no config file was found
-            }*/
+            }
             return null;
         }
 
