@@ -222,14 +222,14 @@ namespace EmbeddedDebugger.Model.Logging
 
         public void RegisterLoggingChanged(object sender, Register r)
         {
-            if (r.Log && !logRegisters.Any(x => x.ID == r.ID && x.FullName == r.FullName && x.CpuID == r.CpuID))
-            {
-                logRegisters.Add(r);
-            }
-            else if (!r.Log && logRegisters.Any(x => x.ID == r.ID && x.FullName == r.FullName && x.CpuID == r.CpuID))
-            {
-                logRegisters.Remove(r);
-            }
+            //if (r.Log && !logRegisters.Any(x => x.ID == r.ID && x.FullName == r.FullName && x.CpuID == r.CpuID))
+            //{
+             //   logRegisters.Add(r);
+            //}
+            //else if (!r.Log && logRegisters.Any(x => x.ID == r.ID && x.FullName == r.FullName && x.CpuID == r.CpuID))
+            //{
+              //  logRegisters.Remove(r);
+            //}
         }
 
         private void SetNewFileName()

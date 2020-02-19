@@ -28,62 +28,36 @@ using System.Windows.Forms;
 
 namespace EmbeddedDebugger.Model
 {
-    public class Register : INotifyPropertyChanged
+    public class Register
     {
+
         #region Fields
-        private RegisterValue registerValue;
-        private List<Register> childRegisters;
-        private Register parent;
-        private uint id;
         private string name;
         private string fullName;
-        private ReadWrite readWrite;
-        private VariableType variableType;
         private string variableTypeName;
-        private bool plot;
-        // TODO: Remove the plotting done here
-        //private LineSeries myLine;
-        //private PlotModel plotModel;
-        private int maxNumberOfValues;
-        private double numberOfSeconds;
-        private int size;
-        private uint offset;
-        private int derefDepth;
-        private bool? show;
-        private Source source;
-        private int timeStampUnits = 1;
-        private byte? debugChannel;
-        private ChannelMode channelMode;
-        private bool log;
-        //private Color lineColor;
-        private CpuNode cpuNode;
-        private ValueDisplayFormat valueDisplayFormat;
-        private bool isCollapsed = true;
         #endregion
 
         #region Properties
-        public RegisterValue RegisterValue { get => registerValue; set => registerValue = value; }
+        public RegisterValue RegisterValue { get; set; }
+        public List<RegisterValue> MyValues { get; private set; }
         public string Value
         {
             get
             {
-                string s = registerValue != null ? registerValue.ValueAsFormattedString(valueDisplayFormat) : "";
-                if (!enableValueUpdates)
+                string s = RegisterValue != null ? RegisterValue.ValueAsFormattedString(this.ValueDisplayFormat) : "";
+                if (!EnableValueUpdates)
                     s = s.Trim();
                 return s;
             }
             set
             {
-                RegisterValue regValue = RegisterValue.GetRegisterValueByVariableType(variableType);
+                RegisterValue regValue = RegisterValue.GetRegisterValueByVariableType(VariableType);
                 try
                 {
-                    if (regValue.ValueByteArrayFromString(value, out byte[] output, valueDisplayFormat))
+                    if (regValue.ValueByteArrayFromString(value, out byte[] output, this.ValueDisplayFormat))
                     {
                         regValue.ValueByteArray = output;
-                        registerValue = regValue;
-                        ValueChanged(this, regValue);
-                        if (EnableValueUpdates)
-                            PropertyChanged(this, new PropertyChangedEventArgs("Value"));
+                        RegisterValue = regValue;
                     }
                 }
                 catch (Exception e)
@@ -92,43 +66,22 @@ namespace EmbeddedDebugger.Model
                 }
             }
         }
-        public string ValuePlain { get { return this.Value.Trim(); } }
-        public List<Register> ChildRegisters { get => childRegisters; set => childRegisters = value; }
-        public bool HasChildren { get => this.childRegisters != null && childRegisters.Count > 0; }
-        public Register Parent { get => parent; set => parent = value; }
+        public List<Register> ChildRegisters { get; set; }
+        public bool HasChildren => this.ChildRegisters != null && this.ChildRegisters.Count > 0;
+        public Register Parent { get; set; }
         [DisplayName("ID")]
-        public uint ID { get => id; set => id = value; }
+        public uint ID { get; set; }
         [DisplayName("Name")]
-        public string Name { get => name ?? fullName; set => name = value; }
-        public string FullName { get => fullName ?? name; set => fullName = value; }
-        public ReadWrite ReadWrite
-        {
-            get => readWrite;
-            set
-            {
-                readWrite = value;
-                PropertyChanged(this, new PropertyChangedEventArgs("ReadWrite"));
-            }
-        }
-
-        private bool enableValueUpdates = true;
-        public bool EnableValueUpdates
-        {
-            get => enableValueUpdates;
-            set
-            {
-                bool doPropertyChanged = value != enableValueUpdates;
-                enableValueUpdates = value;
-                if (doPropertyChanged)
-                    PropertyChanged(this, new PropertyChangedEventArgs("Value"));
-            }
-        }
-        public VariableType VariableType { get => variableType; set => variableType = value; }
+        public string Name { get => this.name ?? this.fullName; set => this.name = value; }
+        public string FullName { get => this.fullName ?? this.name; set => this.fullName = value; }
+        public ReadWrite ReadWrite { get; set; }
+        public bool EnableValueUpdates { get; set; } = true;
+        public VariableType VariableType { get; set; }
         public string VariableTypeString
         {
             get
             {
-                if (variableType == VariableType.Unknown)
+                if (VariableType == VariableType.Unknown)
                 {
                     return $"\"{variableTypeName}\"";
                 }
@@ -138,52 +91,18 @@ namespace EmbeddedDebugger.Model
                 //}
                 else
                 {
-                    return variableType.ToString().ToLower();
+                    return VariableType.ToString().ToLower();
                 }
 
             }
         }
         public string VariableTypeName
         {
-            get
-            {
-                if (variableType == VariableType.Unknown)
-                {
-                    return variableTypeName;
-                }
-                return variableType.ToString().ToLower();
-            }
-            set
-            {
-                variableTypeName = value;
-            }
+            get => this.VariableType == VariableType.Unknown ? this.variableTypeName : this.VariableType.ToString().ToLower();
+            set => this.variableTypeName = value;
         }
-        
-        public bool Plot
-        {
-            get => plot;
-            set
-            {
-                plot = value;
-                /*
-                if (value)
-                {
-                    if (lineColor.IsEmpty)
-                    {
-                        KnownColor[] colors = GetLineColors().ToArray();
-                        lineColor = Color.FromKnownColor(colors[new Random(Guid.NewGuid().GetHashCode()).Next(0, colors.Length - 1)]);
-                        PropertyChanged(this, new PropertyChangedEventArgs("LineColor"));
-                        PropertyChanged(this, new PropertyChangedEventArgs("LineKnownColor"));
-                    }
-                    myLine = new LineSeries
-                    {
-                        Title = fullName,
-                        Color = OxyColor.FromArgb(lineColor.A, lineColor.R, lineColor.G, lineColor.B)
-                    };
-                }
-                PropertyChanged(this, new PropertyChangedEventArgs("Plot"));*/
-            }
-        }
+
+        public bool Plot { get; set; }
         /*
         public KnownColor LineKnownColor
         {
@@ -218,87 +137,28 @@ namespace EmbeddedDebugger.Model
         private object plotModelLock = new object();
         public PlotModel PlotModel { get => plotModel; set { lock (plotModelLock) { plotModel = value; } } }
         */
-        public int MaxNumberOfValues { get => maxNumberOfValues; set => maxNumberOfValues = value; }
-        public double NumberOfSeconds { get => numberOfSeconds; set => numberOfSeconds = value; }
-        public int Size { get => size; set => size = value; }
-        public uint Offset { get => offset; set => offset = value; }
-        public int DerefDepth { get => derefDepth; set => derefDepth = value; }
-        public bool? Show
-        {
-            get => show;
-            set
-            {
-                show = value;
-                PropertyChanged(this, new PropertyChangedEventArgs("Show"));
-            }
-        }
-        public Source Source
-        {
-            get => source;
-            set
-            {
-                source = value;
-                PropertyChanged(this, new PropertyChangedEventArgs("Source"));
-            }
-        }
-        public char ReadWriteChar
-        {
-            get => readWrite == ReadWrite.Read ? '←' : '→';
-        }
-        public int TimeStampUnits { get => timeStampUnits; set => timeStampUnits = value; }
-        public bool IsDebugChannel { get => debugChannel.HasValue; }
-        public byte? DebugChannel { get => debugChannel; set => debugChannel = value; }
-        public ChannelMode ChannelMode
-        {
-            get => channelMode;
-            set
-            {
-                try
-                {
-                    channelMode = value;
-                    ChannelModeUpdated(this, new EventArgs());
-                }
-                catch (ArgumentException)
-                {
-                    channelMode = ChannelMode.Off;
-                    try
-                    {
-                        ChannelModeUpdated(this, new EventArgs());
-                    }
-                    catch (ArgumentException) { }
-                }
-                PropertyChanged(this, new PropertyChangedEventArgs("ChannelMode"));
-            }
-        }
-        public bool Log
-        {
-            get => log;
-            set
-            {
-                log = value;
-                LoggingChanged(this, new EventArgs());
-                PropertyChanged(this, new PropertyChangedEventArgs("Log"));
-            }
-        }
-        public CpuNode CpuNode { get => cpuNode; set => cpuNode = value; }
-        public byte CpuID { get => cpuNode.ID; }
-        public bool IsReadable { get => ((byte)readWrite & 0b0000_0010) >> 1 == 1; }
-        public bool IsWritable { get => ((byte)readWrite & 0b0000_0001) == 1; }
-        public ValueDisplayFormat ValueDisplayFormat
-        {
-            get => valueDisplayFormat;
-            set
-            {
-                valueDisplayFormat = value;
-                if (EnableValueUpdates)
-                    PropertyChanged(this, new PropertyChangedEventArgs("Value"));
-            }
-        }
+        public int MaxNumberOfValues { get; set; }
+        public double NumberOfSeconds { get; set; }
+        public int Size { get; set; }
+        public uint Offset { get; set; }
+        public int DerefDepth { get; set; }
+        public bool? Show { get; set; }
+        public Source Source { get; set; }
+        public char ReadWriteChar => this.ReadWrite == ReadWrite.Read ? '←' : '→';
+        public int TimeStampUnits { get; set; } = 1;
+        public bool IsDebugChannel => DebugChannel.HasValue;
+        public byte? DebugChannel { get; set; }
+        public ChannelMode ChannelMode { get; set; }
+        public CpuNode CpuNode { get; set; }
+        public byte CpuID => CpuNode.ID;
+        public bool IsReadable => ((byte)this.ReadWrite & 0b0000_0010) >> 1 == 1;
+        public bool IsWritable => ((byte)this.ReadWrite & 0b0000_0001) == 1;
+        public ValueDisplayFormat ValueDisplayFormat { get; set; }
         public bool IsIntegralValue
         {
             get
             {
-                switch (variableType)
+                switch (VariableType)
                 {
                     case VariableType.Bool:
                     case VariableType.Char:
@@ -323,7 +183,7 @@ namespace EmbeddedDebugger.Model
         {
             get
             {
-                switch (variableType)
+                switch (this.VariableType)
                 {
                     case VariableType.String:
                     case VariableType.Blob:
@@ -333,50 +193,16 @@ namespace EmbeddedDebugger.Model
             }
         }
 
-        public bool IsCollapsed { get => isCollapsed; set => isCollapsed = value; }
-        #endregion
-
-        #region Events
-        public event EventHandler NewValueAdded = delegate { };
-        public event EventHandler QueryValue = delegate { };
-        public event EventHandler ChannelModeUpdated = delegate { };
-        public event EventHandler<RegisterValue> ValueChanged = delegate { };
-        public event EventHandler LoggingChanged = delegate { };
-        public event PropertyChangedEventHandler PropertyChanged = delegate { };
         #endregion
 
         #region Constructors
         public Register()
         {
-            childRegisters = new List<Register>();
+            this.ChildRegisters = new List<Register>();
+            this.MyValues = new List<RegisterValue>();
         }
         #endregion
 
-        // TODO: Make sure this is not done in the register
-        /*public static IEnumerable<KnownColor> GetLineColors()
-        {
-            yield return KnownColor.Black;
-            yield return KnownColor.Blue;
-            yield return KnownColor.BlueViolet;
-            yield return KnownColor.Brown;
-            yield return KnownColor.CadetBlue;
-            yield return KnownColor.Chartreuse;
-            yield return KnownColor.Chocolate;
-            yield return KnownColor.CornflowerBlue;
-            yield return KnownColor.Crimson;
-            yield return KnownColor.DarkBlue;
-            yield return KnownColor.DarkGreen;
-            yield return KnownColor.DarkMagenta;
-            yield return KnownColor.DarkRed;
-            yield return KnownColor.DarkViolet;
-            yield return KnownColor.ForestGreen;
-            yield return KnownColor.Green;
-            yield return KnownColor.Indigo;
-            yield return KnownColor.MediumBlue;
-            yield return KnownColor.Navy;
-            yield return KnownColor.Purple;
-            yield return KnownColor.Red;
-        }*/
         /// <summary>
         /// Add a value to the register, also adds it to the plotmodel, this is used for plotting
         /// TODO: check if there is a more elegant way.
@@ -386,9 +212,10 @@ namespace EmbeddedDebugger.Model
         {
             if (regValue.GetType() == typeof(RegisterValue))
             {
-                regValue = RegisterValue.GetRegisterValueByVariableType(variableType, regValue.ValueByteArray, regValue.TimeStamp);
+                regValue = RegisterValue.GetRegisterValueByVariableType(this.VariableType, regValue.ValueByteArray, regValue.TimeStamp);
+                this.RegisterValue = regValue;
+                this.MyValues.Add(regValue);
             }
-            registerValue = regValue;
             /*
             if (plot && plotModel != null && regValue.TimeStamp.HasValue)
             {
@@ -423,35 +250,9 @@ namespace EmbeddedDebugger.Model
                 UpdatePlot();
 
             }
-            &*/
-            NewValueAdded(this, new EventArgs());
-            if (EnableValueUpdates)
-                PropertyChanged(this, new PropertyChangedEventArgs("Value"));
-        }
-
-        private static bool updatePlotRequest = false;
-        public static bool EnablePlotUpdate = true;
-        private async void UpdatePlot()
-        {
-            if (updatePlotRequest)
-                return;
-
-            updatePlotRequest = true;
-            await Task.Delay(100);
-            updatePlotRequest = false;
-            /*
-            lock (plotModelLock)
-            {
-                if (plotModel != null && EnablePlotUpdate)
-                    plotModel.InvalidatePlot(true);
-            }
             */
         }
 
-        public void RequestNewValue()
-        {
-            QueryValue(this, new EventArgs());
-        }
 
         public string GetCPPVariableTypes(VariableType varType)
         {
@@ -496,7 +297,6 @@ namespace EmbeddedDebugger.Model
                 ReadWrite = (ReadWrite)Enum.Parse(typeof(ReadWrite), old.ReadWrite.ToString()),
                 VariableType = (VariableType)Enum.Parse(typeof(VariableType), old.VariableType.ToString()),
                 VariableTypeName = old.VariableTypeName.ToString(),
-                //Plot = Convert.ToBoolean(old.Plot),
                 MaxNumberOfValues = Convert.ToInt32(old.MaxNumberOfValues),
                 NumberOfSeconds = Convert.ToDouble(old.NumberOfSeconds),
                 Size = Convert.ToInt32(old.Size),
@@ -506,7 +306,6 @@ namespace EmbeddedDebugger.Model
                 Source = (Source)Enum.Parse(typeof(Source), old.Source.ToString()),
                 TimeStampUnits = Convert.ToInt32(old.TimeStampUnits),
                 DebugChannel = null,
-                //Log = Convert.ToBoolean(old.Plot),
                 CpuNode = old.CpuNode,
             };
         }
@@ -516,42 +315,41 @@ namespace EmbeddedDebugger.Model
             if (!(obj is Register)) return false;
             Register reg = (Register)obj;
             return
-                reg.ID == ID &&
-                reg.FullName == FullName &&
-                reg.ReadWrite == ReadWrite &&
-                reg.VariableType == VariableType &&
-                reg.Size == Size &&
-                reg.Offset == Offset &&
-                reg.DerefDepth == DerefDepth &&
-                reg.Source == Source &&
-                reg.CpuNode == CpuNode;
+                reg.ID == this.ID &&
+                reg.FullName == this.FullName &&
+                reg.ReadWrite == this.ReadWrite &&
+                reg.VariableType == this.VariableType &&
+                reg.Size == this.Size &&
+                reg.Offset == this.Offset &&
+                reg.DerefDepth == this.DerefDepth &&
+                reg.Source == this.Source &&
+                reg.CpuNode == this.CpuNode;
         }
 
         public override int GetHashCode()
         {
-            var hashCode = 1671609247;
-            hashCode = hashCode * -1521134295 + EqualityComparer<List<Register>>.Default.GetHashCode(childRegisters);
-            hashCode = hashCode * -1521134295 + EqualityComparer<Register>.Default.GetHashCode(parent);
-            hashCode = hashCode * -1521134295 + id.GetHashCode();
+            int hashCode = 1671609247;
+            hashCode = hashCode * -1521134295 + EqualityComparer<List<Register>>.Default.GetHashCode(ChildRegisters);
+            hashCode = hashCode * -1521134295 + EqualityComparer<Register>.Default.GetHashCode(Parent);
+            hashCode = hashCode * -1521134295 + ID.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(name);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(fullName);
-            hashCode = hashCode * -1521134295 + readWrite.GetHashCode();
-            hashCode = hashCode * -1521134295 + variableType.GetHashCode();
+            hashCode = hashCode * -1521134295 + this.ReadWrite.GetHashCode();
+            hashCode = hashCode * -1521134295 + VariableType.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(variableTypeName);
-            hashCode = hashCode * -1521134295 + plot.GetHashCode();
+            hashCode = hashCode * -1521134295 + Plot.GetHashCode();
             //hashCode = hashCode * -1521134295 + EqualityComparer<LineSeries>.Default.GetHashCode(myLine);
             //hashCode = hashCode * -1521134295 + EqualityComparer<PlotModel>.Default.GetHashCode(plotModel);
-            hashCode = hashCode * -1521134295 + maxNumberOfValues.GetHashCode();
-            hashCode = hashCode * -1521134295 + numberOfSeconds.GetHashCode();
-            hashCode = hashCode * -1521134295 + size.GetHashCode();
-            hashCode = hashCode * -1521134295 + offset.GetHashCode();
-            hashCode = hashCode * -1521134295 + derefDepth.GetHashCode();
-            hashCode = hashCode * -1521134295 + show.GetHashCode();
-            hashCode = hashCode * -1521134295 + source.GetHashCode();
-            hashCode = hashCode * -1521134295 + timeStampUnits.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<byte?>.Default.GetHashCode(debugChannel);
-            hashCode = hashCode * -1521134295 + channelMode.GetHashCode();
-            hashCode = hashCode * -1521134295 + log.GetHashCode();
+            hashCode = hashCode * -1521134295 + MaxNumberOfValues.GetHashCode();
+            hashCode = hashCode * -1521134295 + NumberOfSeconds.GetHashCode();
+            hashCode = hashCode * -1521134295 + Size.GetHashCode();
+            hashCode = hashCode * -1521134295 + Offset.GetHashCode();
+            hashCode = hashCode * -1521134295 + DerefDepth.GetHashCode();
+            hashCode = hashCode * -1521134295 + Show.GetHashCode();
+            hashCode = hashCode * -1521134295 + Source.GetHashCode();
+            hashCode = hashCode * -1521134295 + TimeStampUnits.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<byte?>.Default.GetHashCode(DebugChannel);
+            hashCode = hashCode * -1521134295 + this.ChannelMode.GetHashCode();
             return hashCode;
         }
     }

@@ -87,8 +87,8 @@ namespace EmbeddedDebugger.View.Windows
 
             // Set up the settings
             VariableTypeAsCPP.IsChecked = Settings.Default.CPPVariableTypes;
-            RPCEnabledMenuItem.IsChecked = Settings.Default.RPCEnabled;
-            RPCEnabledMenuItem_Click(this, new RoutedEventArgs());
+            //RPCEnabledMenuItem.IsChecked = Settings.Default.RPCEnabled;
+            //RPCEnabledMenuItem_Click(this, new RoutedEventArgs());
         }
 
         private void Model_HasDisconnected(object sender, EventArgs e)

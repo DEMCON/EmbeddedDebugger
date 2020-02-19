@@ -16,21 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using EmbeddedDebugger.Model;
+using EmbeddedDebugger.ViewModel;
 using OxyPlot;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using OxyPlot.Series;
 
 namespace EmbeddedDebugger.View.UserControls
 {
@@ -42,9 +38,11 @@ namespace EmbeddedDebugger.View.UserControls
         private PlotModel plotModel;
         private bool paused;
         private bool showSettings = true;
+        private SystemViewModel systemViewModel;
+        private PlottingViewModel plottingViewModel;
 
         private List<Register> plotRegisters;
-        public List<Register> PlotRegisters { get => plotRegisters; }
+        public List<Register> PlotRegisters { get => this.plottingViewModel.RegistersToPlot; }
         public PlotUserControl()
         {
             InitializeComponent();
@@ -52,7 +50,6 @@ namespace EmbeddedDebugger.View.UserControls
             plotModel = new PlotModel { Title = "" };
             Plot.Model = plotModel;
             AutoScaleCheckBox.IsChecked = true;
-            Register.EnablePlotUpdate = !paused;
         }
 
         //TODO Readd logging
@@ -123,7 +120,6 @@ namespace EmbeddedDebugger.View.UserControls
         private void PauseButton_Click(object sender, RoutedEventArgs e)
         {
             paused = !paused;
-            Register.EnablePlotUpdate = !paused;
             if (paused)
             {
                 PauseButton.Content = "▶";
@@ -154,9 +150,9 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void MinYScaleTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            if(!double.TryParse(e.Text, out double result) && !e.Text.Equals("."))
+            if (!double.TryParse(e.Text, out double result) && !e.Text.Equals("."))
             {
-                e.Handled =true;
+                e.Handled = true;
             }
         }
 
@@ -178,7 +174,7 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void RangeXTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if(plotRegisters == null || !double.TryParse(RangeXTextBox.Text, out double result)) return;
+            if (plotRegisters == null || !double.TryParse(RangeXTextBox.Text, out double result)) return;
             foreach (Register r in plotRegisters)
             {
                 r.NumberOfSeconds = result;
@@ -193,6 +189,36 @@ namespace EmbeddedDebugger.View.UserControls
                 ElementCollection<OxyPlot.Axes.Axis> ec = plotModel.Axes;
                 plotModel.Axes[1].Maximum = Double.Parse(MaxYScaleTextBox.Text);
                 ElementCollection<OxyPlot.Axes.Axis> ec2 = plotModel.Axes;
+            }
+        }
+
+        private void PlotUserControl_OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is ViewModelManager vmmOld)
+            {
+                vmmOld.RefreshLow -= this.Refresh;
+            }
+            if (e.NewValue is ViewModelManager vmm)
+            {
+                this.systemViewModel = vmm.SystemViewModel;
+                this.plottingViewModel = vmm.PlottingViewModel;
+                vmm.RefreshLow += this.Refresh;
+            }
+        }
+
+        private void Refresh(object sender, EventArgs e)
+        {
+            if (this.plottingViewModel.RegistersToPlot.Count > 0)
+            {
+                foreach (Register r in this.plottingViewModel.RegistersToPlot)
+                {
+                    LineSeries ls = new LineSeries();
+                    r.MyValues.ToList().ForEach(x=> ls.Points.Add(new DataPoint((uint)x.TimeStamp, Convert.ToDouble(x.Value))));
+                    ls.Color = OxyColors.Blue;
+                    this.plotModel.Series.Add(ls);
+                    this.plotModel.InvalidatePlot(true);
+                }
+
             }
         }
     }

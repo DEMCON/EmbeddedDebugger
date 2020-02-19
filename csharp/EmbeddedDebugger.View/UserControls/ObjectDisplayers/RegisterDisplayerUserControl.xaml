@@ -112,8 +112,7 @@
                     </MultiBinding>
                 </ComboBox.IsEnabled>
             </ComboBox>
-            <CheckBox Grid.Column="10" VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding ElementName=rduc, Path=Register.Log}" 
-              IsEnabled="{Binding ElementName=rduc, Path=Register.IsReadable}" VerticalContentAlignment="Center"/>
+            <CheckBox Grid.Column="10" VerticalAlignment="Center" HorizontalAlignment="Center" IsEnabled="{Binding ElementName=rduc, Path=Register.IsReadable}" VerticalContentAlignment="Center"/>
             <Button Grid.Column="11" Margin="3" Name="RefreshButton" Content="Refresh" Click="RefreshButton_OnClick" Padding="0" BorderThickness="0">
                 <Button.IsEnabled>
                     <MultiBinding Converter="{StaticResource BooleanOrConverter}">

@@ -48,7 +48,8 @@ namespace EmbeddedDebugger.View.UserControls
             if (registers == null) return;
             foreach (Register register in registers)
             {
-                register.RequestNewValue();
+                this.systemViewModel.RequestNewValue(register);
+                //register.RequestNewValue();
             }
         }
 

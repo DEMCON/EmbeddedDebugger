@@ -152,7 +152,7 @@ namespace EmbeddedDebugger.Model.RPC
             if (!mm.Nodes.Any(x => x.ID == nodeID)) return;
             CpuNode node = mm.Nodes.First(x => x.ID == nodeID);
             if (!node.Registers.Any(x => x.ID == registerID)) return;
-            node.Registers.First(x => x.ID == registerID).Log = logging;
+            //node.Registers.First(x => x.ID == registerID).Log = logging;
         }
 
         [XmlRpcMethod("StartLogging")]

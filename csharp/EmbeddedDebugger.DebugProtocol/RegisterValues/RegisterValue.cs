@@ -32,15 +32,11 @@ namespace EmbeddedDebugger.DebugProtocol.RegisterValues
     /// </summary>
     public class RegisterValue
     {
-        #region fields
-        private uint? timeStamp;
-        #endregion
-
         #region Properties
         public virtual int ArraySize { get; }
         public virtual object Value { get; }
         public virtual byte[] ValueByteArray { get; set; }
-        public uint? TimeStamp { get => timeStamp; set => timeStamp = value; }
+        public uint? TimeStamp { get; set; }
         #endregion
 
         public virtual bool ValueByteArrayFromObject(object x, out byte[] output)

@@ -17,6 +17,7 @@ namespace EmbeddedDebugger.View.UserControls.ObjectDisplayers
     {
         private SystemViewModel systemViewModel;
         private RegisterValue currentValue;
+        private PlottingViewModel plottingViewModel;
 
         public static readonly DependencyProperty RegisterProperty = DependencyProperty.Register(
             "Register",
@@ -50,12 +51,12 @@ namespace EmbeddedDebugger.View.UserControls.ObjectDisplayers
 
         private void PlotCheckBox_OnChecked(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            this.plottingViewModel.RegistersToPlot.Add(this.Register);
         }
 
         private void PlotCheckBox_OnUnchecked(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            this.plottingViewModel.RegistersToPlot.Remove(this.Register);
         }
 
         private void RefreshButton_OnClick(object sender, RoutedEventArgs e)
@@ -101,6 +102,7 @@ namespace EmbeddedDebugger.View.UserControls.ObjectDisplayers
             if (e.NewValue is ViewModelManager vmm)
             {
                 this.systemViewModel = vmm.SystemViewModel;
+                this.plottingViewModel = vmm.PlottingViewModel;
                 vmm.RefreshMedium += this.Update;
             }
         }

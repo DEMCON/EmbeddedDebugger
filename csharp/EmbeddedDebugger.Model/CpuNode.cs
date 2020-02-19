@@ -194,10 +194,6 @@ namespace EmbeddedDebugger.Model
         public void AddRegister(Register register, ReadWrite readWrite)
         {
             register.TimeStampUnits = sizes[VariableType.TimeStamp];
-            register.QueryValue += CpuNode_RegisterQueriesValue;
-            register.ChannelModeUpdated += Register_ChannelModeUpdated;
-            register.ValueChanged += Register_ValueChanged;
-            register.LoggingChanged += Register_LoggingChanged;
         }
         #endregion
 

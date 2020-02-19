@@ -94,7 +94,7 @@ namespace EmbeddedDebugger.View.CustomControls
             }
             foreach (Register reg in searchRegs)
             {
-                reg.IsCollapsed = true;
+                //reg.IsCollapsed = true;
             }
             mySource = searchRegs;
             SearchThrough(searchValue);
@@ -105,18 +105,18 @@ namespace EmbeddedDebugger.View.CustomControls
             List<Register> searchRegs = new List<Register>();
             foreach (Register reg in mySource.Cast<Register>())
             {
-                if (reg.IsCollapsed)
-                {
+                //if (reg.IsCollapsed)
+                //{
                     searchRegs.AddRange(GetAllChildNodes(reg));
-                }
-                else
-                {
+                //}
+                //else
+                //{
                     searchRegs.Add(reg);
-                }
+                //}
             }
             foreach (Register reg in searchRegs)
             {
-                reg.IsCollapsed = false;
+                //reg.IsCollapsed = false;
             }
             mySource = searchRegs;
             SearchThrough(searchValue);
@@ -139,16 +139,16 @@ namespace EmbeddedDebugger.View.CustomControls
         private void ButtonClicked(object sender, RoutedEventArgs e)
         {
             Register register = (Register)CurrentItem;
-            register.IsCollapsed = !register.IsCollapsed;
+            //register.IsCollapsed = !register.IsCollapsed;
             List<Register> regs = ItemsSource.Cast<Register>().ToList();
-            if (register.IsCollapsed)
+            //if (register.IsCollapsed)
             {
                 foreach (Register reg in register.ChildRegisters)
                 {
                     regs.Remove(reg);
                 }
             }
-            else
+            //else
             {
                 int counter = 1;
                 foreach (Register reg in register.ChildRegisters)
