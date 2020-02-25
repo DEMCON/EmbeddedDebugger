@@ -122,7 +122,7 @@ namespace EmbeddedDebugger.View.Windows
             {
                 try
                 {
-                    model.RpcInterface.Start();
+                    model?.RpcInterface?.Start();
                 }
                 catch (Exception ex)
                 {
@@ -134,7 +134,7 @@ namespace EmbeddedDebugger.View.Windows
             }
             else
             {
-                model.RpcInterface.Stop();
+                model?.RpcInterface?.Stop();
                 Settings.Default.RPCEnabled = false;
                 Settings.Default.Save();
             }
