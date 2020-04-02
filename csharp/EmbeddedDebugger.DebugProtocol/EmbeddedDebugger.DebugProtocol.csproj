@@ -53,7 +53,11 @@
     <Compile Include="MessageCodec.cs" />
     <Compile Include="Messages\ApplicationMessage.cs" />
     <Compile Include="Messages\ConfigChannelMessage.cs" />
+    <Compile Include="Messages\DebugStringMessage.cs" />
+    <Compile Include="Messages\DecimationMessage.cs" />
     <Compile Include="Messages\QueryRegisterMessage.cs" />
+    <Compile Include="Messages\ReadChannelDataMessage.cs" />
+    <Compile Include="Messages\ResetTimeMessage.cs" />
     <Compile Include="Messages\TraceMessage.cs" />
     <Compile Include="Messages\VersionMessage.cs" />
     <Compile Include="Messages\WriteRegisterMessage.cs" />

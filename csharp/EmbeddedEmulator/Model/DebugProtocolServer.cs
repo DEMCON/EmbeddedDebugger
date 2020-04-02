@@ -424,21 +424,21 @@ namespace EmbeddedEmulator.Model
             }
             else if (msg.CommandData[0] == 0x02)
             {
-                List<byte> data = new List<byte>
-                {
-                    (byte)(stopwatch.ElapsedMilliseconds),
-                    (byte)(stopwatch.ElapsedMilliseconds >> 8),
-                    (byte)(stopwatch.ElapsedMilliseconds >> 16)
-                };
+                List<byte> data = new List<byte>();
                 ushort mask = 0b0000_0000_0000_0000;
                 foreach (Register r in embeddedConfig.Registers.Where(x => x.IsDebugChannel && x.ChannelMode == ChannelMode.Once).OrderBy(x => x.DebugChannel))
                 {
                     mask = (ushort)(mask | 1 << r.DebugChannel);
                     data.AddRange(r.Value.ValueByteArray);
                 }
-                data.Insert(3, (byte)mask);
-                data.Insert(4, (byte)(mask >> 8));
-                SendMessage(new ProtocolMessage(msg.ControllerID, msg.MsgID, msg.Command, data.ToArray()));
+
+                ReadChannelDataMessage readChannelDataMessage = new ReadChannelDataMessage()
+                {
+                    TimeStamp = (uint)stopwatch.ElapsedMilliseconds,
+                    Mask = mask,
+                    Data = data.ToArray(),
+                };
+                SendMessage(readChannelDataMessage.ToProtocolMessage(msg.ControllerID, msg.MsgID));
             }
             else
             {

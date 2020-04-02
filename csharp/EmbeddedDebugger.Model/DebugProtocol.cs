@@ -243,37 +243,10 @@ namespace EmbeddedDebugger.Model
                                     msg.IsAckMessage = true;
                                 }
                             }
-                            switch (msg.Command)
-                            {
-                                case Command.GetVersion:
-                                    msg.InvalidReason = DispatchVersionMessage(msg);
-                                    break;
-                                case Command.GetInfo:
-                                    msg.InvalidReason = DispatchInfoMessage(msg);
-                                    break;
-                                case Command.WriteRegister:
-                                    msg.InvalidReason = DispatchWriteRegisterMessage(msg);
-                                    break;
-                                case Command.QueryRegister:
-                                    msg.InvalidReason = DispatchQueryRegisterMessage(msg);
-                                    break;
-                                case Command.ConfigChannel:
-                                    msg.InvalidReason = DispatchConfigChannelMessage(msg);
-                                    break;
-                                case Command.Decimation:
-                                    msg.InvalidReason = DispatchDecimationMessage(msg);
-                                    break;
-                                case Command.ResetTime:
-                                    msg.InvalidReason = DispatchResetTimeMessage(msg);
-                                    break;
-                                case Command.ReadChannelData:
-                                    msg.InvalidReason = DispatchReadChannelDataMessage(msg);
-                                    break;
-                                case Command.DebugString:
-                                    msg.InvalidReason = DispatchDebugStringMessage(msg);
-                                    break;
-                            }
+
+                            DispatchValidMessage(msg);
                         }
+
                         // Get the node this message came from and add it to the message list if it hasn't already been set
                         CpuNode node = core.Nodes.FirstOrDefault(x => x.ID == msg.ControllerID);
                         if (node != null)
@@ -506,14 +479,11 @@ namespace EmbeddedDebugger.Model
         /// <param name="dec">The new decimation</param>
         public void Decimation(byte nodeID, byte? dec = null)
         {
-            if (dec.HasValue)
+            DecimationMessage msg = new DecimationMessage()
             {
-                SendMessage(new ProtocolMessage(nodeID, GetMsgID(nodeID), Command.Decimation, new byte[] { (byte)dec }));
-            }
-            else
-            {
-                SendMessage(new ProtocolMessage(nodeID, GetMsgID(nodeID), Command.Decimation));
-            }
+                Decimation = dec
+            };
+            SendMessage(nodeID, msg);
         }
 
         /// <summary>
@@ -549,7 +519,11 @@ namespace EmbeddedDebugger.Model
         /// <param name="debugString">The debug string</param>
         public void SendDebugString(byte nodeID, string debugString)
         {
-            SendMessage(new ProtocolMessage(nodeID, GetMsgID(nodeID), Command.DebugString, Encoding.UTF8.GetBytes(debugString)));
+            DebugStringMessage debugStringMessage = new DebugStringMessage()
+            {
+                Message = debugString
+            };
+            SendMessage(nodeID, debugStringMessage);
         }
 
         /// <summary>
@@ -611,28 +585,65 @@ namespace EmbeddedDebugger.Model
         #endregion
 
         #region DispatchMethods
+
+        private void DispatchValidMessage(ProtocolMessage msg)
+        {
+            try
+            {
+                switch (msg.Command)
+                {
+                    case Command.GetVersion:
+                        DispatchVersionMessage(msg);
+                        break;
+                    case Command.GetInfo:
+                        DispatchInfoMessage(msg);
+                        break;
+                    case Command.WriteRegister:
+                        DispatchWriteRegisterMessage(msg);
+                        break;
+                    case Command.QueryRegister:
+                        DispatchQueryRegisterMessage(msg);
+                        break;
+                    case Command.ConfigChannel:
+                        DispatchConfigChannelMessage(msg);
+                        break;
+                    case Command.Decimation:
+                        DispatchDecimationMessage(msg);
+                        break;
+                    case Command.ResetTime:
+                        DispatchResetTimeMessage(msg);
+                        break;
+                    case Command.ReadChannelData:
+                        DispatchReadChannelDataMessage(msg);
+                        break;
+                    case Command.DebugString:
+                        DispatchDebugStringMessage(msg);
+                        break;
+                }
+            }
+            catch (ArgumentException e)
+            {
+                msg.InvalidReason = e.Message;
+            }
+        }
+
         /// <summary>
         /// This method is used to dispatch a Version message
         /// Adding the new CPU node to the list of nodes
         /// </summary>
         /// <param name="msg">The message</param>
         /// <returns>In case the dispatching failes, a string with explanation is returned</returns>
-        private string DispatchVersionMessage(ProtocolMessage msg)
+        private void DispatchVersionMessage(ProtocolMessage msg)
         {
             // Gather all information from the message
             byte id = msg.ControllerID;
-            VersionMessage version_message;
-            try
-            {
-                version_message = new VersionMessage(msg);
-            }
-            catch (ArgumentException ex)
-            {
-                return ex.Message;
-            }
+            VersionMessage version_message = new VersionMessage(msg);
 
             // If the node is already known, don't re-add it 
-            if (core.Nodes.Any(x => x.ID == msg.ControllerID)) return "CPUNode already known!";
+            if (core.Nodes.Any(x => x.ID == msg.ControllerID))
+            {
+                throw new ArgumentException("CPUNode already known!");
+            }
 
             // Create a new node with the information that was gathered
             CpuNode node = new CpuNode(id, version_message.ProtocolVersion, version_message.ApplicationVersion, version_message.Name, version_message.SerialNumber);
@@ -673,7 +684,6 @@ namespace EmbeddedDebugger.Model
             {
                 // TODO: Implement something to let the user know that no config file was found
             }
-            return null;
         }
 
 
@@ -683,10 +693,13 @@ namespace EmbeddedDebugger.Model
         /// </summary>
         /// <param name="msg">The received message</param>
         /// <returns>In case the dispatching failes, a string with explanation is returned</returns>
-        private string DispatchInfoMessage(ProtocolMessage msg)
+        private void DispatchInfoMessage(ProtocolMessage msg)
         {
             // Check if message is too small
-            if (msg.CommandData.Length < 2) return "Message too short for Info Message";
+            if (msg.CommandData.Length < 2)
+            {
+                throw new ArgumentException("Message too short for Info Message");
+            }
 
             List<byte> records = new List<byte>();
             for (int i = 0; i < msg.CommandData.Length; i++)
@@ -711,7 +724,6 @@ namespace EmbeddedDebugger.Model
                     records.Add(b);
                 }
             }
-            return null;
         }
 
         /// <summary>
@@ -720,12 +732,13 @@ namespace EmbeddedDebugger.Model
         /// </summary>
         /// <param name="msg">The received message</param>
         /// <returns>In case the dispatching failes, a string with explanation is returned</returns>
-        private string DispatchWriteRegisterMessage(ProtocolMessage msg)
+        private void DispatchWriteRegisterMessage(ProtocolMessage msg)
         {
-            if (msg.CommandData.Length == 0) return "Message too short for Write Register Message";
+            if (msg.CommandData.Length == 0)
+            {
+                throw new ArgumentException("Message too short for Write Register Message");
+            }
             byte result = msg.CommandData[0];
-
-            return null;
         }
 
         /// <summary>
@@ -734,38 +747,29 @@ namespace EmbeddedDebugger.Model
         /// </summary>
         /// <param name="msg">The received message</param>
         /// <returns>In case the dispatching failes, a string with explanation is returned</returns>
-        private string DispatchQueryRegisterMessage(ProtocolMessage msg)
+        private void DispatchQueryRegisterMessage(ProtocolMessage msg)
         {
-            QueryRegisterMessage response;
-            try
-            {
-                response = new QueryRegisterMessage(msg);
-            }
-            catch (ArgumentException e)
-            {
-                return e.Message;
-            }
+            QueryRegisterMessage response = new QueryRegisterMessage(msg);
 
             if (response.Value == null)
             {
                 // Error reading occured!
-                return "Error reading occured";
+                throw new ArgumentException("Error reading occured");
             }
 
             if (!core.Nodes.Any(x => x.ID == msg.ControllerID))
             {
-                return "No node found for the msg";
+                throw new ArgumentException("No node found for the msg");
             }
             CpuNode node = core.Nodes.First(x => x.ID == msg.ControllerID);
             MessageCodec.GetControlByteValues(node.ProtocolVersion, response.Control, out ReadWrite readWrite, out Source source, out int derefDepth);
             Register r = node.EmbeddedConfig.GetRegister(response.Offset, readWrite);
             if (r == null)
             {
-                return "No register found with this offset or readwrite";
+                throw new ArgumentException("No register found with this offset or readwrite");
             }
             r.AddValue(RegisterValue.GetRegisterValueByVariableType(r.VariableType, response.Value));
             RegisterQueried(this, r);
-            return null;
         }
 
         /// <summary>
@@ -775,20 +779,11 @@ namespace EmbeddedDebugger.Model
         /// </summary>
         /// <param name="msg">The received message</param>
         /// <returns>In case the dispatching failes, a string with explanation is returned</returns>
-        private string DispatchConfigChannelMessage(ProtocolMessage msg)
+        private void DispatchConfigChannelMessage(ProtocolMessage msg)
         {
-            try
-            {
-                new ConfigChannelMessage(msg);
-            }
-            catch (ArgumentException e)
-            {
-                return e.Message;
-            }
+            new ConfigChannelMessage(msg);
 
             // TODO add the correct implementation
-
-            return null;
         }
 
         /// <summary>
@@ -797,15 +792,13 @@ namespace EmbeddedDebugger.Model
         /// </summary>
         /// <param name="msg">The received message</param>
         /// <returns>In case the dispatching failes, a string with explanation is returned</returns>
-        private string DispatchDecimationMessage(ProtocolMessage msg)
+        private void DispatchDecimationMessage(ProtocolMessage msg)
         {
-            if (msg.CommandData.Length < 1)
+            DecimationMessage decimationMessage = new DecimationMessage(msg);
+            if (decimationMessage.Decimation.HasValue)
             {
-                return "Message too short for Decimation Message";
+                core.Decimation = decimationMessage.Decimation.Value;
             }
-            byte dec = msg.CommandData[0];
-            core.Decimation = dec;
-            return null;
         }
 
 
@@ -815,10 +808,9 @@ namespace EmbeddedDebugger.Model
         /// </summary>
         /// <param name="msg">The received message</param>
         /// <returns>In case the dispatching failes, a string with explanation is returned</returns>
-        private string DispatchResetTimeMessage(ProtocolMessage msg)
+        private void DispatchResetTimeMessage(ProtocolMessage msg)
         {
             // Method can be used in time if the protocol is ever upgraded
-            return null;
         }
 
 
@@ -828,35 +820,33 @@ namespace EmbeddedDebugger.Model
         /// </summary>
         /// <param name="msg">The received message</param>
         /// <returns>In case the dispatching failes, a string with explanation is returned</returns>
-        private string DispatchReadChannelDataMessage(ProtocolMessage msg)
+        private void DispatchReadChannelDataMessage(ProtocolMessage msg)
         {
-            if (msg.CommandData.Length == 0)
-            {
-                return "Message too short for Read Channel Data Message";
-            }
             byte id = msg.ControllerID;
             CpuNode node = core.Nodes.FirstOrDefault(x => x.ID == id);
-            if (node == null) return "No node found";
-            byte[] timeArray = msg.CommandData.Take(3).ToArray();
-            uint time = (uint)((0x00 << 24) | (timeArray[2] << 16) | (timeArray[1] << 8) | timeArray[0]);
-            ushort mask = BitConverter.ToUInt16(msg.CommandData.Skip(3).Take(2).ToArray(), 0);
-            List<byte> value = msg.CommandData.Skip(5).ToList();
+            if (node == null)
+            {
+                throw new ArgumentException("No node found");
+            }
+
+            ReadChannelDataMessage readChannelDataMessage = new ReadChannelDataMessage(msg);
+            List<byte> value = readChannelDataMessage.Data.ToList();
+
             for (int i = node.MaxNumberOfDebugChannels; i >= 0; i--)
             {
-                if ((mask >> i & 1) == 1 && node.DebugChannels.ContainsKey(i))
+                if ((readChannelDataMessage.Mask >> i & 1) == 1 && node.DebugChannels.ContainsKey(i))
                 {
                     byte[] myValue = value.Take(node.DebugChannels[i].Size).ToArray();
                     value.RemoveRange(0, node.DebugChannels[i].Size);
                     RegisterValue regVal = new RegisterValue
                     {
-                        TimeStamp = time,
+                        TimeStamp = readChannelDataMessage.TimeStamp,
                         ValueByteArray = myValue
                     };
                     node.DebugChannels[i].AddValue(regVal);
                 }
             }
-            NewReadChannelData(this, time);
-            return null;
+            NewReadChannelData(this, readChannelDataMessage.TimeStamp);
         }
 
 
@@ -866,12 +856,17 @@ namespace EmbeddedDebugger.Model
         /// </summary>
         /// <param name="msg">The received message</param>
         /// <returns>In case the dispatching failes, a string with explanation is returned</returns>
-        private string DispatchDebugStringMessage(ProtocolMessage msg)
+        private void DispatchDebugStringMessage(ProtocolMessage msg)
         {
-            if (!core.Nodes.Any(x => x.ID == msg.ControllerID) || msg.CommandData.Length == 0) return "Empty string";
+            if (!core.Nodes.Any(x => x.ID == msg.ControllerID) || msg.CommandData.Length == 0)
+            {
+                throw new ArgumentException("Empty string");
+            }
+
+            DebugStringMessage debugStringMessage = new DebugStringMessage(msg);
+
             CpuNode node = core.Nodes.First(x => x.ID == msg.ControllerID);
-            node.NewTerminalData = Encoding.UTF8.GetString(msg.CommandData);
-            return null;
+            node.NewTerminalData = debugStringMessage.Message;
         }
         #endregion
         #endregion
