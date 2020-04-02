@@ -21,10 +21,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EmbeddedDebugger.DebugProtocol.Messages;
 
 namespace EmbeddedDebugger.Model.Messages
 {
-    public class TraceMessage
+    public class TraceMessage : ApplicationMessage
     {
         #region fields
         private TraceLevel traceLevel;
@@ -39,6 +40,8 @@ namespace EmbeddedDebugger.Model.Messages
         public byte NodeID { get => nodeID; set => nodeID = value; }
         public DateTime DateTime { get => dateTime; }
         #endregion
+
+        public override Command Command => Command.Tracing;
         
         public TraceMessage()
         {
@@ -61,7 +64,7 @@ namespace EmbeddedDebugger.Model.Messages
             dateTime = DateTime.Now;
         }
 
-        public byte[] ToBytes()
+        public override byte[] ToBytes()
         {
             List<byte> returnable = new List<byte>()
             {

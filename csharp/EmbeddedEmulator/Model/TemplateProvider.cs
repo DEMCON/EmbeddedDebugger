@@ -61,7 +61,7 @@ namespace EmbeddedEmulator.Model
                 SerialNumber = ec.SerialNumber,
             };
 
-            return new ProtocolMessage(localControllerID, msgID, Command.GetVersion, versionMessage.ToBytes());
+            return versionMessage.ToProtocolMessage(localControllerID, msgID);
         }
 
         public static ProtocolMessage GetInfoMessage(byte msgID, byte controllerID)

@@ -415,12 +415,15 @@ namespace EmbeddedDebugger.Model
         /// <param name="r">The register to write to</param>
         public void WriteToRegister(byte nodeID, byte[] value, Register r)
         {
-            List<byte> data = new List<byte>();
-            data.AddRange(BitConverter.GetBytes(r.Offset));
-            data.Add(MessageCodec.GetControlByte(core.Nodes.First(x => x.ID == nodeID).ProtocolVersion, r.ReadWrite, r.Source, r.DerefDepth));
-            data.Add((byte)value.Length);
-            data.AddRange(value);
-            SendMessage(new ProtocolMessage(nodeID, GetMsgID(nodeID), Command.WriteRegister, data.ToArray()));
+            Version protocolVersion = core.Nodes.First(x => x.ID == nodeID).ProtocolVersion;
+            byte control = MessageCodec.GetControlByte(protocolVersion, r.ReadWrite, r.Source, r.DerefDepth);
+            WriteRegisterMessage msg = new WriteRegisterMessage()
+            {
+                Offset = r.Offset,
+                Control = control,
+                Value = value,
+            };
+            SendMessage(nodeID, msg);
         }
 
         /// <summary>
@@ -432,11 +435,16 @@ namespace EmbeddedDebugger.Model
         public void QueryRegister(byte nodeID, CpuNode node, Register r)
         {
             if (r.VariableType == VariableType.Unknown) return;
-            List<byte> data = new List<byte>();
-            data.AddRange(BitConverter.GetBytes(r.Offset));
-            data.Add(MessageCodec.GetControlByte(core.Nodes.First(x => x.ID == nodeID).ProtocolVersion, r.ReadWrite, r.Source, r.DerefDepth));
-            data.Add((byte)r.Size);
-            SendMessage(new ProtocolMessage(nodeID, GetMsgID(nodeID), Command.QueryRegister, data.ToArray()));
+            Version protocolVersion = core.Nodes.First(x => x.ID == nodeID).ProtocolVersion;
+            byte control = MessageCodec.GetControlByte(protocolVersion, r.ReadWrite, r.Source, r.DerefDepth);
+
+            QueryRegisterMessage msg = new QueryRegisterMessage()
+            {
+                Offset = r.Offset,
+                Control = control,
+                Size = r.Size,
+            };
+            SendMessage(nodeID, msg);
         }
 
         /// <summary>
@@ -446,11 +454,11 @@ namespace EmbeddedDebugger.Model
         /// <param name="channelID">The ID of the channel</param>
         public void ConfigChannel(byte nodeID, byte channelID)
         {
-            List<byte> data = new List<byte>
+            ConfigChannelMessage msg = new ConfigChannelMessage()
             {
-                channelID
+                ChannelId = channelID
             };
-            SendMessage(new ProtocolMessage(nodeID, GetMsgID(nodeID), Command.ConfigChannel, data.ToArray()));
+            SendMessage(nodeID, msg);
         }
 
         /// <summary>
@@ -461,12 +469,12 @@ namespace EmbeddedDebugger.Model
         /// <param name="mode">The new mode</param>
         public void ConfigChannel(byte nodeID, byte channelID, ChannelMode mode)
         {
-            List<byte> data = new List<byte>
+            ConfigChannelMessage msg = new ConfigChannelMessage()
             {
-                channelID,
-                (byte)mode
+                ChannelId = channelID,
+                Mode = mode,
             };
-            SendMessage(new ProtocolMessage(nodeID, GetMsgID(nodeID), Command.ConfigChannel, data.ToArray()));
+            SendMessage(nodeID, msg);
         }
 
         /// <summary>
@@ -478,15 +486,17 @@ namespace EmbeddedDebugger.Model
         /// <param name="r">The register the channel is bound to</param>
         public void ConfigChannel(byte nodeID, byte channelID, ChannelMode mode, Register r)
         {
-            List<byte> data = new List<byte>
+            Version protocolVersion = core.Nodes.First(x => x.ID == nodeID).ProtocolVersion;
+            ConfigChannelMessage msg = new ConfigChannelMessage()
             {
-                channelID,
-                (byte)mode
+                ChannelId = channelID,
+                Mode = mode,
+                Offset = r.Offset,
+                Control = MessageCodec.GetControlByte(protocolVersion, r.ReadWrite, r.Source, r.DerefDepth),
+                Size = r.Size,
             };
-            data.AddRange(BitConverter.GetBytes(r.Offset));
-            data.Add(MessageCodec.GetControlByte(core.Nodes.First(x => x.ID == nodeID).ProtocolVersion, r.ReadWrite, r.Source, r.DerefDepth));
-            data.Add((byte)r.Size);
-            SendMessage(new ProtocolMessage(nodeID, GetMsgID(nodeID), Command.ConfigChannel, data.ToArray()));
+
+            SendMessage(nodeID, msg);
         }
 
         /// <summary>
@@ -577,6 +587,12 @@ namespace EmbeddedDebugger.Model
 
             Console.WriteLine(msg);
             connector.SendMessage(MessageCodec.EncodeMessage(msg));
+        }
+
+        private void SendMessage(byte nodeID, ApplicationMessage msg)
+        {
+            ProtocolMessage protocol_message = msg.ToProtocolMessage(nodeID, GetMsgID(nodeID));
+            SendMessage(protocol_message);
         }
         #endregion
 
@@ -720,38 +736,34 @@ namespace EmbeddedDebugger.Model
         /// <returns>In case the dispatching failes, a string with explanation is returned</returns>
         private string DispatchQueryRegisterMessage(ProtocolMessage msg)
         {
-            if (msg.CommandData.Length < 7) return "Message too short for Query Register Message";
-            uint offset = BitConverter.ToUInt32(msg.CommandData, 0);
-            byte ctrl = msg.CommandData[4];
+            QueryRegisterMessage response;
+            try
+            {
+                response = new QueryRegisterMessage(msg);
+            }
+            catch (ArgumentException e)
+            {
+                return e.Message;
+            }
 
-            byte size = msg.CommandData[5];
-            if (size == 0x00 && msg.CommandData.Length <= 6)
+            if (response.Value == null)
             {
                 // Error reading occured!
                 return "Error reading occured";
             }
 
-            byte[] value;
-            if (size == 0x00)
-            {
-                value = msg.CommandData.Skip(6).ToArray();
-            }
-            else
-            {
-                value = msg.CommandData.Skip(6).Take(size).ToArray();
-            }
             if (!core.Nodes.Any(x => x.ID == msg.ControllerID))
             {
                 return "No node found for the msg";
             }
             CpuNode node = core.Nodes.First(x => x.ID == msg.ControllerID);
-            MessageCodec.GetControlByteValues(node.ProtocolVersion, ctrl, out ReadWrite readWrite, out Source source, out int derefDepth);
-            Register r = node.EmbeddedConfig.GetRegister(offset, readWrite);
+            MessageCodec.GetControlByteValues(node.ProtocolVersion, response.Control, out ReadWrite readWrite, out Source source, out int derefDepth);
+            Register r = node.EmbeddedConfig.GetRegister(response.Offset, readWrite);
             if (r == null)
             {
                 return "No register found with this offset or readwrite";
             }
-            r.AddValue(RegisterValue.GetRegisterValueByVariableType(r.VariableType, value));
+            r.AddValue(RegisterValue.GetRegisterValueByVariableType(r.VariableType, response.Value));
             RegisterQueried(this, r);
             return null;
         }
@@ -765,18 +777,15 @@ namespace EmbeddedDebugger.Model
         /// <returns>In case the dispatching failes, a string with explanation is returned</returns>
         private string DispatchConfigChannelMessage(ProtocolMessage msg)
         {
-            if (msg.CommandData.Length < 2)
+            try
             {
-                return "Message too short for Config Channel Message";
+                new ConfigChannelMessage(msg);
             }
-            byte channel = msg.CommandData[0];
-            byte mode = msg.CommandData[1];
-            if (msg.CommandData.Length > 2)
+            catch (ArgumentException e)
             {
-                uint offset = BitConverter.ToUInt32(msg.CommandData.Skip(2).Take(4).ToArray(), 0);
-                byte ctrl = msg.CommandData[6];
-                byte size = msg.CommandData[7];
+                return e.Message;
             }
+
             // TODO add the correct implementation
 
             return null;

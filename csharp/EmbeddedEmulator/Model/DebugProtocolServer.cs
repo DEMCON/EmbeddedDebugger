@@ -240,7 +240,6 @@ namespace EmbeddedEmulator.Model
 
                         case Command.WriteRegister:
                             DispatchWriteRegisterMessage(msg);
-                            SendMessage(new ProtocolMessage(msg.ControllerID, msg.MsgID, msg.Command, new byte[] { 0x00 }));
                             break;
 
                         case Command.QueryRegister:
@@ -262,28 +261,27 @@ namespace EmbeddedEmulator.Model
 
         private void DispatchWriteRegisterMessage(ProtocolMessage msg)
         {
-            uint offset = BitConverter.ToUInt32(msg.CommandData, 0);
-            byte ctrl = msg.CommandData[4];
-            MessageCodec.GetControlByteValues(embeddedConfig.ProtocolVersion, ctrl, out ReadWrite readWrite, out Source source, out int derefDepth);
-            int size = msg.CommandData[5];
-            byte[] value = msg.CommandData.Skip(6).ToArray();
-            if (embeddedConfig.WriteRegisters.Any(x =>
-                 x.Offset == offset &&
+            // Recode request:
+            WriteRegisterMessage requestMessage = new WriteRegisterMessage(msg);
+            MessageCodec.GetControlByteValues(embeddedConfig.ProtocolVersion, requestMessage.Control, out ReadWrite readWrite, out Source source, out int derefDepth);
+
+            // Lookup register:
+            Register register = embeddedConfig.WriteRegisters.FirstOrDefault(x =>
+                 x.Offset == requestMessage.Offset &&
                  x.DerefDepth == derefDepth &&
                  x.ReadWrite == readWrite &&
                  x.Source == source &&
-                 x.Size == size
-            ))
+                 x.Size == requestMessage.Value.Length
+            );
+
+            if (register != null)
             {
-                embeddedConfig.WriteRegisters.First(x =>
-                    x.Offset == offset &&
-                    x.DerefDepth == derefDepth &&
-                    x.ReadWrite == readWrite &&
-                    x.Source == source &&
-                    x.Size == size
-                ).Value.ValueByteArray = value;
+                register.Value.ValueByteArray = requestMessage.Value;
                 NewWriteMessage(this, msg);
             }
+
+            // Ack message:
+            SendMessage(new ProtocolMessage(msg.ControllerID, msg.MsgID, msg.Command, new byte[] { 0x00 }));
         }
 
         private void DispatchConfigChannelMessage(ProtocolMessage msg)
@@ -302,49 +300,57 @@ namespace EmbeddedEmulator.Model
             }
             else
             {
-                byte channelNumber = msg.CommandData[0];
-                Register r = null;
-                if (msg.CommandData.Length == 1 && embeddedConfig.Registers.Any(x => x.DebugChannel == channelNumber))
-                {
-                    r = embeddedConfig.Registers.First(x => x.DebugChannel == channelNumber);
-                    List<byte> data = new List<byte>
-                        {
-                            (byte)r.ChannelMode
-                        };
-                    data.AddRange(BitConverter.GetBytes(r.Offset));
-                    data.Add(MessageCodec.GetControlByte(embeddedConfig.ProtocolVersion, r.ReadWrite, r.Source, r.DerefDepth));
-                    data.Add((byte)r.Size);
-                    returnMsg = new ProtocolMessage(msg.ControllerID, msg.MsgID, Command.ConfigChannel, data.ToArray());
+                ConfigChannelMessage requestMessage = new ConfigChannelMessage(msg);
 
-                }
-                else if (msg.CommandData.Length == 2 && embeddedConfig.Registers.Any(x => x.DebugChannel == channelNumber))
+                Register r = null;
+                if (msg.CommandData.Length == 1 && embeddedConfig.Registers.Any(x => x.DebugChannel == requestMessage.ChannelId))
                 {
-                    r = embeddedConfig.Registers.First(x => x.DebugChannel == channelNumber);
-                    r.ChannelMode = (ChannelMode)msg.CommandData[1];
-                    List<byte> data = new List<byte>
+                    r = embeddedConfig.Registers.First(x => x.DebugChannel == requestMessage.ChannelId);
+                    ConfigChannelMessage responseMessage = new ConfigChannelMessage()
                     {
-                        (byte)r.ChannelMode
+                        ChannelId = requestMessage.ChannelId,
+                        Mode = r.ChannelMode,
+                        Offset = r.Offset,
+                        Control = MessageCodec.GetControlByte(embeddedConfig.ProtocolVersion, r.ReadWrite, r.Source, r.DerefDepth),
+                        Size = r.Size,
                     };
-                    returnMsg = new ProtocolMessage(msg.ControllerID, msg.MsgID, Command.ConfigChannel, data.ToArray());
+                    returnMsg = responseMessage.ToProtocolMessage(msg.ControllerID, msg.MsgID);
+                }
+                else if (msg.CommandData.Length == 2 && embeddedConfig.Registers.Any(x => x.DebugChannel == requestMessage.ChannelId))
+                {
+                    r = embeddedConfig.Registers.First(x => x.DebugChannel == requestMessage.ChannelId);
+                    r.ChannelMode = (ChannelMode)msg.CommandData[1];
+                    ConfigChannelMessage responseMessage = new ConfigChannelMessage()
+                    {
+                        ChannelId = requestMessage.ChannelId,
+                        Mode = r.ChannelMode,
+                    };
+                    returnMsg = responseMessage.ToProtocolMessage(msg.ControllerID, msg.MsgID);
                 }
                 else if (msg.CommandData.Length == 8)
                 {
-                    if (embeddedConfig.Registers.Any(x => x.DebugChannel == channelNumber))
+                    if (embeddedConfig.Registers.Any(x => x.DebugChannel == requestMessage.ChannelId))
                     {
-                        embeddedConfig.Registers.First(x => x.DebugChannel == channelNumber).DebugChannel = null;
+                        embeddedConfig.Registers.First(x => x.DebugChannel == requestMessage.ChannelId).DebugChannel = null;
                     }
-                    if (embeddedConfig.Registers.Any(
-                        x => x.Offset == BitConverter.ToUInt32(msg.CommandData, 2) &&
-                        MessageCodec.GetControlByte(embeddedConfig.ProtocolVersion, x.ReadWrite, x.Source, x.DerefDepth) == msg.CommandData[6] &&
-                        x.Size == msg.CommandData[7]))
+
+                    Register register = embeddedConfig.Registers.FirstOrDefault(
+                        x => x.Offset == requestMessage.Offset.Value &&
+                        MessageCodec.GetControlByte(embeddedConfig.ProtocolVersion, x.ReadWrite, x.Source, x.DerefDepth) == requestMessage.Control.Value &&
+                        x.Size == requestMessage.Size.Value);
+                    if (register != null)
                     {
-                        r = embeddedConfig.Registers.First(
-                            x => x.Offset == BitConverter.ToUInt32(msg.CommandData, 2) &&
-                            MessageCodec.GetControlByte(embeddedConfig.ProtocolVersion, x.ReadWrite, x.Source, x.DerefDepth) == msg.CommandData[6] &&
-                            x.Size == msg.CommandData[7]);
-                        r.DebugChannel = msg.CommandData[0];
-                        r.ChannelMode = (ChannelMode)msg.CommandData[1];
-                        returnMsg = msg;
+                        register.DebugChannel = requestMessage.ChannelId;
+                        register.ChannelMode = requestMessage.Mode.Value;
+                        ConfigChannelMessage responseMessage = new ConfigChannelMessage()
+                        {
+                            ChannelId = requestMessage.ChannelId,
+                            Mode = requestMessage.Mode,
+                            Offset = requestMessage.Offset,
+                            Control = requestMessage.Control,
+                            Size = requestMessage.Size,
+                        };
+                        returnMsg = responseMessage.ToProtocolMessage(msg.ControllerID, msg.MsgID);
                     }
                 }
             }
@@ -354,28 +360,26 @@ namespace EmbeddedEmulator.Model
 
         private void DispatchQueryRegisterMessage(ProtocolMessage msg)
         {
-            uint offset = BitConverter.ToUInt32(msg.CommandData, 0);
-            byte ctrl = msg.CommandData[4];
-            MessageCodec.GetControlByteValues(embeddedConfig.ProtocolVersion, ctrl, out ReadWrite readWrite, out Source source, out int derefDepth);
-            int size = msg.CommandData[5];
-            if (embeddedConfig.Registers.Any(x =>
-                 x.Offset == offset &&
+            QueryRegisterMessage request_message = new QueryRegisterMessage(msg);
+
+            MessageCodec.GetControlByteValues(embeddedConfig.ProtocolVersion, request_message.Control, out ReadWrite readWrite, out Source source, out int derefDepth);
+
+            Register register = embeddedConfig.Registers.FirstOrDefault(x =>
+                 x.Offset == request_message.Offset &&
                  x.DerefDepth == derefDepth &&
                  x.ReadWrite == readWrite &&
                  x.Source == source &&
-                 x.Size == size
-            ))
+                 x.Size == request_message.Size);
+            if (register != null)
             {
-                List<byte> data = new List<byte>();
-                data.AddRange(msg.CommandData);
-                data.AddRange(embeddedConfig.Registers.First(x =>
-                    x.Offset == offset &&
-                    x.DerefDepth == derefDepth &&
-                    x.ReadWrite == readWrite &&
-                    x.Source == source &&
-                    x.Size == size
-                    ).Value.ValueByteArray);
-                SendMessage(new ProtocolMessage(msg.ControllerID, msg.MsgID, msg.Command, data.ToArray()));
+                QueryRegisterMessage response_message = new QueryRegisterMessage()
+                {
+                    Offset = request_message.Offset,
+                    Control = request_message.Control,
+                    Value = register.Value.ValueByteArray,
+                };
+
+                SendMessage(response_message.ToProtocolMessage(msg.ControllerID, msg.MsgID));
             }
             else
             {

@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using EmbeddedDebugger.DebugProtocol.Enums;
+
 namespace EmbeddedDebugger.DebugProtocol.Messages
 {
-    public class VersionMessage
+    public class VersionMessage : ApplicationMessage
     {
         public Version ProtocolVersion { get; set; }
 
@@ -15,6 +17,8 @@ namespace EmbeddedDebugger.DebugProtocol.Messages
         public String Name { get; set; }
 
         public String SerialNumber { get; set; }
+
+        public override Command Command => Command.GetVersion;
 
         public VersionMessage()
         {
@@ -77,7 +81,7 @@ namespace EmbeddedDebugger.DebugProtocol.Messages
             return new Version(version_data[0], version_data[1], version_data[3] << 8 | version_data[2]);
         }
 
-        public byte[] ToBytes()
+        public override byte[] ToBytes()
         {
             List<byte> data = new List<byte>();
             data.AddRange(VersionToBytes(this.ProtocolVersion));
