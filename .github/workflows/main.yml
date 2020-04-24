@@ -1,4 +1,4 @@
-name: NET
+name: C# .NET
 
 on:
   push:
@@ -20,3 +20,15 @@ jobs:
         run: |
            cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\"
            .\MSBuild.exe $Env:GITHUB_WORKSPACE\csharp\EmbeddedDebugger.sln
+  test:
+    runs-on: windows-2019
+    steps:
+      - name: get trx2junit
+        run: |
+          dotnet tool install -g trx2junit
+          export PATH="$PATH:/root/.dotnet/tools"
+      - name: run unittest 
+        run: |
+          dir /s /b *.UnitTests.dll | findstr /r SLNProfiler.UnitTests\\*\\bin\\ > testcontainers.txt
+          for /f %%f in (testcontainers.txt) do vstest.console.exe "%%f" /logger:trx;LogFileName=testoutput.trx
+          trx2junit TestResults/testoutput.trx
