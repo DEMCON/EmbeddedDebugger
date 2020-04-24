@@ -1,6 +1,6 @@
 
 [![Build Status](https://travis-ci.org/DEMCON/EmbeddedDebugger.svg?branch=master)](https://travis-ci.org/DEMCON/EmbeddedDebugger)
-
+![NET](https://github.com/DEMCON/EmbeddedDebugger/workflows/NET/badge.svg)
 # Embedded debugger
 
 The Embedded Debugger is a tool which is used to debug embedded
