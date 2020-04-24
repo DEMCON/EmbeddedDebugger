@@ -33,8 +33,8 @@ namespace EmbeddedDebugger.View.UserControls
         private SystemViewModel systemViewModel;
 
         #region Properties
-        private List<IConnector> connectors;
-        public List<IConnector> Connectors
+        private List<Connector> connectors;
+        public List<Connector> Connectors
         {
             get => this.connectors;
             set
@@ -53,7 +53,7 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.ConnectorChooserComboBox.SelectedItem is IConnector connector)
+            if (this.ConnectorChooserComboBox.SelectedItem is Connector connector)
             {
                 this.systemViewModel.ConnectConnector(connector);
             }
@@ -61,7 +61,7 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.ConnectorChooserComboBox.SelectedItem is IConnector connector)
+            if (this.ConnectorChooserComboBox.SelectedItem is Connector connector)
             {
                 this.systemViewModel.ShowConnectorSettings(connector);
             }
@@ -69,7 +69,7 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.ConnectorChooserComboBox.SelectedItem is IConnector connector)
+            if (this.ConnectorChooserComboBox.SelectedItem is Connector connector)
             {
                 this.systemViewModel.DisconnectConnector(connector);
             }
@@ -110,7 +110,18 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void ConnectorChooserUserControl_OnLoaded(object sender, RoutedEventArgs e)
         {
-            this.Connectors = this.systemViewModel.GetConnectors();
+            List<Connector> conn = this.systemViewModel.GetConnectors();
+            if (this.systemViewModel.FindPreviousConnector() is Connector connector)
+            {
+                conn.Remove(conn.First(x => x.GetType() == connector.GetType()));
+                conn.Add(connector);
+                this.Connectors = conn;
+                this.ConnectorChooserComboBox.SelectedItem = connector;
+            }
+            else
+            {
+                this.Connectors = conn;
+            }
         }
     }
 }

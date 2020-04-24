@@ -59,7 +59,7 @@ namespace EmbeddedDebugger.View.Windows
                 SourceComboBox.SelectedItem = register.Source;
                 DerefDepthNumericUpDown.Value = register.DerefDepth;
                 ReadWriteComboBox.SelectedItem = register.ReadWrite;
-                ParentTextBlock.Text = register.Parent == null ? "None" : $"{register.Parent.ID}. {register.Parent.Name}";
+                ParentTextBlock.Text = register.Parent == null ? "None" : $"{register.Parent.Id}. {register.Parent.Name}";
             }
         }
         public IList<Register> Registers { get => registers; set => registers = value; }
@@ -139,7 +139,7 @@ namespace EmbeddedDebugger.View.Windows
             if (rcw.ShowDialog() == true)
             {
                 parentRegister = rcw.SelectedRegister;
-                ParentTextBlock.Text = parentRegister == null ? "None" : $"{parentRegister.ID}. {parentRegister.Name}";
+                ParentTextBlock.Text = parentRegister == null ? "None" : $"{parentRegister.Id}. {parentRegister.Name}";
             }
         }
 

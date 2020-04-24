@@ -38,7 +38,7 @@ namespace EmbeddedDebugger.Model
         private readonly List<CpuNode> nodes;
         public List<CpuNode> Nodes => nodes;
         // By making this a list of objects, the view never has to have the assembly information of the connectors
-        public List<IConnector> Connectors => dp.Connectors;
+        public List<Connector> Connectors => dp.Connectors;
         public bool IsConnected => dp.IsConnected;
         public object Connector => dp.Connector;
         public byte Decimation { get; set; }

@@ -110,10 +110,16 @@ namespace EmbeddedDebugger.View.UserControls
         {
             if (!this.Dispatcher.CheckAccess())
             {
-                this.Dispatcher.Invoke(this.Refresh);
-                return;
+                try
+                {
+                    this.Dispatcher.Invoke(this.Refresh);
+                }
+                catch (Exception e)
+                {
+
+                }
             }
-            if (this.nodes == null || !this.nodes.SequenceEqual(this.systemViewModel.GetCpuNodes()))
+            else if (this.nodes == null || !this.nodes.SequenceEqual(this.systemViewModel.GetCpuNodes()))
             {
                 int selectedIndex = this.CpuNodeComboBox.SelectedIndex;
                 this.CpuNodeComboBox.ItemsSource = null;

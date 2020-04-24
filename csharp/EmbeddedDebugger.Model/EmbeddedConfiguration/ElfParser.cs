@@ -153,7 +153,7 @@ namespace EmbeddedDebugger.Model.EmbeddedConfiguration
                     Source = Source.ElfParsed,
                     ReadWrite = ReadWrite.ReadWrite,
                     Show = false,
-                    ID = id++,
+                    Id = id++,
                 };
                 if (Enum.TryParse(type.ToString(), out VariableType varType))
                 {

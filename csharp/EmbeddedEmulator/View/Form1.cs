@@ -43,7 +43,7 @@ namespace EmbeddedEmulator.View
         private Stopwatch stopwatch;
         private DebugProtocolServer dp;
 
-        private IConnector connector;
+        private Connector connector;
         public bool Bool { get => (bool)embeddedConfig.WriteRegisters.First(x => x.Offset == 2).Value.Value; }
         public int Int { get => (int)embeddedConfig.WriteRegisters.First(x => x.Offset == 3).Value.Value; }
         public bool RequestSine { get => (bool)embeddedConfig.WriteRegisters.First(x => x.Offset == 4).Value.Value; }
@@ -194,12 +194,12 @@ namespace EmbeddedEmulator.View
 
         private void SettingsButton_Click(object sender, EventArgs e)
         {
-            ((IConnector)connectionChooserComboBox.SelectedItem).ShowDialog();
+            ((Connector)connectionChooserComboBox.SelectedItem).ShowDialog();
         }
 
         private void ConnectionChooserComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            connector = (IConnector)connectionChooserComboBox.SelectedItem;
+            connector = (Connector)connectionChooserComboBox.SelectedItem;
         }
 
         private void StopSendingButton_Click(object sender, EventArgs e)

@@ -21,6 +21,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
+using EmbeddedDebugger.Connectors.Serial;
 
 namespace EmbeddedDebugger.Connectors.Interfaces
 {
@@ -28,63 +30,66 @@ namespace EmbeddedDebugger.Connectors.Interfaces
     /// This interface is used to define how a connector should behave and how can be communicated with one
     /// It allows the rest of the software to talk to a microcontroller in a modular way
     /// </summary>
-    public interface IConnector
+    [XmlInclude(typeof(SerialConnector))]
+    [Serializable]
+    public abstract class Connector
     {
         /// <summary>
         /// The name of the connector
         /// </summary>
-        string Name { get; }
+        public abstract string Name { get; }
         /// <summary>
         /// Whether this connector is connected
         /// </summary>
-        bool IsConnected { get; }
+        public abstract bool IsConnected { get; }
         /// <summary>
         /// This eventhandler is called whenever a new message is received
         /// </summary>
-        event EventHandler<BytesReceivedEventArgs> MessageReceived;
+        public abstract event EventHandler<BytesReceivedEventArgs> MessageReceived;
         /// <summary>
         /// Sometimes a port is disconnected unexpectedly, this eventhandler can be used to perform the appropriate actions
         /// </summary>
-        event EventHandler UnexpectedDisconnect;
+        public abstract event EventHandler UnexpectedDisconnect;
         /// <summary>
         /// Some connectors work like servers, which do not connect, but have to be connected to, therefore an event is needed when it has connected
         /// </summary>
-        event EventHandler HasConnected;
+        public abstract event EventHandler HasConnected;
+
         /// <summary>
         /// The connector needs to be configured, choosing things like a port or hostname
         /// </summary>
         /// <param name="owner">The parent window, to center to</param>
         /// <returns>Whether or not the configuration is accepted</returns>
-        bool? ShowDialog();
+        public abstract bool? ShowDialog();
         /// <summary>
         /// Try to connect to the port
         /// </summary>
         /// <returns>Whether or not a connection has been established</returns>
-        bool Connect();
+        public abstract bool Connect();
         /// <summary>
         /// Disconnect from the connected port
         /// </summary>
-        void Disconnect();
+        public abstract void Disconnect();
         /// <summary>
         /// Send a message over the connection
         /// </summary>
         /// <param name="msg">The message to send</param>
-        void SendMessage(byte[] msg);
+        public abstract void SendMessage(byte[] msg);
         /// <summary>
         /// This should return the name of the connector, ensuring we can simply put them all in a list and have a nice name for it
         /// </summary>
         /// <returns>Should return Name</returns>
-        string ToString();
+        public abstract override string ToString();
         /// <summary>
         /// Some connectors can/should be used as server
         /// </summary>
-        bool AsServer { get; set; }
+        public abstract bool AsServer { get; set; }
         /// <summary>
         /// Used to raise the event, not usefull for a standard connector
         /// But when a standard connector is inherited, this method can be used to override whenever the project connector has an application protocol. 
         /// Therefore method should ALWAYS be virtual!
         /// </summary>
         /// <param name="inputMsg">The received byte array</param>
-        void ReceiveMessage(byte[] msg);
+        public abstract void ReceiveMessage(byte[] msg);
     }
 }

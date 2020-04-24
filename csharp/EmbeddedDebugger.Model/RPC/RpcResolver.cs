@@ -105,9 +105,9 @@ namespace EmbeddedDebugger.Model.RPC
             foreach (CpuNode node in mm.Nodes)
             {
                 if (node.ID != nodeID) continue;
-                if (node.Registers.Any(x => x.ID == registerID))
+                if (node.Registers.Any(x => x.Id == registerID))
                 {
-                    return node.Registers.First(x => x.ID == registerID).Value;
+                    return node.Registers.First(x => x.Id == registerID).Value;
                 }
             }
             return "No such value found";
@@ -119,9 +119,9 @@ namespace EmbeddedDebugger.Model.RPC
             foreach (CpuNode node in mm.Nodes)
             {
                 if (node.ID != nodeID) continue;
-                if (node.Registers.Any(x => x.ID == registerID))
+                if (node.Registers.Any(x => x.Id == registerID))
                 {
-                    node.Registers.First(x => x.ID == registerID).Value = value;
+                    node.Registers.First(x => x.Id == registerID).Value = value;
                     return true;
                 }
             }
@@ -133,8 +133,8 @@ namespace EmbeddedDebugger.Model.RPC
         {
             if (!mm.Nodes.Any(x => x.ID == nodeID)) return;
             CpuNode node = mm.Nodes.First(x => x.ID == nodeID);
-            if (!node.Registers.Any(x => x.ID == registerID)) return;
-            node.Registers.First(x => x.ID == registerID).ChannelMode = mode;
+            if (!node.Registers.Any(x => x.Id == registerID)) return;
+            node.Registers.First(x => x.Id == registerID).ChannelMode = mode;
         }
 
         [XmlRpcMethod("SetPlotting")]
@@ -142,7 +142,7 @@ namespace EmbeddedDebugger.Model.RPC
         {
             if (!mm.Nodes.Any(x => x.ID == nodeID)) return;
             CpuNode node = mm.Nodes.First(x => x.ID == nodeID);
-            if (!node.Registers.Any(x => x.ID == registerID)) return;
+            if (!node.Registers.Any(x => x.Id == registerID)) return;
             //node.Registers.First(x => x.ID == registerID).Plot = plotting;
         }
 
@@ -151,7 +151,7 @@ namespace EmbeddedDebugger.Model.RPC
         {
             if (!mm.Nodes.Any(x => x.ID == nodeID)) return;
             CpuNode node = mm.Nodes.First(x => x.ID == nodeID);
-            if (!node.Registers.Any(x => x.ID == registerID)) return;
+            if (!node.Registers.Any(x => x.Id == registerID)) return;
             //node.Registers.First(x => x.ID == registerID).Log = logging;
         }
 

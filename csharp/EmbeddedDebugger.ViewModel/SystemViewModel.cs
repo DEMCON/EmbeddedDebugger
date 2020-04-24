@@ -3,12 +3,20 @@ using EmbeddedDebugger.DebugProtocol.Enums;
 using EmbeddedDebugger.Model;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Xml.Serialization;
+using NLog;
 
 namespace EmbeddedDebugger.ViewModel
 {
     public class SystemViewModel
     {
+        /// <summary>
+        /// The logger for this class
+        /// </summary>
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
         private readonly ModelManager modelManager;
         private readonly Model.DebugProtocol debugProtocol;
 
@@ -31,23 +39,35 @@ namespace EmbeddedDebugger.ViewModel
         #endregion
 
         #region Connector
-        public List<IConnector> GetConnectors()
+        public List<Connector> GetConnectors()
         {
             return this.modelManager.Connectors;
         }
 
-        public void ConnectConnector(IConnector connector)
+        public void ConnectConnector(Connector connector)
         {
             this.debugProtocol.Connector = connector;
-            this.debugProtocol.Connect();
+            // If connect was successful, save this configuration to be opened on next launch
+            if (this.debugProtocol.Connect())
+            {
+                System.Xml.Serialization.XmlSerializer writer =
+                    new System.Xml.Serialization.XmlSerializer(typeof(Connector));
+
+                string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "EmbeddedDebugger", "Config", "connection.xml");
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                FileStream file = File.Create(path);
+
+                writer.Serialize(file, this.debugProtocol.Connector);
+                file.Close();
+            }
         }
 
-        public void DisconnectConnector(IConnector connector)
+        public void DisconnectConnector(Connector connector)
         {
             this.debugProtocol.Disconnect();
         }
 
-        public void ShowConnectorSettings(IConnector connector)
+        public void ShowConnectorSettings(Connector connector)
         {
             this.debugProtocol.ShowSettings(connector);
         }
@@ -105,6 +125,30 @@ namespace EmbeddedDebugger.ViewModel
                 if (channelMode == ChannelMode.Off) this.modelManager.DebugChannels.Remove((byte)channelId);
             }
             return result;
+        }
+
+        public Connector FindPreviousConnector()
+        {
+            Connector returnable = null;
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "EmbeddedDebugger", "Config", "connection.xml");
+            if (File.Exists(path))
+            {
+                try
+                {
+                    XmlSerializer serializer =
+                        new XmlSerializer(typeof(Connector));
+                    using (Stream reader = new FileStream(path, FileMode.Open))
+                    {
+                        // Call the Deserialize method to restore the object's state.
+                        returnable = (Connector)serializer.Deserialize(reader);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e);
+                }
+            }
+            return returnable;
         }
     }
 }

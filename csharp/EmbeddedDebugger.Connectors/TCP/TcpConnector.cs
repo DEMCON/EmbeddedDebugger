@@ -31,7 +31,7 @@ namespace EmbeddedDebugger.Connectors.TCP
     /// <summary>
     /// This class is an interface between a TCP connection with a microcontroller or embedded system and the core of the program
     /// </summary>
-    public class TcpConnector : IConnector, IDisposable
+    public class TcpConnector : Connector, IDisposable
     {
         // What we should name this connector
         private const string myName = "TCP";
@@ -51,15 +51,15 @@ namespace EmbeddedDebugger.Connectors.TCP
         public TcpConnector() { }
 
         #region IConnector Members
-        public virtual string Name { get { return myName; } }
-        public bool IsConnected { get { return isConnected; } }
-        public event EventHandler HasConnected = delegate { };
-        public event EventHandler<BytesReceivedEventArgs> MessageReceived = delegate { };
-        public event EventHandler UnexpectedDisconnect = delegate { };
+        public override string Name => myName;
+        public override bool IsConnected => isConnected;
+        public override event EventHandler HasConnected = delegate { };
+        public override event EventHandler<BytesReceivedEventArgs> MessageReceived = delegate { };
+        public override event EventHandler UnexpectedDisconnect = delegate { };
         private bool asServer;
-        public bool AsServer { get => asServer; set => asServer = value; }
+        public override bool AsServer { get => asServer; set => asServer = value; }
 
-        public virtual bool Connect()
+        public override bool Connect()
         {
             // If the hostname is not set, show the settings form
             if (hostName == null && ShowDialog() == false)
@@ -115,7 +115,7 @@ namespace EmbeddedDebugger.Connectors.TCP
             return true;
         }
 
-        public void Disconnect()
+        public override void Disconnect()
         {
             try
             {
@@ -164,7 +164,7 @@ namespace EmbeddedDebugger.Connectors.TCP
             isConnected = false;
         }
 
-        public virtual void SendMessage(byte[] msg)
+        public override void SendMessage(byte[] msg)
         {
             if (!isConnected || stream == null) return;
             try
@@ -184,7 +184,7 @@ namespace EmbeddedDebugger.Connectors.TCP
             }
         }
 
-        public bool? ShowDialog()
+        public override bool? ShowDialog()
         {
             // Set the current settings to the settings form
             TcpConnectorSettingsWindow tcpcs = new TcpConnectorSettingsWindow
@@ -210,7 +210,7 @@ namespace EmbeddedDebugger.Connectors.TCP
             return myName;
         }
 
-        public virtual void ReceiveMessage(byte[] msg)
+        public override void ReceiveMessage(byte[] msg)
         {
             MessageReceived(this, new BytesReceivedEventArgs(msg));
         }

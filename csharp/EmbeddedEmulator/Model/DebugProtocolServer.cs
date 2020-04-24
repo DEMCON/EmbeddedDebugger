@@ -41,16 +41,16 @@ namespace EmbeddedEmulator.Model
         private EmbeddedConfig embeddedConfig;
         private byte[] remainder;
         private bool autoRespond;
-        private IConnector connector;
+        private Connector connector;
         private Stopwatch stopwatch;
-        private List<IConnector> connectors;
+        private List<Connector> connectors;
         private System.Timers.Timer timer;
         private int timerCounter;
         private bool multipleNodes;
         private int numberOfNodesToSimulate;
 
         public bool AutoRespond { get => autoRespond; set => autoRespond = value; }
-        public IConnector Connector
+        public Connector Connector
         {
             get => connector;
             set
@@ -66,7 +66,7 @@ namespace EmbeddedEmulator.Model
                 }
             }
         }
-        public List<IConnector> Connectors { get => connectors; }
+        public List<Connector> Connectors { get => connectors; }
         public bool SimulateMultipleNodes { get => multipleNodes; set => multipleNodes = value; }
         public int NumberOfNodesToSimulate { get => numberOfNodesToSimulate; set => numberOfNodesToSimulate = value; }
 
@@ -76,7 +76,7 @@ namespace EmbeddedEmulator.Model
         public DebugProtocolServer(EmbeddedConfig embeddedConfig)
         {
             connectors = GetConnectorTypes().ToList();
-            foreach(IConnector ic in connectors)
+            foreach(Connector ic in connectors)
             {
                 ic.AsServer = true;
             }
@@ -181,13 +181,13 @@ namespace EmbeddedEmulator.Model
         /// This method gathers all classes extending either the IConnector or the IProjectConnector.
         /// </summary>
         /// <returns>The list of all connectors</returns>
-        private IEnumerable<IConnector> GetConnectorTypes()
+        private IEnumerable<Connector> GetConnectorTypes()
         {
             foreach (Type typeString in AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
-                .Where(p => typeof(IConnector).IsAssignableFrom(p) && !p.IsInterface).ToList())
+                .Where(p => typeof(Connector).IsAssignableFrom(p) && !p.IsInterface).ToList())
             {
-                yield return (IConnector)Activator.CreateInstance(typeString);
+                yield return (Connector)Activator.CreateInstance(typeString);
             }
         }
 

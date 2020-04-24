@@ -52,14 +52,14 @@ namespace EmbeddedDebugger.Model
         private readonly ValueLogger logger;
 
         #region Properties
-        private IConnector connector;
-        public IConnector Connector { get => connector; set => connector = value; }
+        private Connector connector;
+        public Connector Connector { get => connector; set => connector = value; }
 
-        public object NewConnector { get => connector; set => connector = value as IConnector; }
+        public object NewConnector { get => connector; set => connector = value as Connector; }
 
         // This list could be dynamic, but since the assembly will never(!) change during runtime it is useless to reassemble this list
-        private readonly List<IConnector> connectors;
-        public List<IConnector> Connectors { get => connectors; }
+        private readonly List<Connector> connectors;
+        public List<Connector> Connectors { get => connectors; }
 
         private bool isConnected;
         public bool IsConnected { get => isConnected; }
@@ -160,7 +160,7 @@ namespace EmbeddedDebugger.Model
         /// <summary>
         /// Show a form with the settings of the connector
         /// </summary>
-        public void ShowSettings(IConnector connector)
+        public void ShowSettings(Connector connector)
         {
             connector.ShowDialog();
         }
@@ -200,19 +200,19 @@ namespace EmbeddedDebugger.Model
         /// This method gathers all classes extending either the IConnector or the IProjectConnector.
         /// </summary>
         /// <returns>The list of all connectors</returns>
-        private IEnumerable<IConnector> GetConnectorTypes()
+        private IEnumerable<Connector> GetConnectorTypes()
         {
             foreach (Type typeString in AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
                 .Where(p => typeof(IProjectConnector).IsAssignableFrom(p) && !p.IsInterface).ToList())
             {
-                yield return (IConnector)Activator.CreateInstance(typeString);
+                yield return (Connector)Activator.CreateInstance(typeString);
             }
             foreach (Type typeString in AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
-                .Where(p => typeof(IConnector).IsAssignableFrom(p) && !p.IsInterface).ToList())
+                .Where(p => typeof(Connector).IsAssignableFrom(p) && !p.IsInterface && !p.IsAbstract).ToList())
             {
-                yield return (IConnector)Activator.CreateInstance(typeString);
+                yield return (Connector)Activator.CreateInstance(typeString);
             }
         }
 

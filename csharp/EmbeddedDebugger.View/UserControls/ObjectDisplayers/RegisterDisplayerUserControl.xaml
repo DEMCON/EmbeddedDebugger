@@ -70,7 +70,7 @@
 
             <Button Name="CollapseButton" Background="Transparent" BorderThickness="0" Content="{Binding ElementName=rduc, Path=Collapsed, Converter={StaticResource booleanToCollapsedConverter}}" Visibility="{Binding ElementName=rduc, Path=Register.HasChildren, Converter={StaticResource booleanToVisibilityConverter}}"  Click="CollapseButton_OnClick "/>
             <TextBlock Grid.Column="1" Margin="3" Text="{Binding ElementName=rduc, Path=Register.CpuID}" VerticalAlignment="Center" TextAlignment="Left"/>
-            <TextBlock Grid.Column="2" Margin="3" Text="{Binding ElementName=rduc, Path=Register.ID}" VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="2" Margin="3" Text="{Binding ElementName=rduc, Path=Register.Id}" VerticalAlignment="Center"/>
             <TextBlock Grid.Column="3" Margin="3" Text="{Binding ElementName=rduc, Path=Register.Name}" VerticalAlignment="Center"/>
             <TextBlock Grid.Column="4" Margin="3" Text="{Binding ElementName=rduc, Path=Register.VariableTypeString}" VerticalAlignment="Center"/>
             <ComboBox Grid.Column="5" Margin="3" Name="ValueDisplayFormatComboBox"  SelectedItem="{Binding ElementName=rduc, Path=Register.ValueDisplayFormat}" ItemsSource="{Binding Source={StaticResource ValueDisplayFormatEnumData}}" Padding="3,0" VerticalContentAlignment="Center" SelectionChanged="ValueDisplayFormatComboBox_OnSelectionChanged ">

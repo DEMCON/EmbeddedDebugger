@@ -24,7 +24,7 @@ using System.Threading.Tasks;
 
 namespace EmbeddedDebugger.Connectors.ProjectConnectors.Interfaces
 {
-    public interface IProjectConnector : IConnector
+    public interface IProjectConnector
     {
         /// <summary>
         /// The overriden method from the normal connector, allowing for a project specific piece of magic to be applied

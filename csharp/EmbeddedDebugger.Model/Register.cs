@@ -70,32 +70,15 @@ namespace EmbeddedDebugger.Model
         public bool HasChildren => this.ChildRegisters != null && this.ChildRegisters.Count > 0;
         public Register Parent { get; set; }
         [DisplayName("ID")]
-        public uint ID { get; set; }
+        public uint Id { get; set; }
         [DisplayName("Name")]
         public string Name { get => this.name ?? this.fullName; set => this.name = value; }
         public string FullName { get => this.fullName ?? this.name; set => this.fullName = value; }
         public ReadWrite ReadWrite { get; set; }
         public bool EnableValueUpdates { get; set; } = true;
         public VariableType VariableType { get; set; }
-        public string VariableTypeString
-        {
-            get
-            {
-                if (VariableType == VariableType.Unknown)
-                {
-                    return $"\"{variableTypeName}\"";
-                }
-                //if (Settings.Default.CPPVariableTypes)
-                //{
-                //   return GetCPPVariableTypes(variableType);
-                //}
-                else
-                {
-                    return VariableType.ToString().ToLower();
-                }
+        public string VariableTypeString => this.VariableType == VariableType.Unknown ? $"\"{this.variableTypeName}\"" : this.VariableType.ToString().ToLower();
 
-            }
-        }
         public string VariableTypeName
         {
             get => this.VariableType == VariableType.Unknown ? this.variableTypeName : this.VariableType.ToString().ToLower();
@@ -103,40 +86,7 @@ namespace EmbeddedDebugger.Model
         }
 
         public bool Plot { get; set; }
-        /*
-        public KnownColor LineKnownColor
-        {
-            get
-            {
-                return LineColor.ToKnownColor();
-            }
-            set
-            {
-                LineColor = Color.FromKnownColor(value);
-                PropertyChanged(this, new PropertyChangedEventArgs("LineColor"));
-                PropertyChanged(this, new PropertyChangedEventArgs("LineKnownColor"));
-            }
-        }
 
-        public Color LineColor
-        {
-            get => lineColor.IsEmpty ? Color.Red : lineColor;
-            set
-            {
-                lineColor = value;
-                if (myLine == null)
-                {
-                    return;
-                }
-                myLine.Color = OxyColor.FromArgb(value.A, value.R, value.G, value.B);
-                PropertyChanged(this, new PropertyChangedEventArgs("LineColor"));
-                PropertyChanged(this, new PropertyChangedEventArgs("LineKnownColor"));
-            }
-        }
-        public LineSeries Line { get => myLine; }
-        private object plotModelLock = new object();
-        public PlotModel PlotModel { get => plotModel; set { lock (plotModelLock) { plotModel = value; } } }
-        */
         public int MaxNumberOfValues { get; set; }
         public double NumberOfSeconds { get; set; }
         public int Size { get; set; }
@@ -210,47 +160,16 @@ namespace EmbeddedDebugger.Model
         /// <param name="regValue">The value which is to be added to the Register</param>
         public void AddValue(RegisterValue regValue)
         {
-            if (regValue.GetType() == typeof(RegisterValue))
+            if (regValue != null)
             {
+                Console.WriteLine($"Register {this.name} got value {regValue.Value}");
                 regValue = RegisterValue.GetRegisterValueByVariableType(this.VariableType, regValue.ValueByteArray, regValue.TimeStamp);
                 this.RegisterValue = regValue;
-                this.MyValues.Add(regValue);
+                if (this.Plot && regValue.TimeStamp != null)
+                {
+                    this.MyValues.Add(regValue);
+                }
             }
-            /*
-            if (plot && plotModel != null && regValue.TimeStamp.HasValue)
-            {
-                double time = (double)regValue.TimeStamp / (uint)timeStampUnits;
-                double theValue;
-                try
-                {
-                    theValue = Convert.ToDouble(regValue.Value);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    Plot = false;
-                    return;
-                }
-                lock (plotModel.SyncRoot)
-                {
-                    myLine.Points.Add(new DataPoint(time, theValue));
-                    if (EnablePlotUpdate)
-                    {
-                        if (myLine.Points.Last().X < myLine.Points[0].X)
-                        {
-                            myLine.Points.RemoveRange(0, myLine.Points.Count - 2);
-                        }
-                        if (myLine.Points[0].X < myLine.Points.Last().X - numberOfSeconds)
-                        {
-                            DataPoint dp = myLine.Points.First(x => x.X >= myLine.Points.Last().X - numberOfSeconds);
-                            myLine.Points.RemoveRange(0, myLine.Points.IndexOf(dp));
-                        }
-                    }
-                }
-                UpdatePlot();
-
-            }
-            */
         }
 
 
@@ -291,7 +210,7 @@ namespace EmbeddedDebugger.Model
             {
                 ChildRegisters = old.ChildRegisters.ToList(),
                 Parent = old.Parent == null ? null : GetCopy(old.Parent),
-                ID = Convert.ToUInt32(old.ID),
+                Id = Convert.ToUInt32(old.Id),
                 Name = old.Name.ToString(),
                 FullName = old.FullName.ToString(),
                 ReadWrite = (ReadWrite)Enum.Parse(typeof(ReadWrite), old.ReadWrite.ToString()),
@@ -315,7 +234,7 @@ namespace EmbeddedDebugger.Model
             if (!(obj is Register)) return false;
             Register reg = (Register)obj;
             return
-                reg.ID == this.ID &&
+                reg.Id == this.Id &&
                 reg.FullName == this.FullName &&
                 reg.ReadWrite == this.ReadWrite &&
                 reg.VariableType == this.VariableType &&
@@ -331,7 +250,7 @@ namespace EmbeddedDebugger.Model
             int hashCode = 1671609247;
             hashCode = hashCode * -1521134295 + EqualityComparer<List<Register>>.Default.GetHashCode(ChildRegisters);
             hashCode = hashCode * -1521134295 + EqualityComparer<Register>.Default.GetHashCode(Parent);
-            hashCode = hashCode * -1521134295 + ID.GetHashCode();
+            hashCode = hashCode * -1521134295 + this.Id.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(name);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(fullName);
             hashCode = hashCode * -1521134295 + this.ReadWrite.GetHashCode();

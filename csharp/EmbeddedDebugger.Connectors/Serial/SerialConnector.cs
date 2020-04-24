@@ -30,7 +30,7 @@ namespace EmbeddedDebugger.Connectors.Serial
     /// <summary>
     /// This class is an interface between a serial connection with a microcontroller and the core of the program
     /// </summary>
-    public class SerialConnector : IConnector
+    public class SerialConnector : Connector
     {
         // What we should name this connector
         private const string myName = "Serial";
@@ -61,14 +61,14 @@ namespace EmbeddedDebugger.Connectors.Serial
         public SerialConnector() { }
 
         #region IConnector Members
-        public string Name { get { return myName; } }
-        public bool AsServer { get => false; set => myName.ToString(); }
-        public bool IsConnected { get { return isConnected; } }
-        public event EventHandler HasConnected = delegate { };
-        public event EventHandler<BytesReceivedEventArgs> MessageReceived = delegate { };
-        public event EventHandler UnexpectedDisconnect = delegate { };
+        public override string Name => myName;
+        public override bool AsServer { get => false; set => myName.ToString(); }
+        public override bool IsConnected => isConnected;
+        public override event EventHandler HasConnected = delegate { };
+        public override event EventHandler<BytesReceivedEventArgs> MessageReceived = delegate { };
+        public override event EventHandler UnexpectedDisconnect = delegate { };
 
-        public bool Connect()
+        public override bool Connect()
         {
             // If no portname has been defined, show the settings dialog
             if (string.IsNullOrEmpty(portName) && ShowDialog() == false)
@@ -99,7 +99,7 @@ namespace EmbeddedDebugger.Connectors.Serial
                 return false;
             }
             isConnected = true;
-            HasConnected(this, new EventArgs());
+            this.HasConnected(this, new EventArgs());
             // Define an action which takes care of reading new data from the serialport
             // This uses the underlying basestream of the comport, since the original com port is not robust enough
             byte[] buffer = new byte[blockLimit];
@@ -145,12 +145,12 @@ namespace EmbeddedDebugger.Connectors.Serial
             return true;
         }
 
-        public void Disconnect()
+        public override void Disconnect()
         {
             port.Close();
         }
 
-        public void SendMessage(byte[] msg)
+        public override void SendMessage(byte[] msg)
         {
             try
             {
@@ -167,7 +167,7 @@ namespace EmbeddedDebugger.Connectors.Serial
             }
         }
 
-        public bool? ShowDialog()
+        public override bool? ShowDialog()
         {
             // Write the current settings to the form
             SerialConnectorSettingsWindow scs = new SerialConnectorSettingsWindow
@@ -198,7 +198,7 @@ namespace EmbeddedDebugger.Connectors.Serial
             return dr;
         }
 
-        public void ReceiveMessage(byte[] msg)
+        public override void ReceiveMessage(byte[] msg)
         {
             MessageReceived(this, new BytesReceivedEventArgs(msg));
         }

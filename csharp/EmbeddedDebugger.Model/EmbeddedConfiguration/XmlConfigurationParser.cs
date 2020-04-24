@@ -59,7 +59,7 @@ namespace EmbeddedDebugger.Model.EmbeddedConfiguration
         public void ToFile(string filePath, EmbeddedConfig config)
         {
             // Set the basic parts for the percentage
-            totalNumOfNodes = 10 + config.Registers.Count != 0 ? config.Registers.Last().ID : (uint)(config.Registers.Count);
+            totalNumOfNodes = 10 + config.Registers.Count != 0 ? config.Registers.Last().Id : (uint)(config.Registers.Count);
             currentNodeNumber = 0;
 
             XmlDocument doc = new XmlDocument();
@@ -167,12 +167,12 @@ namespace EmbeddedDebugger.Model.EmbeddedConfiguration
         /// <returns>The generated XML element</returns>
         private XmlElement GetXMLFromRegister(Register reg, XmlDocument doc, uint id)
         {
-            currentNodeNumber = reg.ID;
+            currentNodeNumber = reg.Id;
             PercentageChanged(this, new EventArgs());
 
             // Create the XML node and add all information
             XmlElement register = doc.CreateElement("Register");
-            register.SetAttribute("id", (reg.ID == 0 ? id : reg.ID).ToString());
+            register.SetAttribute("id", (reg.Id == 0 ? id : reg.Id).ToString());
             register.SetAttribute("name", reg.Name);
             register.SetAttribute("fullName", reg.FullName);
             register.SetAttribute("type", reg.VariableType.ToString().ToLower());
@@ -298,7 +298,7 @@ namespace EmbeddedDebugger.Model.EmbeddedConfiguration
                 {
                     r = new Register()
                     {
-                        ID = counter++,
+                        Id = counter++,
                         FullName = singleReadNode.Attributes["fullName"].Value,
                         Name = singleReadNode.Attributes["fullName"].Value.Substring(singleReadNode.Attributes["fullName"].Value.IndexOf(':') + 1).Trim(),
                         VariableType = (VariableType)Enum.Parse(typeof(VariableType), singleReadNode.Attributes["type"].Value.First().ToString().ToUpper() + singleReadNode.Attributes["type"].Value.Substring(1)),
@@ -328,7 +328,7 @@ namespace EmbeddedDebugger.Model.EmbeddedConfiguration
                 {
                     r = new Register()
                     {
-                        ID = counter++,
+                        Id = counter++,
                         FullName = singleWriteNode.Attributes["fullName"].Value,
                         Name = singleWriteNode.Attributes["fullName"].Value.Substring(singleWriteNode.Attributes["fullName"].Value.IndexOf(':') + 1).Trim(),
                         VariableType = (VariableType)Enum.Parse(typeof(VariableType), singleWriteNode.Attributes["type"].Value.First().ToString().ToUpper() + singleWriteNode.Attributes["type"].Value.Substring(1)),
@@ -427,7 +427,7 @@ namespace EmbeddedDebugger.Model.EmbeddedConfiguration
         {
             Register r = new Register()
             {
-                ID = Convert.ToUInt32(element.Attributes["id"].Value),
+                Id = Convert.ToUInt32(element.Attributes["id"].Value),
                 FullName = element.Attributes["fullName"].Value,
                 Name = element.Attributes["name"] != null ? element.Attributes["name"].Value : element.Attributes["fullName"].Value.Substring(element.Attributes["fullName"].Value.LastIndexOf('.') + 1).Trim(),
                 VariableType = (VariableType)Enum.Parse(typeof(VariableType), element.Attributes["type"].Value.First().ToString().ToUpper() + element.Attributes["type"].Value.Substring(1), true),
@@ -440,7 +440,7 @@ namespace EmbeddedDebugger.Model.EmbeddedConfiguration
                 Parent = parent,
                 CpuNode = node,
             };
-            currentNodeNumber = r.ID;
+            currentNodeNumber = r.Id;
             PercentageChanged(this, new EventArgs());
             if (r.VariableType == VariableType.Unknown)
             {
@@ -529,7 +529,7 @@ namespace EmbeddedDebugger.Model.EmbeddedConfiguration
         {
             Register r = new Register()
             {
-                ID = Convert.ToUInt32(element.Attributes["id"].Value),
+                Id = Convert.ToUInt32(element.Attributes["id"].Value),
                 FullName = element.Attributes["fullName"].Value,
                 Name = element.Attributes["name"] != null ? element.Attributes["name"].Value : element.Attributes["fullName"].Value.Substring(element.Attributes["fullName"].Value.LastIndexOf('.') + 1).Trim(),
                 VariableType = (VariableType)Enum.Parse(typeof(VariableType), element.Attributes["type"].Value.First().ToString().ToUpper() + element.Attributes["type"].Value.Substring(1), true),
@@ -542,7 +542,7 @@ namespace EmbeddedDebugger.Model.EmbeddedConfiguration
                 Parent = parent,
                 CpuNode = node,
             };
-            currentNodeNumber = r.ID;
+            currentNodeNumber = r.Id;
             PercentageChanged(this, new EventArgs());
             if (r.VariableType == VariableType.Unknown)
             {
