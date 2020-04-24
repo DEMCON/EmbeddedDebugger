@@ -185,7 +185,7 @@ namespace EmbeddedEmulator.Model
         {
             foreach (Type typeString in AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
-                .Where(p => typeof(Connector).IsAssignableFrom(p) && !p.IsInterface).ToList())
+                .Where(p => typeof(Connector).IsAssignableFrom(p) && !p.IsInterface && !p.IsAbstract).ToList())
             {
                 yield return (Connector)Activator.CreateInstance(typeString);
             }

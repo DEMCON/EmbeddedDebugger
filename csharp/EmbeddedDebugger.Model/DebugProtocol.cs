@@ -677,9 +677,7 @@ namespace EmbeddedDebugger.Model
                     "Configurations",
                     this.connector.ToString(),
                     node.Name.Trim(),
-                    $"cpu{id:D2}",
-                    node.Name.Trim(),
-                    $"/cpu{id:D2}-V{node.ApplicationVersion.Major:D2}_{node.ApplicationVersion.Minor:D2}_{node.ApplicationVersion.Build:D4}.xml")))
+                    $"cpu{id:D2}-V{node.ApplicationVersion.Major:D2}_{node.ApplicationVersion.Minor:D2}_{node.ApplicationVersion.Build:D4}.xml")))
             {
                 ConfigLoaded(this, new EventArgs());
             }
