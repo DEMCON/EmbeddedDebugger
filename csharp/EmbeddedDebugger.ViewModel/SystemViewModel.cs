@@ -1,12 +1,12 @@
 ﻿using EmbeddedDebugger.Connectors.Interfaces;
 using EmbeddedDebugger.DebugProtocol.Enums;
 using EmbeddedDebugger.Model;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using NLog;
 
 namespace EmbeddedDebugger.ViewModel
 {
@@ -50,8 +50,7 @@ namespace EmbeddedDebugger.ViewModel
             // If connect was successful, save this configuration to be opened on next launch
             if (this.debugProtocol.Connect())
             {
-                System.Xml.Serialization.XmlSerializer writer =
-                    new System.Xml.Serialization.XmlSerializer(typeof(Connector));
+                XmlSerializer writer = new XmlSerializer(typeof(Connector));
 
                 string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "EmbeddedDebugger", "Config", "connection.xml");
                 Directory.CreateDirectory(Path.GetDirectoryName(path));

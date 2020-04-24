@@ -320,7 +320,24 @@ namespace EmbeddedEmulator.View
 
         private void SaveConfigFileButton_Click(object sender, EventArgs e)
         {
-            new XmlConfigurationParser().ToFile(Path.Combine( @"C:\Configurations\","TCP",this.embeddedConfig.CpuName, "cpu01-V00_00_0001.xml"), this.embeddedConfig);
+            new XmlConfigurationParser().ToFile(
+                Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                    "EmbeddedDebugger",
+                    "Configurations",
+                    "TCP",
+                    this.embeddedConfig.CpuName,
+                    "cpu01-V00_00_0001.xml"),
+                 this.embeddedConfig);
+            new XmlConfigurationParser().ToFile(
+                Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                    "EmbeddedDebugger",
+                    "Configurations",
+                    "Serial",
+                    this.embeddedConfig.CpuName,
+                    "cpu01-V00_00_0001.xml"),
+                this.embeddedConfig);
         }
     }
 }

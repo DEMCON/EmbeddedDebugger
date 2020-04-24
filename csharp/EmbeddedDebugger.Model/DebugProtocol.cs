@@ -26,8 +26,8 @@ using EmbeddedDebugger.Model.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Timers;
 
@@ -667,20 +667,23 @@ namespace EmbeddedDebugger.Model
             node.RegisterLoggingChanged += logger.RegisterLoggingChanged;
             // TODO: Add loading of config again
             // Try to load the configuration from .xml file/
-            
+
             if (
-                
+
             node.TryToLoadConfiguration(
-                $"C:/Configurations/" +
-                $"{connector.ToString()}" +
-                $"/{node.Name.Trim()}" +
-                $"/cpu{id.ToString("D2")}" +
-                $"-V{node.ApplicationVersion.Major.ToString("D2")}" +
-                $"_{node.ApplicationVersion.Minor.ToString("D2")}" +
-                $"_{node.ApplicationVersion.Build.ToString("D4")}.xml"))
+                Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                    "EmbeddedDebugger",
+                    "Configurations",
+                    this.connector.ToString(),
+                    node.Name.Trim(),
+                    $"cpu{id:D2}",
+                    node.Name.Trim(),
+                    $"/cpu{id:D2}-V{node.ApplicationVersion.Major:D2}_{node.ApplicationVersion.Minor:D2}_{node.ApplicationVersion.Build:D4}.xml")))
             {
                 ConfigLoaded(this, new EventArgs());
-            } else
+            }
+            else
             {
                 // TODO: Implement something to let the user know that no config file was found
             }
