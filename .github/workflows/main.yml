@@ -22,4 +22,4 @@ jobs:
            .\MSBuild.exe $Env:GITHUB_WORKSPACE\csharp\EmbeddedDebugger.sln
       - name: run unittest 
         run: |
-          Get-ChildItem -Filter *.UnitTests.dll -r | % { vstest.console.exe "$_" /logger:trx;LogFileName=testoutput.trx }
+          Get-ChildItem -Path "$Env:GITHUB_WORKSPACE\csharp" -Filter *.UnitTests.dll -r | % { vstest.console.exe "$_" /logger:trx;LogFileName=testoutput.trx }
