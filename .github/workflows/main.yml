@@ -22,5 +22,4 @@ jobs:
            .\MSBuild.exe $Env:GITHUB_WORKSPACE\csharp\EmbeddedDebugger.sln
       - name: run unittest 
         run: |
-          dir /s /b *.UnitTests.dll | findstr /r SLNProfiler.UnitTests\\*\\bin\\ > testcontainers.txt
-          for /f %%f in (testcontainers.txt) do vstest.console.exe "%%f" /logger:trx;LogFileName=testoutput.trx
+          Get-ChildItem -Filter *.UnitTests.dll -r | % { vstest.console.exe "$_" /logger:trx;LogFileName=testoutput.trx }
