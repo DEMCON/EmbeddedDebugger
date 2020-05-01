@@ -1,0 +1,20 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "STM32F4 discovery demo",
+            "cwd": "${workspaceRoot}",
+            "executable": "Examples/stm32discovery/build/demo",
+            "request": "launch",
+            "type": "cortex-debug",
+            "device": "STM32F407VGT",
+            "configFiles": [
+                "board/stm32f4discovery.cfg"
+            ],
+            "servertype": "openocd"
+        }
+    ]
+}
