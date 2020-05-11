@@ -26,6 +26,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
              xmlns:customcontrols="clr-namespace:EmbeddedDebugger.View.CustomControls"
              xmlns:converter="clr-namespace:EmbeddedDebugger.View.Converters"
              xmlns:model1="clr-namespace:EmbeddedDebugger.Model;assembly=EmbeddedDebugger.Model"
+             xmlns:objectdisplayers="clr-namespace:EmbeddedDebugger.View.UserControls.ObjectDisplayers"
+             xmlns:dataContext="clr-namespace:EmbeddedDebugger.View.DataContext"
+             x:Name="rwruc"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="952"
              DataContextChanged="ReadWriteRegistersUserControl_OnDataContextChanged ">
@@ -60,7 +63,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <Label x:Name="ClearFilter" Content="❌" Grid.Column="1" Margin="0,6,3.6,7.2" VerticalAlignment="Center" HorizontalAlignment="Right" Width="17" VerticalContentAlignment="Center" Padding="0,0,3,0" HorizontalContentAlignment="Center" Foreground="DarkRed" FontWeight="Bold" MouseDown="ClearFilter_MouseDown" FontSize="10"/>
         </Grid>
         <!-- Datagrid -->
-        <Grid Margin="5,0,0,0" Height="30" Width="950" HorizontalAlignment="Left" Grid.Row="1">
+        <Grid Margin="2,0,0,0" Height="30" Width="950" HorizontalAlignment="Left" Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="25"/>
                 <ColumnDefinition Width="30"/>
@@ -99,10 +102,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <Label Grid.Column="9" Content="Plot color" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray"/>
             <Label Grid.Column="10" Content="Log" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray"/>
             <Label Grid.Column="11" Content="Refresh value" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray"/>
-            
+
         </Grid>
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+        <ListView Grid.Row="2" Name="RegistersStackPanel">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Margin" Value="0"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="dataContext:RegisterDataContext">
+                    <objectdisplayers:RegisterDisplayerUserControl Register="{Binding Register}"/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ListView>
+        <!--<ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
             <StackPanel Background="White" Margin="5,0" Name="RegistersStackPanel" />
-        </ScrollViewer>
+        </ScrollViewer>-->
     </Grid>
 </UserControl>

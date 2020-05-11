@@ -66,12 +66,12 @@ namespace EmbeddedDebugger.View.UserControls
         {
             if (e.OldValue is ViewModelManager vmmOld)
             {
-                vmmOld.RefreshLow -= this.Update;
+                vmmOld.RefreshViewModel.RefreshLow -= this.Update;
             }
             if (e.NewValue is ViewModelManager vmm)
             {
                 this.systemViewModel = vmm.SystemViewModel;
-                vmm.RefreshLow += this.Update;
+                vmm.RefreshViewModel.RefreshLow += this.Update;
                 this.NodesDataGrid.ItemsSource = this.systemViewModel.GetCpuNodes();
             }
         }

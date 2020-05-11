@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="PlottingViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RefreshViewModel.cs" />
     <Compile Include="SystemViewModel.cs" />
     <Compile Include="ViewModelManager.cs" />
   </ItemGroup>

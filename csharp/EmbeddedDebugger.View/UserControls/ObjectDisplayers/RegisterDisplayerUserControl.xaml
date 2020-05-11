@@ -53,6 +53,7 @@
                 <ColumnDefinition Width="30"/>
                 <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
+            
             <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
             <Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
             <Border Grid.Column="2" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
@@ -73,6 +74,7 @@
             <TextBlock Grid.Column="2" Margin="3" Text="{Binding ElementName=rduc, Path=Register.Id}" VerticalAlignment="Center"/>
             <TextBlock Grid.Column="3" Margin="3" Text="{Binding ElementName=rduc, Path=Register.Name}" VerticalAlignment="Center"/>
             <TextBlock Grid.Column="4" Margin="3" Text="{Binding ElementName=rduc, Path=Register.VariableTypeString}" VerticalAlignment="Center"/>
+
             <ComboBox Grid.Column="5" Margin="3" Name="ValueDisplayFormatComboBox"  SelectedItem="{Binding ElementName=rduc, Path=Register.ValueDisplayFormat}" ItemsSource="{Binding Source={StaticResource ValueDisplayFormatEnumData}}" Padding="3,0" VerticalContentAlignment="Center" SelectionChanged="ValueDisplayFormatComboBox_OnSelectionChanged ">
                 <ComboBox.IsEnabled>
                     <MultiBinding Converter="{StaticResource BooleanAndConverter}">
@@ -102,6 +104,7 @@
                 </CheckBox.IsEnabled>
             </CheckBox>
             <!--SelectedItem="{Binding LineKnownColor, UpdateSourceTrigger=PropertyChanged}"-->
+            
             <ComboBox Grid.Column="9" Margin="3"
               ItemsSource="{Binding ElementName=rduc, Path=LineColors, Mode=OneWay}" VerticalContentAlignment="Center" Padding="3,0">
                 <ComboBox.IsEnabled>

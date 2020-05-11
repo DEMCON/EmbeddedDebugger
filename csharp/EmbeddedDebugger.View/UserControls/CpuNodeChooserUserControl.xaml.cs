@@ -98,12 +98,12 @@ namespace EmbeddedDebugger.View.UserControls
         {
             if (e.OldValue is ViewModelManager oldVmm)
             {
-                oldVmm.RefreshLow -= this.Vmm_RefreshLow;
+                oldVmm.RefreshViewModel.RefreshLow -= this.Vmm_RefreshLow;
             }
             if (e.NewValue is ViewModelManager vmm)
             {
                 this.systemViewModel = vmm.SystemViewModel;
-                vmm.RefreshLow += this.Vmm_RefreshLow;
+                vmm.RefreshViewModel.RefreshLow += this.Vmm_RefreshLow;
             }
         }
         public void Refresh()

@@ -196,13 +196,13 @@ namespace EmbeddedDebugger.View.UserControls
         {
             if (e.OldValue is ViewModelManager vmmOld)
             {
-                vmmOld.RefreshLow -= this.Refresh;
+                vmmOld.RefreshViewModel.RefreshLow -= this.Refresh;
             }
             if (e.NewValue is ViewModelManager vmm)
             {
                 this.systemViewModel = vmm.SystemViewModel;
                 this.plottingViewModel = vmm.PlottingViewModel;
-                vmm.RefreshLow += this.Refresh;
+                vmm.RefreshViewModel.RefreshLow += this.Refresh;
             }
         }
 

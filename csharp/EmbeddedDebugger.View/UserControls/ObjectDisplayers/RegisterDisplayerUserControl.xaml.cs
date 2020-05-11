@@ -5,15 +5,17 @@ using EmbeddedDebugger.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using EmbeddedDebugger.View.DataContext;
 
 namespace EmbeddedDebugger.View.UserControls.ObjectDisplayers
 {
     /// <summary>
     /// Interaction logic for RegisterDisplayerUserControl.xaml
     /// </summary>
-    public partial class RegisterDisplayerUserControl : UserControl
+    public partial class RegisterDisplayerUserControl
     {
         private SystemViewModel systemViewModel;
         private RegisterValue currentValue;
@@ -90,50 +92,48 @@ namespace EmbeddedDebugger.View.UserControls.ObjectDisplayers
 
         public void Update(object o, EventArgs e)
         {
-            this.Refresh();
+            new Task(() => this.Refresh()).Start();
         }
 
         private void RegisterDisplayerUserControl_OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (e.OldValue is ViewModelManager vmmOld)
+            if (e.OldValue is RegisterDataContext rdcOld)
             {
-                vmmOld.RefreshMedium -= this.Update;
+                rdcOld.RefreshViewModel.RefreshMedium -= this.Update;
             }
-            if (e.NewValue is ViewModelManager vmm)
+            if (e.NewValue is RegisterDataContext rdc)
             {
-                this.systemViewModel = vmm.SystemViewModel;
-                this.plottingViewModel = vmm.PlottingViewModel;
-                vmm.RefreshMedium += this.Update;
+                this.systemViewModel = rdc.SystemViewModel;
+                this.plottingViewModel = rdc.PlottingViewModel;
+                rdc.RefreshViewModel.RefreshMedium += this.Update;
             }
         }
 
-        public static IEnumerable<KnownColor> LineColors
-        {
-            get => new List<KnownColor>()
-                {
-                    KnownColor.Black,
-                    KnownColor.Blue,
-                    KnownColor.BlueViolet,
-                    KnownColor.Brown,
-                    KnownColor.CadetBlue,
-                    KnownColor.Chartreuse,
-                    KnownColor.Chocolate,
-                    KnownColor.CornflowerBlue,
-                    KnownColor.Crimson,
-                    KnownColor.DarkBlue,
-                    KnownColor.DarkGreen,
-                    KnownColor.DarkMagenta,
-                    KnownColor.DarkRed,
-                    KnownColor.DarkViolet,
-                    KnownColor.ForestGreen,
-                    KnownColor.Green,
-                    KnownColor.Indigo,
-                    KnownColor.MediumBlue,
-                    KnownColor.Navy,
-                    KnownColor.Purple,
-                    KnownColor.Red,
-                };
-        }
+        public static IEnumerable<KnownColor> LineColors =>
+            new List<KnownColor>()
+            {
+                KnownColor.Black,
+                KnownColor.Blue,
+                KnownColor.BlueViolet,
+                KnownColor.Brown,
+                KnownColor.CadetBlue,
+                KnownColor.Chartreuse,
+                KnownColor.Chocolate,
+                KnownColor.CornflowerBlue,
+                KnownColor.Crimson,
+                KnownColor.DarkBlue,
+                KnownColor.DarkGreen,
+                KnownColor.DarkMagenta,
+                KnownColor.DarkRed,
+                KnownColor.DarkViolet,
+                KnownColor.ForestGreen,
+                KnownColor.Green,
+                KnownColor.Indigo,
+                KnownColor.MediumBlue,
+                KnownColor.Navy,
+                KnownColor.Purple,
+                KnownColor.Red,
+            };
 
         private void ValueDisplayFormatComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {

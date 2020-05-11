@@ -116,6 +116,7 @@
     <Compile Include="CustomControls\NumericUpDown.cs" />
     <Compile Include="CustomControls\TraceTerminal.cs" />
     <Compile Include="CustomControls\TreeDataGrid.cs" />
+    <Compile Include="DataContext\RegisterDataContext.cs" />
     <Compile Include="DataProviders\AboutAssemblyDataProvider.cs" />
     <Compile Include="DataProviders\IAboutDataProvider.cs" />
     <Compile Include="UserControls\ConnectUserControl.xaml.cs">

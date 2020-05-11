@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using EmbeddedDebugger.Model;
+using EmbeddedDebugger.View.DataContext;
 using EmbeddedDebugger.View.UserControls.ObjectDisplayers;
 using EmbeddedDebugger.ViewModel;
 using System;
@@ -34,8 +35,20 @@ namespace EmbeddedDebugger.View.UserControls
     public partial class ReadWriteRegistersUserControl : UserControl
     {
         private SystemViewModel systemViewModel;
+        private RefreshViewModel refreshViewModel;
+        private PlottingViewModel plottingViewModel;
 
-        private IList<Register> registers;
+        public static readonly DependencyProperty RegistersProperty = DependencyProperty.Register(
+            "Registers",
+            typeof(IList<Register>),
+            typeof(RegisterDisplayerUserControl),
+            new FrameworkPropertyMetadata(null)
+        );
+        public IList<Register> Registers
+        {
+            get => (IList<Register>)this.GetValue(RegistersProperty);
+            set => this.SetValue(RegistersProperty, value);
+        }
 
         public ReadWriteRegistersUserControl()
         {
@@ -45,8 +58,8 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void RefreshAllButton_Click(object sender, RoutedEventArgs e)
         {
-            if (registers == null) return;
-            foreach (Register register in registers)
+            if (this.Registers == null) return;
+            foreach (Register register in Registers)
             {
                 this.systemViewModel.RequestNewValue(register);
                 //register.RequestNewValue();
@@ -65,18 +78,17 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void ResetTimeButton_Click(object sender, RoutedEventArgs e)
         {
-            int decimation_ms = 10;
-            if (!int.TryParse(Decimation.Text, out decimation_ms))
-                decimation_ms = 10;
+            if (!int.TryParse(this.Decimation.Text, out int decimationMs))
+                decimationMs = 10;
 
-            Decimation.Text = decimation_ms.ToString();
+            this.Decimation.Text = decimationMs.ToString();
 
         }
 
 
         private void RemoveAllChannels_Click(object sender, RoutedEventArgs e)
         {
-            foreach (Register r in registers.First().CpuNode.DebugChannelRegisters)
+            foreach (Register r in Registers.First().CpuNode.DebugChannelRegisters)
             {
                 r.ChannelMode = DebugProtocol.Enums.ChannelMode.Off;
             }
@@ -92,52 +104,29 @@ namespace EmbeddedDebugger.View.UserControls
             //    RegisterDataGrid.CollapseAll();
         }
 
-        private void RegisterDataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
-        {
-            foreach (DataGridCellInfo di in e.RemovedCells)
-            {
-                if (!(di.Item is Register))
-                    continue;
-
-                Register r = (Register)di.Item;
-                if (r != null && r.IsWritable)
-                    r.EnableValueUpdates = true;
-            }
-
-            foreach (DataGridCellInfo di in e.AddedCells)
-            {
-                if (!(di.Item is Register))
-                    continue;
-
-                Register r = (Register)di.Item;
-                // if (r != null && r.IsWritable &&
-                //         RegisterDataGrid.CurrentColumn != null &&
-                //          RegisterDataGrid.CurrentColumn.Header != null && RegisterDataGrid.CurrentColumn.Header.Equals("Value"))
-                {
-                    r.EnableValueUpdates = false;
-                }
-            }
-        }
-
         private void ClearFilter_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            SearchTextBox.Clear();
+            this.SearchTextBox.Clear();
         }
 
         public void Refresh()
         {
-            if (this.registers == null || !this.registers.SequenceEqual(this.systemViewModel.GetRegisters()))
+            this.Dispatcher.Invoke(() =>
             {
-                this.registers = this.systemViewModel.GetRegisters();
-                if (this.registers != null)
+                if (this.Registers == null || !this.Registers.SequenceEqual(this.systemViewModel.GetRegisters()))
                 {
-                    this.Dispatcher.Invoke(() => { this.RegistersStackPanel.Children.Clear(); });
-                    foreach (Register r in this.registers)
-                    {
-                        this.Dispatcher.Invoke(() => { this.RegistersStackPanel.Children.Add(new RegisterDisplayerUserControl() { Register = r }); });
-                    }
+                    this.Registers = this.systemViewModel.GetRegisters();
+                    if (this.Registers == null) return;
+                    this.RegistersStackPanel.ItemsSource = this.systemViewModel.GetRegisters().
+                        Select(x => new RegisterDataContext()
+                        {
+                            Register = x,
+                            RefreshViewModel = this.refreshViewModel,
+                            SystemViewModel = this.systemViewModel,
+                            PlottingViewModel = this.plottingViewModel
+                        });
                 }
-            }
+            });
         }
 
         public void Update(object o, EventArgs e)
@@ -149,12 +138,14 @@ namespace EmbeddedDebugger.View.UserControls
         {
             if (e.OldValue is ViewModelManager vmmOld)
             {
-                vmmOld.RefreshLow -= this.Update;
+                vmmOld.RefreshViewModel.RefreshLow -= this.Update;
             }
             if (e.NewValue is ViewModelManager vmm)
             {
                 this.systemViewModel = vmm.SystemViewModel;
-                vmm.RefreshLow += this.Update;
+                this.refreshViewModel = vmm.RefreshViewModel;
+                this.plottingViewModel = vmm.PlottingViewModel;
+                vmm.RefreshViewModel.RefreshLow += this.Update;
             }
         }
 

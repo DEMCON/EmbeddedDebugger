@@ -16,26 +16,18 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using EmbeddedDebugger.Model;
+using EmbeddedDebugger.ViewModel;
 
-namespace EmbeddedDebugger.ViewModel
+namespace EmbeddedDebugger.View.DataContext
 {
-    public class ViewModelManager
+    public class RegisterDataContext
     {
-        //TODO: Remove public access
-        public ModelManager ModelManager { get; }
+        public Register Register { get; set; }
 
-        public SystemViewModel SystemViewModel { get; }
+        public RefreshViewModel RefreshViewModel { get; set; }
 
-        public PlottingViewModel PlottingViewModel { get; }
+        public SystemViewModel SystemViewModel { get; set; }
 
-        public RefreshViewModel RefreshViewModel { get; }
-
-        public ViewModelManager()
-        {
-            this.ModelManager = new ModelManager();
-            this.SystemViewModel = new SystemViewModel(this.ModelManager);
-            this.PlottingViewModel = new PlottingViewModel(this.ModelManager);
-            this.RefreshViewModel = new RefreshViewModel();
-        }
+        public PlottingViewModel PlottingViewModel { get; set; }
     }
 }
