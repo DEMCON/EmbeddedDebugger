@@ -57,6 +57,10 @@
     <Compile Include="ViewModelManager.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\EmbeddedDebugger.Connectors.ProjectConnectors\EmbeddedDebugger.Connectors.ProjectConnectors.csproj">
+      <Project>{5EB967A9-CDB4-4AD6-B9E3-443855906A49}</Project>
+      <Name>EmbeddedDebugger.Connectors.ProjectConnectors</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EmbeddedDebugger.Connectors\EmbeddedDebugger.Connectors.csproj">
       <Project>{b54188ca-c1cb-4c64-aa44-774e0e579669}</Project>
       <Name>EmbeddedDebugger.Connectors</Name>

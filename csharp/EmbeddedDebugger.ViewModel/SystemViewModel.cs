@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using EmbeddedDebugger.Connectors.Interfaces;
+using EmbeddedDebugger.Connectors.ProjectConnectors.Connectors;
 using EmbeddedDebugger.DebugProtocol.Enums;
 using EmbeddedDebugger.Model;
 using NLog;
@@ -67,7 +68,7 @@ namespace EmbeddedDebugger.ViewModel
             // If connect was successful, save this configuration to be opened on next launch
             if (this.debugProtocol.Connect())
             {
-                XmlSerializer writer = new XmlSerializer(typeof(Connector));
+                XmlSerializer writer = new XmlSerializer(typeof(Connector), new[] { typeof(ExampleProjectConnector) });
 
                 string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "EmbeddedDebugger", "Config", "connection.xml");
                 Directory.CreateDirectory(Path.GetDirectoryName(path));

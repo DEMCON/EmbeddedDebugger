@@ -23,6 +23,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using EmbeddedDebugger.Connectors.Serial;
+using EmbeddedDebugger.Connectors.TCP;
 
 namespace EmbeddedDebugger.Connectors.Interfaces
 {
@@ -31,6 +32,7 @@ namespace EmbeddedDebugger.Connectors.Interfaces
     /// It allows the rest of the software to talk to a microcontroller in a modular way
     /// </summary>
     [XmlInclude(typeof(SerialConnector))]
+    [XmlInclude(typeof(TcpConnector))]
     [Serializable]
     public abstract class Connector
     {
