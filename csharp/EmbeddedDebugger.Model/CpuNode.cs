@@ -286,10 +286,10 @@ namespace EmbeddedDebugger.Model
         /// </summary>
         public void SetupChannels()
         {
-            foreach (Register r in embeddedConfig.Registers.Where(x => x.Show == true && x.IsReadable && !x.IsVariableSize))
-            {
-                SetRegisterAsDebugChannel(r);
-            }
+            //foreach (Register r in embeddedConfig.Registers.Where(x => x.Show == true && x.IsReadable && !x.IsVariableSize))
+            //{
+            //    SetRegisterAsDebugChannel(r);
+            //}
         }
 
         /// <summary>

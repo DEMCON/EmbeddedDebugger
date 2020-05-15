@@ -654,10 +654,10 @@ namespace EmbeddedDebugger.Model
             // Ask the node to send over its information
             GetNodeInfo(node.ID);
             // Turn off all channels
-            for (int i = 0; i < node.MaxNumberOfDebugChannels; i++)
-            {
-                ConfigChannel(node.ID, (byte)i, ChannelMode.Off);
-            }
+            //for (int i = 0; i < node.MaxNumberOfDebugChannels; i++)
+            //{
+            //    ConfigChannel(node.ID, (byte)i, ChannelMode.Off);
+            //}
             // Add the event handlers of the node
             node.RegisterQueriesValue += Node_RegisterQueriesValue;
             node.NewDebugChannel += AddNewDebugChannel;

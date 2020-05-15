@@ -18,15 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using EmbeddedDebugger.Model;
 using EmbeddedDebugger.ViewModel;
 using OxyPlot;
+using OxyPlot.Series;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using OxyPlot.Series;
 
 namespace EmbeddedDebugger.View.UserControls
 {
@@ -41,6 +39,8 @@ namespace EmbeddedDebugger.View.UserControls
         private SystemViewModel systemViewModel;
         private PlottingViewModel plottingViewModel;
 
+        private Dictionary<Register, LineSeries> plotSeries;
+
         private List<Register> plotRegisters;
         public List<Register> PlotRegisters { get => this.plottingViewModel.RegistersToPlot; }
         public PlotUserControl()
@@ -50,6 +50,7 @@ namespace EmbeddedDebugger.View.UserControls
             plotModel = new PlotModel { Title = "" };
             Plot.Model = plotModel;
             AutoScaleCheckBox.IsChecked = true;
+            this.plotSeries = new Dictionary<Register, LineSeries>();
         }
 
         //TODO Readd logging
@@ -202,7 +203,7 @@ namespace EmbeddedDebugger.View.UserControls
             {
                 this.systemViewModel = vmm.SystemViewModel;
                 this.plottingViewModel = vmm.PlottingViewModel;
-                vmm.RefreshViewModel.RefreshLow += this.Refresh;
+                vmm.RefreshViewModel.RefreshHigh += this.Refresh;
             }
         }
 
@@ -212,10 +213,20 @@ namespace EmbeddedDebugger.View.UserControls
             {
                 foreach (Register r in this.plottingViewModel.RegistersToPlot)
                 {
-                    LineSeries ls = new LineSeries();
-                    r.MyValues.ToList().ForEach(x=> ls.Points.Add(new DataPoint((uint)x.TimeStamp, Convert.ToDouble(x.Value))));
+                    LineSeries ls;
+                    if (this.plotSeries.ContainsKey(r))
+                    {
+                        ls = this.plotSeries[r];
+                    }
+                    else
+                    {
+                        ls = new LineSeries();
+                        this.plotSeries.Add(r, ls);
+                        this.plotModel.Series.Add(ls);
+                    }
+                    r.MyValues.ToList().ForEach(x => ls.Points.Add(new DataPoint((uint)x.TimeStamp, Convert.ToDouble(x.Value))));
+                    r.MyValues.Clear();
                     ls.Color = OxyColors.Blue;
-                    this.plotModel.Series.Add(ls);
                     this.plotModel.InvalidatePlot(true);
                 }
 

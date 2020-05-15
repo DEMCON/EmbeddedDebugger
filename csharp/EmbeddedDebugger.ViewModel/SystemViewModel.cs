@@ -122,7 +122,7 @@ namespace EmbeddedDebugger.ViewModel
         public bool UpdateChannelMode(Register register, ChannelMode channelMode)
         {
             bool result = false;
-            if (!register.CpuNode.DebugChannels.ContainsValue(register))
+            if (!register.CpuNode.DebugChannels.ContainsValue(register) && channelMode != ChannelMode.Off)
             {
                 for (byte i = 0; i < register.CpuNode.MaxNumberOfDebugChannels; i++)
                 {
@@ -135,7 +135,7 @@ namespace EmbeddedDebugger.ViewModel
                     }
                 }
             }
-            else
+            else if (register.CpuNode.DebugChannels.ContainsValue(register))
             {
                 int channelId = register.CpuNode.DebugChannels.FirstOrDefault(x => x.Value == register).Key;
                 this.modelManager.DebugProtocol.ConfigChannel(register.CpuID, (byte)channelId, channelMode, register);
