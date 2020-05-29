@@ -20,8 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace EmbeddedDebugger.Model.EmbeddedConfiguration
@@ -510,10 +508,37 @@ namespace EmbeddedDebugger.Model.EmbeddedConfiguration
 #endif
                     throw;
                 }
-                returnable.Registers.Add(r);
+
+                // Try to add the register as a child
+                if (r.Name.Contains(".") && AddToChildRegister(returnable.Registers, r, r.FullName))
+                { }
+                else
+                {
+                    // Other wise, just add it to the list
+                    returnable.Registers.Add(r);
+                }
             }
             currentNodeNumber = 0;
             PercentageChanged(this, new EventArgs());
+            return returnable;
+        }
+
+        private bool AddToChildRegister(IEnumerable<Register> registers, Register r, string name)
+        {
+            bool returnable = false;
+            if (name.Contains(".") && registers != null)
+            {
+                if (registers.Any(x => x.Name == name.Substring(0, name.IndexOf("."))))
+                {
+                    Register parent = registers.First(x => x.Name == name.Substring(0, name.IndexOf(".")));
+                    if (!AddToChildRegister(parent.ChildRegisters, r, name.Substring(name.IndexOf(".") + 1)))
+                    {
+                        parent.ChildRegisters.Add(r);
+                    }
+                    returnable = true;
+                }
+
+            }
             return returnable;
         }
 

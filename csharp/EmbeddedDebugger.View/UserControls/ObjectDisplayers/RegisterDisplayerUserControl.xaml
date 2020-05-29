@@ -11,7 +11,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="30" d:DesignWidth="950" Background="White"
              x:Name="rduc"
-             HorizontalAlignment="Left"
+             HorizontalAlignment="Stretch"
              DataContextChanged="RegisterDisplayerUserControl_OnDataContextChanged">
     <UserControl.Resources>
         <ObjectDataProvider x:Key="ChannelModeEnumData"
@@ -38,15 +38,15 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <!--<Border BorderThickness="1" BorderBrush="Black" Height="30" Width="950" HorizontalAlignment="Left">-->
-        <Grid Height="30" Width="950" HorizontalAlignment="Left">
+        <Grid Height="30">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="25"/>
+                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="30"/>
                 <ColumnDefinition Width="43"/>
-                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="40"/>
                 <ColumnDefinition Width="70"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="200"/>
                 <ColumnDefinition Width="87"/>
                 <ColumnDefinition Width="30"/>
                 <ColumnDefinition Width="100"/>
@@ -70,9 +70,9 @@
             <Border Grid.Column="0" Grid.ColumnSpan="12" BorderBrush="Gray" BorderThickness="0,0,0,1" Background="{x:Null}" />
 
             <Button Name="CollapseButton" Background="Transparent" BorderThickness="0" Content="{Binding ElementName=rduc, Path=Collapsed, Converter={StaticResource booleanToCollapsedConverter}}" Visibility="{Binding ElementName=rduc, Path=Register.HasChildren, Converter={StaticResource booleanToVisibilityConverter}}"  Click="CollapseButton_OnClick "/>
-            <TextBlock Grid.Column="1" Margin="3" Text="{Binding ElementName=rduc, Path=Register.CpuID}" VerticalAlignment="Center" TextAlignment="Left"/>
-            <TextBlock Grid.Column="2" Margin="3" Text="{Binding ElementName=rduc, Path=Register.Id}" VerticalAlignment="Center"/>
-            <TextBlock Grid.Column="3" Margin="3" Text="{Binding ElementName=rduc, Path=Register.Name}" VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="1" Margin="3" Text="{Binding ElementName=rduc, Path=Register.Name}" VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="2" Margin="3" Text="{Binding ElementName=rduc, Path=Register.CpuID}" VerticalAlignment="Center" TextAlignment="Left"/>
+            <TextBlock Grid.Column="3" Margin="3" Text="{Binding ElementName=rduc, Path=Register.Id}" VerticalAlignment="Center"/>
             <TextBlock Grid.Column="4" Margin="3" Text="{Binding ElementName=rduc, Path=Register.VariableTypeString}" VerticalAlignment="Center"/>
 
             <ComboBox Grid.Column="5" Margin="3" Name="ValueDisplayFormatComboBox"  SelectedItem="{Binding ElementName=rduc, Path=Register.ValueDisplayFormat}" ItemsSource="{Binding Source={StaticResource ValueDisplayFormatEnumData}}" Padding="3,0" VerticalContentAlignment="Center" SelectionChanged="ValueDisplayFormatComboBox_OnSelectionChanged ">
