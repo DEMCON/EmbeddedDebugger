@@ -85,9 +85,9 @@ namespace EmbeddedDebugger.Model
             }
         }
 
-        public void RequestOnce(object sender, int e)
+        public void RequestOnce(byte nodeId)
         {
-            dp.ReadChannelData((byte)e, 0x02);
+            dp.ReadChannelData(nodeId, 0x02);
         }
 
         private void Dp_RegisterQueried(object sender, Register reg)

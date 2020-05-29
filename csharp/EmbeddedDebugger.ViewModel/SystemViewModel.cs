@@ -167,5 +167,10 @@ namespace EmbeddedDebugger.ViewModel
             }
             return returnable;
         }
+
+        public void ReadOnceOfChannels()
+        {
+            this.modelManager.RequestOnce(SelectedCpuNode.ID);
+        }
     }
 }

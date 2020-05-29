@@ -17,11 +17,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using EmbeddedDebugger.Model;
 using EmbeddedDebugger.View.DataContext;
-using EmbeddedDebugger.View.UserControls.ObjectDisplayers;
 using EmbeddedDebugger.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -38,17 +38,8 @@ namespace EmbeddedDebugger.View.UserControls
         private RefreshViewModel refreshViewModel;
         private PlottingViewModel plottingViewModel;
 
-        public static readonly DependencyProperty RegistersProperty = DependencyProperty.Register(
-            "Registers",
-            typeof(IList<Register>),
-            typeof(RegisterDisplayerUserControl),
-            new FrameworkPropertyMetadata(null)
-        );
-        public IList<Register> Registers
-        {
-            get => (IList<Register>)this.GetValue(RegistersProperty);
-            set => this.SetValue(RegistersProperty, value);
-        }
+        public IList<Register> Registers { get; set; }
+
 
         public ReadWriteRegistersUserControl()
         {
@@ -72,8 +63,20 @@ namespace EmbeddedDebugger.View.UserControls
             int startLength = tb.Text.Length;
 
             await Task.Delay(300);
-            //if (startLength == tb.Text.Length)
-            //RegisterDataGrid.SearchValue = SearchTextBox.Text;
+            // Check if the user stopped typing 
+            if (startLength == tb.Text.Length)
+            {
+                string searchText = this.SearchTextBox.Text;
+                this.RegistersStackPanel.ItemsSource = this.Registers
+                    .Where(x => Regex.IsMatch(x.Name, searchText))
+                    .Select(x => new RegisterDataContext()
+                    {
+                        Register = x,
+                        RefreshViewModel = this.refreshViewModel,
+                        SystemViewModel = this.systemViewModel,
+                        PlottingViewModel = this.plottingViewModel
+                    });
+            }
         }
 
         private void ResetTimeButton_Click(object sender, RoutedEventArgs e)
@@ -117,7 +120,7 @@ namespace EmbeddedDebugger.View.UserControls
                 {
                     this.Registers = this.systemViewModel.GetRegisters();
                     if (this.Registers == null) return;
-                    this.RegistersStackPanel.ItemsSource = this.systemViewModel.GetRegisters().
+                    this.RegistersStackPanel.ItemsSource = this.Registers.
                         Select(x => new RegisterDataContext()
                         {
                             Register = x,
@@ -151,7 +154,7 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void ReadOnceChannels_OnClick(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            this.systemViewModel.ReadOnceOfChannels();
         }
     }
 }
