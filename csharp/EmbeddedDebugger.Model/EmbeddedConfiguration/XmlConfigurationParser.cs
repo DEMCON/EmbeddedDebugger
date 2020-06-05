@@ -528,10 +528,9 @@ namespace EmbeddedDebugger.Model.EmbeddedConfiguration
             bool returnable = false;
             if (name.Contains(".") && registers != null)
             {
-                if (registers.Any(x => x.Name == name.Substring(0, name.IndexOf("."))))
+                if (registers.FirstOrDefault(x => x.Name.EndsWith(name.Substring(0, name.IndexOf(".", StringComparison.Ordinal)))) is Register parent)
                 {
-                    Register parent = registers.First(x => x.Name == name.Substring(0, name.IndexOf(".")));
-                    if (!AddToChildRegister(parent.ChildRegisters, r, name.Substring(name.IndexOf(".") + 1)))
+                    if (!this.AddToChildRegister(parent.ChildRegisters, r, name.Substring(name.IndexOf(".", StringComparison.Ordinal) + 1)))
                     {
                         parent.ChildRegisters.Add(r);
                     }

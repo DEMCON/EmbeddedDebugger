@@ -55,7 +55,7 @@
             </Grid.ColumnDefinitions>
             
             <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
-            <Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
+            <!--<Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />-->
             <Border Grid.Column="2" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
             <Border Grid.Column="3" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
             <Border Grid.Column="4" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
@@ -67,7 +67,8 @@
             <Border Grid.Column="10" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
             <Border Grid.Column="11" BorderBrush="Gray" BorderThickness="1,0,0,0" Height="30" Background="{x:Null}" />
             <Border Grid.Column="12" BorderBrush="Gray" BorderThickness="1,0,1,0" Height="30" Background="{x:Null}" />
-            <Border Grid.Column="0" Grid.ColumnSpan="12" BorderBrush="Gray" BorderThickness="0,0,0,1" Background="{x:Null}" />
+            <Border Grid.Column="0" Grid.ColumnSpan="12" BorderBrush="Gray" BorderThickness="0,0,0,0" Background="{x:Null}" />
+            <Border Grid.Column="0" Grid.ColumnSpan="12" BorderBrush="Gray" BorderThickness="0,1,0,0" Background="{x:Null}" />
 
             <Button Name="CollapseButton" Background="Transparent" BorderThickness="0" Content="{Binding ElementName=rduc, Path=Collapsed, Converter={StaticResource booleanToCollapsedConverter}}" Visibility="{Binding ElementName=rduc, Path=Register.HasChildren, Converter={StaticResource booleanToVisibilityConverter}}"  Click="CollapseButton_OnClick "/>
             <TextBlock Grid.Column="1" Margin="3" Text="{Binding ElementName=rduc, Path=Register.Name}" VerticalAlignment="Center"/>
@@ -126,6 +127,9 @@
             </Button>
         </Grid>
         <!--</Border>-->
-        <StackPanel Grid.Row="1" Margin="30,0,0,0" Name="ChildrenStackPanel" Visibility="{Binding ElementName=rduc, Path=Collapsed, Converter={StaticResource booleanToVisibilityConverter}, ConverterParameter=Visibility.Collapsed}"/>
+        <Grid Grid.Row="1" Visibility="{Binding ElementName=rduc, Path=Collapsed, Converter={StaticResource booleanToVisibilityConverter}, ConverterParameter=Visibility.Collapsed}">
+            <Border BorderBrush="Gray" BorderThickness="0,1,0,0"  />
+            <StackPanel Margin="30,0,0,0" Name="ChildrenStackPanel"/>
+        </Grid>
     </Grid>
 </UserControl>
