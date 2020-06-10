@@ -164,7 +164,7 @@ namespace EmbeddedDebugger.ViewModel
 
         public void ReadOnceOfChannels()
         {
-            this.modelManager.RequestOnce(SelectedCpuNode.ID);
+            this.modelManager.RequestOnce(SelectedCpuNode.Id);
         }
     }
 }

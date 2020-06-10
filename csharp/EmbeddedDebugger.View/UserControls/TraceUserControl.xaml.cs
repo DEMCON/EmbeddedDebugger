@@ -41,8 +41,7 @@ namespace EmbeddedDebugger.View.UserControls
     public partial class TraceUserControl : UserControl
     {
         private List<CpuNode> registeredNodes;
-        #region Properties
-        #endregion
+
         public TraceUserControl()
         {
             InitializeComponent();
@@ -56,15 +55,6 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void CpuNodeChooser_SelectedCPUChanged(object sender, EventArgs e)
         {
-            foreach (CpuNode node in registeredNodes)
-            {
-                node.NewTraceMessageAdded -= Node_NewTraceMessageAdded;
-            }
-            foreach (CpuNode node in registeredNodes)
-            {
-                node.NewTraceMessageAdded += Node_NewTraceMessageAdded; ;
-            }
-            TraceTerminal.SetMessages(registeredNodes.SelectMany(x => x.TraceMessages).OrderBy(x => x.DateTime).ToList());
         }
 
         private void Node_NewTraceMessageAdded(object sender, TraceMessage e)

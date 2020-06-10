@@ -99,7 +99,7 @@ namespace EmbeddedDebugger.Model.Logging
                     SetNewFileName();
                     fileName = fileName.Replace("{CPU}", node.Name);
                     fileName = fileName.Replace("{Serial}", node.SerialNumber);
-                    fileName = fileName.Replace("{CPUID}", node.ID.ToString());
+                    fileName = fileName.Replace("{CPUID}", node.Id.ToString());
                     try
                     {
                         writer = new StreamWriter($"{directory}\\{fileName}", true);
@@ -111,7 +111,7 @@ namespace EmbeddedDebugger.Model.Logging
 #endif
                         throw;
                     }
-                    fileWriters.Add(node.ID, writer);
+                    fileWriters.Add(node.Id, writer);
                     writer.Write(GetHeader(node));
                 }
             }

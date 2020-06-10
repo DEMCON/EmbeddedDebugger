@@ -44,30 +44,30 @@ namespace EmbeddedEmulator.View
         private DebugProtocolServer dp;
 
         private Connector connector;
-        public bool Bool { get => (bool)embeddedConfig.WriteRegisters.First(x => x.Offset == 2).Value.Value; }
-        public int Int { get => (int)embeddedConfig.WriteRegisters.First(x => x.Offset == 3).Value.Value; }
-        public bool RequestSine { get => (bool)embeddedConfig.WriteRegisters.First(x => x.Offset == 4).Value.Value; }
-        public string String { get => (string)embeddedConfig.ReadRegisters.First(x => x.Offset == 0).Value.Value; }
+        public bool Bool => (bool) this.embeddedConfig.WriteRegisters.First(x => x.Offset == 2).Value.Value;
+        public int Int => (int) this.embeddedConfig.WriteRegisters.First(x => x.Offset == 3).Value.Value;
+        public bool RequestSine => (bool) this.embeddedConfig.WriteRegisters.First(x => x.Offset == 4).Value.Value;
+        public string String => (string) this.embeddedConfig.ReadRegisters.First(x => x.Offset == 0).Value.Value;
 
         public Form1()
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
-            embeddedConfig = new EmbeddedConfig();
-            FillConfig();
-            dp = new DebugProtocolServer(embeddedConfig);
-            dp.NewWriteMessage += Dp_NewWriteMessage;
-            dp.NewDebugString += Dp_NewDebugString;
-            messages = new List<ProtocolMessage>();
-            closeServerButton.Enabled = false;
-            connectionChooserComboBox.DisplayMember = "Name";
-            connectionChooserComboBox.ValueMember = "Name";
+            this.embeddedConfig = new EmbeddedConfig();
+            this.FillConfig();
+            this.dp = new DebugProtocolServer(this.embeddedConfig);
+            this.dp.NewWriteMessage += this.Dp_NewWriteMessage;
+            this.dp.NewDebugString += this.Dp_NewDebugString;
+            this.messages = new List<ProtocolMessage>();
+            this.closeServerButton.Enabled = false;
+            this.connectionChooserComboBox.DisplayMember = "Name";
+            this.connectionChooserComboBox.ValueMember = "Name";
 
-            embeddedTerminal1.NewMessage += EmbeddedTerminal1_NewMessage;
+            this.embeddedTerminal1.NewMessage += this.EmbeddedTerminal1_NewMessage;
 
-            connectionChooserComboBox.DataSource = dp.Connectors;
-            stopwatch = new Stopwatch();
-            stopwatch.Start();
+            this.connectionChooserComboBox.DataSource = this.dp.Connectors;
+            this.stopwatch = new Stopwatch();
+            this.stopwatch.Start();
         }
 
         private void EmbeddedTerminal1_NewMessage(object sender, string e)
@@ -293,12 +293,12 @@ namespace EmbeddedEmulator.View
             for (int i = 1000; i < 2500; i++)
             {
                 embeddedConfig.ReadRegisters.Add(
-                    new Register((uint)i, $"Some name\\{i}", ReadWrite.Read, VariableType.Int, Source.ElfParsed, 0, (uint)i, 4) { Value = new RegisterValueSInt() { ValueByteArray = BitConverter.GetBytes(i) } });
+                    new Register((uint)i, $"Some name.{i}", ReadWrite.Read, VariableType.Int, Source.ElfParsed, 0, (uint)i, 4) { Value = new RegisterValueSInt() { ValueByteArray = BitConverter.GetBytes(i) } });
             }
             for (int i = 4000; i < 5500; i++)
             {
                 embeddedConfig.ReadRegisters.Add(
-                    new Register((uint)i, $"Some name\\{i}", ReadWrite.Read, VariableType.Int, Source.ElfParsed, 0, (uint)i, 4) { Value = new RegisterValueSInt() { ValueByteArray = BitConverter.GetBytes(i) } });
+                    new Register((uint)i, $"Some name.{i}", ReadWrite.Read, VariableType.Int, Source.ElfParsed, 0, (uint)i, 4) { Value = new RegisterValueSInt() { ValueByteArray = BitConverter.GetBytes(i) } });
             }
         }
 

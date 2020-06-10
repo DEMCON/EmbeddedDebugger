@@ -104,7 +104,7 @@ namespace EmbeddedDebugger.Model.RPC
         {
             foreach (CpuNode node in mm.Nodes)
             {
-                if (node.ID != nodeID) continue;
+                if (node.Id != nodeID) continue;
                 if (node.Registers.Any(x => x.Id == registerID))
                 {
                     return node.Registers.First(x => x.Id == registerID).Value;
@@ -118,7 +118,7 @@ namespace EmbeddedDebugger.Model.RPC
         {
             foreach (CpuNode node in mm.Nodes)
             {
-                if (node.ID != nodeID) continue;
+                if (node.Id != nodeID) continue;
                 if (node.Registers.Any(x => x.Id == registerID))
                 {
                     node.Registers.First(x => x.Id == registerID).Value = value;
@@ -131,8 +131,8 @@ namespace EmbeddedDebugger.Model.RPC
         [XmlRpcMethod("SetDebugChannel")]
         public void SetDebugChannel(int nodeID, int registerID, ChannelMode mode)
         {
-            if (!mm.Nodes.Any(x => x.ID == nodeID)) return;
-            CpuNode node = mm.Nodes.First(x => x.ID == nodeID);
+            if (!mm.Nodes.Any(x => x.Id == nodeID)) return;
+            CpuNode node = mm.Nodes.First(x => x.Id == nodeID);
             if (!node.Registers.Any(x => x.Id == registerID)) return;
             node.Registers.First(x => x.Id == registerID).ChannelMode = mode;
         }
@@ -140,8 +140,8 @@ namespace EmbeddedDebugger.Model.RPC
         [XmlRpcMethod("SetPlotting")]
         public void SetPlotting(int nodeID, int registerID, bool plotting)
         {
-            if (!mm.Nodes.Any(x => x.ID == nodeID)) return;
-            CpuNode node = mm.Nodes.First(x => x.ID == nodeID);
+            if (!mm.Nodes.Any(x => x.Id == nodeID)) return;
+            CpuNode node = mm.Nodes.First(x => x.Id == nodeID);
             if (!node.Registers.Any(x => x.Id == registerID)) return;
             //node.Registers.First(x => x.ID == registerID).Plot = plotting;
         }
@@ -149,8 +149,8 @@ namespace EmbeddedDebugger.Model.RPC
         [XmlRpcMethod("SetLogging")]
         public void SetLogging(int nodeID, int registerID, bool logging)
         {
-            if (!mm.Nodes.Any(x => x.ID == nodeID)) return;
-            CpuNode node = mm.Nodes.First(x => x.ID == nodeID);
+            if (!mm.Nodes.Any(x => x.Id == nodeID)) return;
+            CpuNode node = mm.Nodes.First(x => x.Id == nodeID);
             if (!node.Registers.Any(x => x.Id == registerID)) return;
             //node.Registers.First(x => x.ID == registerID).Log = logging;
         }

@@ -206,7 +206,7 @@ namespace EmbeddedDebugger.Model
                         }
 
                         // Get the node this message came from and add it to the message list if it hasn't already been set
-                        CpuNode node = core.Nodes.FirstOrDefault(x => x.ID == msg.ControllerID);
+                        CpuNode node = core.Nodes.FirstOrDefault(x => x.Id == msg.ControllerID);
                         if (node != null)
                         {
                             node.MessageCounter++;
@@ -256,7 +256,7 @@ namespace EmbeddedDebugger.Model
         {
             if (!r.IsDebugChannel) return;
             CpuNode node = (CpuNode)sender;
-            ConfigChannel(node.ID, (byte)r.DebugChannel, ChannelMode.LowSpeed, r);
+            ConfigChannel(node.Id, (byte)r.DebugChannel, ChannelMode.LowSpeed, r);
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace EmbeddedDebugger.Model
         public void RemoveDebugChannel(object sender, Register r)
         {
             CpuNode node = (CpuNode)sender;
-            ConfigChannel(node.ID, (byte)r.DebugChannel, ChannelMode.Off);
+            ConfigChannel(node.Id, (byte)r.DebugChannel, ChannelMode.Off);
         }
 
         /// <summary>
@@ -279,7 +279,7 @@ namespace EmbeddedDebugger.Model
         public void UpdateDebugChannel(object sender, Register r)
         {
             CpuNode node = (CpuNode)sender;
-            ConfigChannel(node.ID, (byte)r.DebugChannel, r.ChannelMode, r);
+            ConfigChannel(node.Id, (byte)r.DebugChannel, r.ChannelMode, r);
         }
 
         /// <summary>
@@ -290,7 +290,7 @@ namespace EmbeddedDebugger.Model
         public void Node_RegisterQueriesValue(object sender, Register r)
         {
             CpuNode node = (CpuNode)sender;
-            QueryRegister(node.ID, node, r);
+            QueryRegister(node.Id, node, r);
         }
 
         /// <summary>
@@ -304,7 +304,7 @@ namespace EmbeddedDebugger.Model
             CpuNode node = (CpuNode)sender;
             Register r = (Register)e[0];
             RegisterValue regValue = (RegisterValue)e[1];
-            WriteToRegister(node.ID, regValue.ValueByteArray, r);
+            WriteToRegister(node.Id, regValue.ValueByteArray, r);
         }
 
         #region Outgoing Messages
@@ -343,7 +343,7 @@ namespace EmbeddedDebugger.Model
         /// <param name="r">The register to write to</param>
         public void WriteToRegister(byte nodeID, byte[] value, Register r)
         {
-            Version protocolVersion = core.Nodes.First(x => x.ID == nodeID).ProtocolVersion;
+            Version protocolVersion = core.Nodes.First(x => x.Id == nodeID).ProtocolVersion;
             byte control = MessageCodec.GetControlByte(protocolVersion, r.ReadWrite, r.Source, r.DerefDepth);
             WriteRegisterMessage msg = new WriteRegisterMessage()
             {
@@ -363,7 +363,7 @@ namespace EmbeddedDebugger.Model
         public void QueryRegister(byte nodeID, CpuNode node, Register r)
         {
             if (r.VariableType == VariableType.Unknown) return;
-            Version protocolVersion = core.Nodes.First(x => x.ID == nodeID).ProtocolVersion;
+            Version protocolVersion = core.Nodes.First(x => x.Id == nodeID).ProtocolVersion;
             byte control = MessageCodec.GetControlByte(protocolVersion, r.ReadWrite, r.Source, r.DerefDepth);
 
             QueryRegisterMessage msg = new QueryRegisterMessage()
@@ -414,7 +414,7 @@ namespace EmbeddedDebugger.Model
         /// <param name="r">The register the channel is bound to</param>
         public void ConfigChannel(byte nodeID, byte channelID, ChannelMode mode, Register r)
         {
-            Version protocolVersion = core.Nodes.First(x => x.ID == nodeID).ProtocolVersion;
+            Version protocolVersion = core.Nodes.First(x => x.Id == nodeID).ProtocolVersion;
             ConfigChannelMessage msg = new ConfigChannelMessage()
             {
                 ChannelId = channelID,
@@ -595,7 +595,7 @@ namespace EmbeddedDebugger.Model
             VersionMessage version_message = new VersionMessage(msg);
 
             // If the node is already known, don't re-add it 
-            if (core.Nodes.Any(x => x.ID == msg.ControllerID))
+            if (core.Nodes.Any(x => x.Id == msg.ControllerID))
             {
                 throw new ArgumentException("CPUNode already known!");
             }
@@ -603,23 +603,17 @@ namespace EmbeddedDebugger.Model
             // Create a new node with the information that was gathered
             CpuNode node = new CpuNode(id, version_message.ProtocolVersion, version_message.ApplicationVersion, version_message.Name, version_message.SerialNumber);
             // Create a msgID, to be used whenever a msg is send
-            msgIDs.Add(node.ID, 0);
+            msgIDs.Add(node.Id, 0);
             // Add the node to the list of nodes in the modelmanager
             core.Nodes.Add(node);
             // Ask the node to send over its information
-            GetNodeInfo(node.ID);
+            GetNodeInfo(node.Id);
             // Turn off all channels
             //for (int i = 0; i < node.MaxNumberOfDebugChannels; i++)
             //{
             //    ConfigChannel(node.ID, (byte)i, ChannelMode.Off);
             //}
             // Add the event handlers of the node
-            node.RegisterQueriesValue += Node_RegisterQueriesValue;
-            node.NewDebugChannel += AddNewDebugChannel;
-            node.RemoveDebugChannel += RemoveDebugChannel;
-            node.UpdateDebugChannel += UpdateDebugChannel;
-            node.RegisterValueChanged += Node_RegisterValueChanged;
-            node.RegisterLoggingChanged += logger.RegisterLoggingChanged;
             // TODO: Add loading of config again
             // Try to load the configuration from .xml file/
 
@@ -666,11 +660,11 @@ namespace EmbeddedDebugger.Model
                     // For the timestamp, 4 bytes are used 
                     if (records[0] == (byte)VariableType.TimeStamp)
                     {
-                        core.Nodes.First(x => x.ID == msg.ControllerID).Sizes[(VariableType)records[0]] = records[4] << 24 | records[3] << 16 | records[2] << 8 | records[1];
+                        core.Nodes.First(x => x.Id == msg.ControllerID).Sizes[(VariableType)records[0]] = records[4] << 24 | records[3] << 16 | records[2] << 8 | records[1];
                     }
                     else
                     {
-                        core.Nodes.First(x => x.ID == msg.ControllerID).Sizes[(VariableType)records[0]] = records[1];
+                        core.Nodes.First(x => x.Id == msg.ControllerID).Sizes[(VariableType)records[0]] = records[1];
                     }
                     records.Clear();
                 }
@@ -712,11 +706,11 @@ namespace EmbeddedDebugger.Model
                 throw new ArgumentException("Error reading occured");
             }
 
-            if (!core.Nodes.Any(x => x.ID == msg.ControllerID))
+            if (!core.Nodes.Any(x => x.Id == msg.ControllerID))
             {
                 throw new ArgumentException("No node found for the msg");
             }
-            CpuNode node = core.Nodes.First(x => x.ID == msg.ControllerID);
+            CpuNode node = core.Nodes.First(x => x.Id == msg.ControllerID);
             MessageCodec.GetControlByteValues(node.ProtocolVersion, response.Control, out ReadWrite readWrite, out Source source, out int derefDepth);
             Register r = node.EmbeddedConfig.GetRegister(response.Offset, readWrite);
             if (r == null)
@@ -777,7 +771,7 @@ namespace EmbeddedDebugger.Model
         private void DispatchReadChannelDataMessage(ProtocolMessage msg)
         {
             byte id = msg.ControllerID;
-            CpuNode node = core.Nodes.FirstOrDefault(x => x.ID == id);
+            CpuNode node = core.Nodes.FirstOrDefault(x => x.Id == id);
             if (node == null)
             {
                 throw new ArgumentException("No node found");
@@ -811,15 +805,14 @@ namespace EmbeddedDebugger.Model
         /// <returns>In case the dispatching failes, a string with explanation is returned</returns>
         private void DispatchDebugStringMessage(ProtocolMessage msg)
         {
-            if (!core.Nodes.Any(x => x.ID == msg.ControllerID) || msg.CommandData.Length == 0)
+            if (!core.Nodes.Any(x => x.Id == msg.ControllerID) || msg.CommandData.Length == 0)
             {
                 throw new ArgumentException("Empty string");
             }
 
             DebugStringMessage debugStringMessage = new DebugStringMessage(msg);
 
-            CpuNode node = core.Nodes.First(x => x.ID == msg.ControllerID);
-            node.NewTerminalData = debugStringMessage.Message;
+            CpuNode node = core.Nodes.First(x => x.Id == msg.ControllerID);
         }
         #endregion
         #endregion

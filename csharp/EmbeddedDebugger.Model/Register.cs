@@ -28,7 +28,6 @@ namespace EmbeddedDebugger.Model
 {
     public class Register
     {
-
         #region Fields
         private string name;
         private string fullName;
@@ -37,7 +36,7 @@ namespace EmbeddedDebugger.Model
 
         #region Properties
         public RegisterValue RegisterValue { get; set; }
-        public List<RegisterValue> MyValues { get; private set; }
+        public List<RegisterValue> MyValues { get; }
         public string Value
         {
             get
@@ -67,9 +66,7 @@ namespace EmbeddedDebugger.Model
         public List<Register> ChildRegisters { get; set; }
         public bool HasChildren => this.ChildRegisters != null && this.ChildRegisters.Count > 0;
         public Register Parent { get; set; }
-        [DisplayName("ID")]
         public uint Id { get; set; }
-        [DisplayName("Name")]
         public string Name { get => this.name ?? this.fullName; set => this.name = value; }
         public string FullName { get => this.fullName ?? this.name; set => this.fullName = value; }
         public ReadWrite ReadWrite { get; set; }
@@ -81,7 +78,7 @@ namespace EmbeddedDebugger.Model
             get => this.VariableType == VariableType.Unknown ? this.variableTypeName : this.VariableType.ToString().ToLower();
             set => this.variableTypeName = value;
         }
-
+        public string VariableTypeString => this.VariableType == VariableType.Unknown ? $"\"{this.variableTypeName}\"" : this.VariableType.ToString().ToLower();
         public bool Plot { get; set; }
 
         public int MaxNumberOfValues { get; set; }
@@ -91,21 +88,21 @@ namespace EmbeddedDebugger.Model
         public int DerefDepth { get; set; }
         public bool? Show { get; set; }
         public Source Source { get; set; }
-        public char ReadWriteChar => this.ReadWrite == ReadWrite.Read ? '←' : '→';
         public int TimeStampUnits { get; set; } = 1;
         public bool IsDebugChannel => DebugChannel.HasValue;
         public byte? DebugChannel { get; set; }
         public ChannelMode ChannelMode { get; set; }
         public CpuNode CpuNode { get; set; }
-        public byte CpuId => CpuNode.ID;
+        public byte CpuId => this.CpuNode.Id;
         public bool IsReadable => ((byte)this.ReadWrite & 0b0000_0010) >> 1 == 1;
         public bool IsWritable => ((byte)this.ReadWrite & 0b0000_0001) == 1;
         public ValueDisplayFormat ValueDisplayFormat { get; set; }
+
         public bool IsIntegralValue
         {
             get
             {
-                switch (VariableType)
+                switch (this.VariableType)
                 {
                     case VariableType.Bool:
                     case VariableType.Char:
@@ -121,8 +118,9 @@ namespace EmbeddedDebugger.Model
                     case VariableType.UInt:
                     case VariableType.ULong:
                         return true;
+                    default:
+                        return false;
                 }
-                return false;
             }
         }
 

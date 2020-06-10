@@ -55,7 +55,7 @@ namespace EmbeddedDebugger.Model
 
         public void NewDebugMessageToEmbedded(object sender, string e)
         {
-            this.DebugProtocol.SendDebugString(((CpuNode)sender).ID, e);
+            this.DebugProtocol.SendDebugString(((CpuNode)sender).Id, e);
         }
 
         public void ResetTime(int decimationMs = 0)
@@ -69,7 +69,7 @@ namespace EmbeddedDebugger.Model
                         decimation = 1;
                     if (decimation > 255)
                         decimation = 255;
-                    this.DebugProtocol.Decimation(n.ID, (byte)decimation);
+                    this.DebugProtocol.Decimation(n.Id, (byte)decimation);
                 }
             }
             this.DebugProtocol.ResetTime();
