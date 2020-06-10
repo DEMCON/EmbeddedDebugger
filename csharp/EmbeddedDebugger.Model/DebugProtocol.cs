@@ -30,91 +30,52 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Timers;
+using Timer = System.Timers.Timer;
 
 namespace EmbeddedDebugger.Model
 {
     /// <summary>
     /// This class is used to communicate properly with an embedded system.
-    /// Ensuring messages are correctly endoded and decoded 
+    /// Ensuring messages are correctly encoded and decoded 
     /// </summary>
     public class DebugProtocol
     {
-        public readonly static Version CurrentVersion = new Version(0, 0, 2);
-        private const int AckTimoutTicks = 20;
-        private const byte REC_SEP = 0x33;
+        private const int AckTimeoutTicks = 20;
+        private const byte RecSep = 0x33;
 
         private readonly ConcurrentQueue<byte[]> incomingBytes;
         private readonly Thread myThread;
         private readonly ModelManager core;
         private readonly Dictionary<byte, byte> msgIDs;
         private readonly List<ProtocolMessage> messagesWaitingAck;
-        private readonly System.Timers.Timer resendsTimer;
         private readonly ValueLogger logger;
 
         #region Properties
-        private Connector connector;
-        public Connector Connector { get => connector; set => connector = value; }
-
-        public object NewConnector { get => connector; set => connector = value as Connector; }
-
-        // This list could be dynamic, but since the assembly will never(!) change during runtime it is useless to reassemble this list
-        private readonly List<Connector> connectors;
-        public List<Connector> Connectors { get => connectors; }
-
-        private bool isConnected;
-        public bool IsConnected { get => isConnected; }
-        #endregion
-
-        #region EventHandlers
-        public event EventHandler HasConnected = delegate { };
-        public event EventHandler HasDisconnected = delegate { };
-        public event EventHandler<Register> RegisterQueried = delegate { };
-        public event EventHandler<long> NewReadChannelData = delegate { };
-        public event EventHandler ConfigLoaded = delegate { };
+        public Connector Connector { get; set; }
+        public List<Connector> Connectors { get; }
+        public bool IsConnected { get; private set; }
         #endregion
 
         public DebugProtocol(ModelManager core, ValueLogger logger)
         {
             this.logger = logger;
-            logger.StartLogging += Logger_StartLogging;
-            logger.StopLogging += Logger_StopLogging;
-            connectors = GetConnectorTypes().ToList();
-            incomingBytes = new ConcurrentQueue<byte[]>();
-            msgIDs = new Dictionary<byte, byte>();
-            messagesWaitingAck = new List<ProtocolMessage>();
+            this.Connectors = this.GetConnectorTypes().ToList();
+            this.incomingBytes = new ConcurrentQueue<byte[]>();
+            this.msgIDs = new Dictionary<byte, byte>();
+            this.messagesWaitingAck = new List<ProtocolMessage>();
             this.core = core;
-            myThread = new Thread(DoWork)
+            this.myThread = new Thread(this.DoWork)
             {
                 IsBackground = true
             };
-            myThread.Start();
+            this.myThread.Start();
             // Create a timer for resending the messages
-            resendsTimer = new System.Timers.Timer(100)
+            Timer resendTimer = new Timer(100)
             {
                 AutoReset = true
             };
-            resendsTimer.Elapsed += DoResends;
-            resendsTimer.Start();
-        }
-
-        /// <summary>
-        /// Make sure the eventhandlers are added whenever logging is started
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Logger_StartLogging(object sender, EventArgs e)
-        {
-            NewReadChannelData += logger.NewValuesReceived;
-        }
-
-        /// <summary>
-        /// Make sure the eventhandlers are removed whenever logging is stopped
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Logger_StopLogging(object sender, EventArgs e)
-        {
-            NewReadChannelData -= logger.NewValuesReceived;
+            resendTimer.Elapsed += this.DoResends;
+            resendTimer.Start();
         }
 
         /// <summary>
@@ -133,14 +94,14 @@ namespace EmbeddedDebugger.Model
         /// <returns>If the connect worked or not</returns>
         public bool Connect()
         {
-            if (connector.IsConnected) return true;
-            connector.HasConnected += ConnectorConnected;
-            connector.UnexpectedDisconnect += ConnectorDisconnected;
-            bool returnable = connector.Connect();
+            if (this.Connector.IsConnected) return true;
+            this.Connector.HasConnected += ConnectorConnected;
+            this.Connector.UnexpectedDisconnect += ConnectorDisconnected;
+            bool returnable = this.Connector.Connect();
             if (!returnable)
             {
-                connector.HasConnected -= ConnectorConnected;
-                connector.UnexpectedDisconnect -= ConnectorDisconnected;
+                this.Connector.HasConnected -= ConnectorConnected;
+                this.Connector.UnexpectedDisconnect -= ConnectorDisconnected;
             }
             return returnable;
         }
@@ -150,11 +111,10 @@ namespace EmbeddedDebugger.Model
         /// </summary>
         public void Disconnect()
         {
-            connector.Disconnect();
+            this.Connector.Disconnect();
             msgIDs.Clear();
             logger.LogRegisters.Clear();
-            HasDisconnected(this, new EventArgs());
-            isConnected = false;
+            this.IsConnected = false;
         }
 
         /// <summary>
@@ -173,9 +133,8 @@ namespace EmbeddedDebugger.Model
         /// <param name="e">Possible EventArgs</param>
         public void ConnectorConnected(object sender, EventArgs e)
         {
-            isConnected = true;
-            HasConnected(sender, e);
-            connector.MessageReceived += NewBytes;
+            this.IsConnected = true;
+            this.Connector.MessageReceived += NewBytes;
             SearchForNodes();
         }
         /// <summary>
@@ -185,13 +144,12 @@ namespace EmbeddedDebugger.Model
         /// <param name="e">Possible EventArgs</param>
         public void ConnectorDisconnected(object sender, EventArgs e)
         {
-            isConnected = false;
+            this.IsConnected = false;
             msgIDs.Clear();
             logger.LogRegisters.Clear();
-            HasDisconnected(sender, e);
-            connector.HasConnected -= ConnectorConnected;
-            connector.UnexpectedDisconnect -= ConnectorDisconnected;
-            connector.MessageReceived -= NewBytes;
+            this.Connector.HasConnected -= ConnectorConnected;
+            this.Connector.UnexpectedDisconnect -= ConnectorDisconnected;
+            this.Connector.MessageReceived -= NewBytes;
         }
         #endregion
         #endregion
@@ -272,21 +230,18 @@ namespace EmbeddedDebugger.Model
         /// <summary>
         /// Resend all non-ACKed messages again
         /// </summary>
-        private void DoResends(Object source, ElapsedEventArgs e)
+        private void DoResends(object source, ElapsedEventArgs e)
         {
-            if (!isConnected) return;
-            lock (messagesWaitingAck)
+            if (!this.IsConnected) return;
+            lock (this.messagesWaitingAck)
             {
-                foreach (ProtocolMessage msg in messagesWaitingAck)
+                foreach (ProtocolMessage msg in this.messagesWaitingAck.Where(msg => msg.TicksSinceLastSend++ > AckTimeoutTicks))
                 {
-                    if (msg.TicksSinceLastSend++ > AckTimoutTicks)
-                    {
-                        msg.TicksSinceLastSend = 0;
-                        connector.SendMessage(MessageCodec.EncodeMessage(msg));
+                    msg.TicksSinceLastSend = 0;
+                    this.Connector.SendMessage(MessageCodec.EncodeMessage(msg));
 #if DEBUG
-                        Console.WriteLine($"Resending message, due to no ACK: {msg}");
+                    Console.WriteLine($"Resending message, due to no ACK: {msg}");
 #endif
-                    }
                 }
             }
         }
@@ -550,7 +505,7 @@ namespace EmbeddedDebugger.Model
         /// <param name="msg">The msg to be send</param>
         private void SendMessage(ProtocolMessage msg)
         {
-            if (!isConnected) return;
+            if (!this.IsConnected) return;
             if (msg.MsgID != 0x00)
             {
                 lock (messagesWaitingAck)
@@ -560,7 +515,7 @@ namespace EmbeddedDebugger.Model
             }
 
             Console.WriteLine(msg);
-            connector.SendMessage(MessageCodec.EncodeMessage(msg));
+            this.Connector.SendMessage(MessageCodec.EncodeMessage(msg));
         }
 
         private void SendMessage(byte nodeID, ApplicationMessage msg)
@@ -675,11 +630,10 @@ namespace EmbeddedDebugger.Model
                     Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
                     "EmbeddedDebugger",
                     "Configurations",
-                    this.connector.ToString(),
+                    this.Connector.ToString(),
                     node.Name.Trim(),
                     $"cpu{id:D2}-V{node.ApplicationVersion.Major:D2}_{node.ApplicationVersion.Minor:D2}_{node.ApplicationVersion.Build:D4}.xml")))
             {
-                ConfigLoaded(this, new EventArgs());
             }
             else
             {
@@ -706,7 +660,7 @@ namespace EmbeddedDebugger.Model
             for (int i = 0; i < msg.CommandData.Length; i++)
             {
                 byte b = msg.CommandData.ElementAt(i);
-                if (b == REC_SEP || i == msg.CommandData.Length - 1)
+                if (b == RecSep || i == msg.CommandData.Length - 1)
                 {
                     if (i == msg.CommandData.Length - 1) { records.Add(b); }
                     // For the timestamp, 4 bytes are used 
@@ -770,7 +724,6 @@ namespace EmbeddedDebugger.Model
                 throw new ArgumentException("No register found with this offset or readwrite");
             }
             r.AddValue(RegisterValue.GetRegisterValueByVariableType(r.VariableType, response.Value));
-            RegisterQueried(this, r);
         }
 
         /// <summary>
@@ -847,7 +800,6 @@ namespace EmbeddedDebugger.Model
                     node.DebugChannels[i].AddValue(regVal);
                 }
             }
-            NewReadChannelData(this, readChannelDataMessage.TimeStamp);
         }
 
 

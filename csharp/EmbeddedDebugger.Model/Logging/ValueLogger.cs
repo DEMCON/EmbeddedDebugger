@@ -185,7 +185,7 @@ namespace EmbeddedDebugger.Model.Logging
                 }
                 foreach (Register r in logRegisters)
                 {
-                    fileWriters[r.CpuID].Write($"{separator}{r.Value}");
+                    fileWriters[r.CpuId].Write($"{separator}{r.Value}");
                 }
                 foreach (StreamWriter writer in fileWriters.Values)
                 {
@@ -278,7 +278,7 @@ namespace EmbeddedDebugger.Model.Logging
                     foreach (Register r in separateFilePerCpuNode ? logRegisters.Where(x => x.CpuNode == node) : logRegisters)
                     {
                         header.Append($"{separator}");
-                        header.Append(separateFilePerCpuNode ? $"{r.FullName}" : $"[{r.CpuNode.Name}:{r.CpuID}]{r.FullName}");
+                        header.Append(separateFilePerCpuNode ? $"{r.FullName}" : $"[{r.CpuNode.Name}:{r.CpuId}]{r.FullName}");
                     }
                     break;
             }

@@ -297,10 +297,6 @@
     <Resource Include="newicon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EmbeddedDebugger.Connectors.ProjectConnectors\EmbeddedDebugger.Connectors.ProjectConnectors.csproj">
-      <Project>{5eb967a9-cdb4-4ad6-b9e3-443855906a49}</Project>
-      <Name>EmbeddedDebugger.Connectors.ProjectConnectors</Name>
-    </ProjectReference>
     <ProjectReference Include="..\EmbeddedDebugger.Connectors\EmbeddedDebugger.Connectors.csproj">
       <Project>{b54188ca-c1cb-4c64-aa44-774e0e579669}</Project>
       <Name>EmbeddedDebugger.Connectors</Name>

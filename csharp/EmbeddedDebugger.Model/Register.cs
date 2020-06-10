@@ -17,8 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using EmbeddedDebugger.DebugProtocol.Enums;
 using EmbeddedDebugger.DebugProtocol.RegisterValues;
-//using OxyPlot;
-//using OxyPlot.Series;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -77,7 +75,6 @@ namespace EmbeddedDebugger.Model
         public ReadWrite ReadWrite { get; set; }
         public bool EnableValueUpdates { get; set; } = true;
         public VariableType VariableType { get; set; }
-        public string VariableTypeString => this.VariableType == VariableType.Unknown ? $"\"{this.variableTypeName}\"" : this.VariableType.ToString().ToLower();
 
         public string VariableTypeName
         {
@@ -100,7 +97,7 @@ namespace EmbeddedDebugger.Model
         public byte? DebugChannel { get; set; }
         public ChannelMode ChannelMode { get; set; }
         public CpuNode CpuNode { get; set; }
-        public byte CpuID => CpuNode.ID;
+        public byte CpuId => CpuNode.ID;
         public bool IsReadable => ((byte)this.ReadWrite & 0b0000_0010) >> 1 == 1;
         public bool IsWritable => ((byte)this.ReadWrite & 0b0000_0001) == 1;
         public ValueDisplayFormat ValueDisplayFormat { get; set; }
@@ -257,8 +254,6 @@ namespace EmbeddedDebugger.Model
             hashCode = hashCode * -1521134295 + VariableType.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(variableTypeName);
             hashCode = hashCode * -1521134295 + Plot.GetHashCode();
-            //hashCode = hashCode * -1521134295 + EqualityComparer<LineSeries>.Default.GetHashCode(myLine);
-            //hashCode = hashCode * -1521134295 + EqualityComparer<PlotModel>.Default.GetHashCode(plotModel);
             hashCode = hashCode * -1521134295 + MaxNumberOfValues.GetHashCode();
             hashCode = hashCode * -1521134295 + NumberOfSeconds.GetHashCode();
             hashCode = hashCode * -1521134295 + Size.GetHashCode();

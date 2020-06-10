@@ -68,7 +68,7 @@ namespace EmbeddedDebugger.View.UserControls
             {
                 string searchText = this.SearchTextBox.Text;
                 this.RegistersStackPanel.ItemsSource = this.Registers
-                    .Where(x => Regex.IsMatch(x.Name, searchText))
+                    .Where(x => this.ParentOrChildMatches(x, searchText))
                     .Select(x => new RegisterDataContext()
                     {
                         Register = x,
@@ -77,6 +77,11 @@ namespace EmbeddedDebugger.View.UserControls
                         PlottingViewModel = this.plottingViewModel
                     });
             }
+        }
+
+        private bool ParentOrChildMatches(Register register, string searchText)
+        {
+            return Regex.IsMatch(register.Name, searchText) || register.ChildRegisters?.Any(x => this.ParentOrChildMatches(x, searchText)) == true;
         }
 
         private void ResetTimeButton_Click(object sender, RoutedEventArgs e)

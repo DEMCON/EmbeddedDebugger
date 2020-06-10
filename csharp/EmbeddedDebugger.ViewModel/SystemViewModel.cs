@@ -98,15 +98,9 @@ namespace EmbeddedDebugger.ViewModel
 
         public IList<Register> GetRegisters()
         {
-            if (SelectedCpuNode == null)
-            {
-                return null; this.GetCpuNodes().SelectMany(x => x.Registers).ToList();
-            }
-            else
-            {
-                //Console.WriteLine(this.SelectedCpuNode);
-                return SelectedCpuNode.Registers;
-            }
+            return this.SelectedCpuNode == null 
+                ? this.GetCpuNodes().SelectMany(x => x.Registers).ToList() 
+                : this.SelectedCpuNode.Registers;
         }
 
         public void ResetTime(CpuNode cpuNode = null)
@@ -116,7 +110,7 @@ namespace EmbeddedDebugger.ViewModel
 
         public void RequestNewValue(Register register)
         {
-            this.modelManager.DebugProtocol.QueryRegister(register.CpuID, register.CpuNode, register);
+            this.modelManager.DebugProtocol.QueryRegister(register.CpuId, register.CpuNode, register);
         }
 
         public bool UpdateChannelMode(Register register, ChannelMode channelMode)
@@ -129,7 +123,7 @@ namespace EmbeddedDebugger.ViewModel
                     if (!register.CpuNode.DebugChannels.ContainsKey(i))
                     {
                         register.CpuNode.DebugChannels.Add(i, register);
-                        this.modelManager.DebugProtocol.ConfigChannel(register.CpuID, i, channelMode, register);
+                        this.modelManager.DebugProtocol.ConfigChannel(register.CpuId, i, channelMode, register);
                         result = true;
                         break;
                     }
@@ -138,7 +132,7 @@ namespace EmbeddedDebugger.ViewModel
             else if (register.CpuNode.DebugChannels.ContainsValue(register))
             {
                 int channelId = register.CpuNode.DebugChannels.FirstOrDefault(x => x.Value == register).Key;
-                this.modelManager.DebugProtocol.ConfigChannel(register.CpuID, (byte)channelId, channelMode, register);
+                this.modelManager.DebugProtocol.ConfigChannel(register.CpuId, (byte)channelId, channelMode, register);
                 if (channelMode == ChannelMode.Off) this.modelManager.DebugChannels.Remove((byte)channelId);
             }
             return result;
