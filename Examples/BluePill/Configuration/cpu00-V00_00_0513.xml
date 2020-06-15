@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<EmbeddedDebugger version="0.0.0.2">
+  <Header>Embedded debugger, (C) DEMCON</Header>
+  <CPU>
+    <Name>EmbeddedDebugger</Name>
+    <Version>
+      <ProtocolVersion>0.8.0</ProtocolVersion>
+      <ApplicationVersion>0.0.1</ApplicationVersion>
+    </Version>
+  </CPU>
+  <RegistersAvailable>
+	<!-- PORTC has address 0x4001 1000, Port output data register has offset 0x0C, so the offset is 0x4001 10C0, which is  -->
+    <Register id="0" name="PORTC" fullName="PORTC" type="short" size="2" offset="1073811468" source="ElfParsed" derefDepth="0" show="1" readWrite="Read" />
+	<Register id="1" name="PORTC(Write)" fullName="PORTC" type="short" size="2" offset="1073811468" source="ElfParsed" derefDepth="0" show="1" readWrite="Write" />
+	<Register id="2" name="PORTB" fullName="PORTC" type="ushort" size="2" offset="1073810444" source="ElfParsed" derefDepth="0" show="1" readWrite="Read" />
+	<Register id="3" name="PORTB(Write)" fullName="PORTC" type="ushort" size="2" offset="1073810444" source="ElfParsed" derefDepth="0" show="1" readWrite="Write" />
+  </RegistersAvailable>
+</EmbeddedDebugger>
