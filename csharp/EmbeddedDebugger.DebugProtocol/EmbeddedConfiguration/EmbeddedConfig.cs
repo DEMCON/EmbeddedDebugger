@@ -24,7 +24,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace EmbeddedDebugger.Model.EmbeddedConfiguration
+namespace EmbeddedDebugger.DebugProtocol.EmbeddedConfiguration
 {
     /// <summary>
     /// This class is used to store the configuration of an embedded system

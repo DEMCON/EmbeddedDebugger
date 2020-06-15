@@ -21,6 +21,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EmbeddedDebugger.DebugProtocol;
 
 namespace EmbeddedDebugger.Model.Logging
 {

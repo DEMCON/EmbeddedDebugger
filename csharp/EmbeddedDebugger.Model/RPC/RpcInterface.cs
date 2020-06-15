@@ -20,7 +20,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using CookComputing.XmlRpc;
-using EmbeddedDebugger.Model.EmbeddedConfiguration;
+using EmbeddedDebugger.DebugProtocol.EmbeddedConfiguration;
 
 namespace EmbeddedDebugger.Model.RPC
 {

@@ -32,6 +32,7 @@ using EmbeddedDebugger.DebugProtocol.Enums;
 using EmbeddedDebugger.DebugProtocol.RegisterValues;
 using System.Runtime.InteropServices;
 using System.Text;
+using Register = EmbeddedEmulator.Model.Register;
 
 namespace EmbeddedEmulator.View
 {

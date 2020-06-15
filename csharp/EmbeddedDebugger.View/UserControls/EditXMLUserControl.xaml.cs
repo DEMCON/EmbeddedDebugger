@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using EmbeddedDebugger.DebugProtocol.Enums;
 using EmbeddedDebugger.Model;
-using EmbeddedDebugger.Model.EmbeddedConfiguration;
+using EmbeddedDebugger.DebugProtocol.EmbeddedConfiguration;
 using EmbeddedDebugger.View.Windows;
 using System;
 using System.Collections.Generic;
@@ -34,6 +34,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using EmbeddedDebugger.DebugProtocol;
 
 namespace EmbeddedDebugger.View.UserControls
 {

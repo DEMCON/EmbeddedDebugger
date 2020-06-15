@@ -26,6 +26,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EmbeddedDebugger.DebugProtocol;
 
 namespace EmbeddedDebugger.Model.RPC
 {

@@ -15,16 +15,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+using EmbeddedDebugger.DebugProtocol.EmbeddedConfiguration;
 using EmbeddedDebugger.DebugProtocol.Enums;
 using EmbeddedDebugger.DebugProtocol.RegisterValues;
-using EmbeddedDebugger.Model.EmbeddedConfiguration;
 using EmbeddedDebugger.Model.Messages;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
-namespace EmbeddedDebugger.Model
+namespace EmbeddedDebugger.DebugProtocol
 {
     /// <summary>
     /// This class represents a CPU node with which we can communicate using the connector

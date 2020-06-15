@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using EmbeddedDebugger.DebugProtocol;
 using EmbeddedDebugger.View.DataContext;
 
 namespace EmbeddedDebugger.View.UserControls.ObjectDisplayers

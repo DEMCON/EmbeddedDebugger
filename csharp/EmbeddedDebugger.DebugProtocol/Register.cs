@@ -19,12 +19,9 @@ using EmbeddedDebugger.DebugProtocol.Enums;
 using EmbeddedDebugger.DebugProtocol.RegisterValues;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
-namespace EmbeddedDebugger.Model
+namespace EmbeddedDebugger.DebugProtocol
 {
     public class Register
     {
@@ -49,17 +46,10 @@ namespace EmbeddedDebugger.Model
             set
             {
                 RegisterValue regValue = RegisterValue.GetRegisterValueByVariableType(VariableType);
-                try
+                if (regValue.ValueByteArrayFromString(value, out byte[] output, this.ValueDisplayFormat))
                 {
-                    if (regValue.ValueByteArrayFromString(value, out byte[] output, this.ValueDisplayFormat))
-                    {
-                        regValue.ValueByteArray = output;
-                        RegisterValue = regValue;
-                    }
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show($"Error: {e.Message}");
+                    regValue.ValueByteArray = output;
+                    RegisterValue = regValue;
                 }
             }
         }

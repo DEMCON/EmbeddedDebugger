@@ -19,6 +19,7 @@ using EmbeddedDebugger.Connectors.Interfaces;
 using EmbeddedDebugger.Model.Logging;
 using EmbeddedDebugger.Model.RPC;
 using System.Collections.Generic;
+using EmbeddedDebugger.DebugProtocol;
 
 namespace EmbeddedDebugger.Model
 {

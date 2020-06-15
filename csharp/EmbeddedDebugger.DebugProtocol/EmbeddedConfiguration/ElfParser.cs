@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-using EmbeddedDebugger.DebugProtocol;
 using EmbeddedDebugger.DebugProtocol.Enums;
 using System;
 using System.Collections.Generic;
@@ -23,10 +22,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Windows.Forms;
 
-namespace EmbeddedDebugger.Model.EmbeddedConfiguration
+namespace EmbeddedDebugger.DebugProtocol.EmbeddedConfiguration
 {
     /// <summary>
     /// This class parses an .elf file to an Embedded Configuration
@@ -52,15 +49,7 @@ namespace EmbeddedDebugger.Model.EmbeddedConfiguration
             percentage = 10;
             PercentageUpped(this, new EventArgs());
             // Start the fromelf.exe which actually does the parsing of the .elf to text
-            try
-            {
-                File.Delete("config.txt");
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show($"Error deleting config.txt: {e.Message}");
-                throw;
-            }
+            File.Delete("config.txt");
             var proc = new Process
             {
                 StartInfo = new ProcessStartInfo

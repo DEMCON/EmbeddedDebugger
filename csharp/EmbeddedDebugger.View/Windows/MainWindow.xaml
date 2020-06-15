@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:usercontrols="clr-namespace:EmbeddedDebugger.View.UserControls"
         mc:Ignorable="d"
-        Title="Embedded Debugger" Height="750" Width="1000" WindowStartupLocation="CenterScreen" Icon="../../newicon.ico">
+        Title="Embedded Debugger" Height="750" Width="1000" WindowStartupLocation="CenterScreen" Icon="../newicon.ico">
     <Grid Background="#eee">
         <Grid.RowDefinitions>
             <RowDefinition Height="25"/>

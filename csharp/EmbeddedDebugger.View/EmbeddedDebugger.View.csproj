@@ -294,7 +294,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="newicon.ico" />
+    <Content Include="newicon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EmbeddedDebugger.Connectors\EmbeddedDebugger.Connectors.csproj">

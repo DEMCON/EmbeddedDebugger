@@ -34,6 +34,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Text.RegularExpressions;
+using EmbeddedDebugger.DebugProtocol;
 using EmbeddedDebugger.View.Converters;
 
 namespace EmbeddedDebugger.View.CustomControls

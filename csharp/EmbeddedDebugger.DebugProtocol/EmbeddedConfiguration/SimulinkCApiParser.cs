@@ -22,7 +22,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EmbeddedDebugger.Model.EmbeddedConfiguration
+namespace EmbeddedDebugger.DebugProtocol.EmbeddedConfiguration
 {
     /// <summary>
     /// This class parses a simulink C api to an Embedded Configuration
