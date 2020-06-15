@@ -144,5 +144,15 @@ namespace EmbeddedDebugger.View.UserControls.ObjectDisplayers
         {
             this.systemViewModel?.UpdateChannelMode(this.Register, (ChannelMode)this.ChannelModeComboBox.SelectedItem);
         }
+
+        private void ValueTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            RegisterValue rv = RegisterValue.GetRegisterValueByVariableType(Register.VariableType);
+            if (rv.ValueByteArrayFromString(ValueTextBox.Text,out byte[] output)){
+                rv.ValueByteArray = output;
+                Register.RegisterValue = rv;
+                systemViewModel.WriteNewValue(this.Register);
+            }
+        }
     }
 }

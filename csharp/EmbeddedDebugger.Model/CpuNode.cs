@@ -44,7 +44,7 @@ namespace EmbeddedDebugger.Model
         public string ApplicationVersionString => $"V {this.ApplicationVersion.Major}.{this.ApplicationVersion.Minor}.{this.ApplicationVersion.Build}";
         public Version ApplicationVersion { get; }
 
-        public IList<Register> Registers => this.EmbeddedConfig.Registers;
+        public IList<Register> Registers => this.EmbeddedConfig?.Registers;
         public EmbeddedConfig EmbeddedConfig { get; set; }
         public List<TraceMessage> TraceMessages { get; }
         public Dictionary<VariableType, int> Sizes { get; }

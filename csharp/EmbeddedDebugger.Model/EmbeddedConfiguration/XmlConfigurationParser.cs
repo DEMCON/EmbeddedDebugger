@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 using System.Xml;
 
 namespace EmbeddedDebugger.Model.EmbeddedConfiguration
@@ -497,6 +498,8 @@ namespace EmbeddedDebugger.Model.EmbeddedConfiguration
             Register r;
             foreach (XmlNode singleReadNode in registers.ChildNodes)
             {
+                // Make sure we do not add any comments...
+                if (singleReadNode is XmlComment) continue;
                 try
                 {
                     r = GetRegisterFromXML0x0x0x2((XmlElement)singleReadNode, null, node);

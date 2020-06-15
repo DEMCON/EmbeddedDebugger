@@ -121,9 +121,10 @@ namespace EmbeddedDebugger.View.UserControls
         {
             this.Dispatcher.Invoke(() =>
             {
-                if (this.Registers == null || !this.Registers.SequenceEqual(this.systemViewModel.GetRegisters()))
+                IList<Register> newRegisters = this.systemViewModel.GetRegisters();
+                if (newRegisters != null && (this.Registers == null || !this.Registers.SequenceEqual(newRegisters)))
                 {
-                    this.Registers = this.systemViewModel.GetRegisters();
+                    this.Registers = newRegisters;
                     if (this.Registers == null) return;
                     this.RegistersStackPanel.ItemsSource = this.Registers.
                         Select(x => new RegisterDataContext()

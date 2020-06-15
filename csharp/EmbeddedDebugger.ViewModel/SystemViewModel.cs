@@ -98,8 +98,8 @@ namespace EmbeddedDebugger.ViewModel
 
         public IList<Register> GetRegisters()
         {
-            return this.SelectedCpuNode == null 
-                ? this.GetCpuNodes().SelectMany(x => x.Registers).ToList() 
+            return this.SelectedCpuNode == null
+                ? this.GetCpuNodes().SelectMany(x => x.Registers).ToList()
                 : this.SelectedCpuNode.Registers;
         }
 
@@ -111,6 +111,11 @@ namespace EmbeddedDebugger.ViewModel
         public void RequestNewValue(Register register)
         {
             this.modelManager.DebugProtocol.QueryRegister(register.CpuId, register.CpuNode, register);
+        }
+
+        public void WriteNewValue(Register register)
+        {
+            this.modelManager.DebugProtocol.WriteToRegister(register.CpuId, register.RegisterValue.ValueByteArray, register);
         }
 
         public bool UpdateChannelMode(Register register, ChannelMode channelMode)

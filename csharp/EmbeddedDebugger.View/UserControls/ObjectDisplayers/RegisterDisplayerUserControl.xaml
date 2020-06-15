@@ -84,7 +84,7 @@
                     </MultiBinding>
                 </ComboBox.IsEnabled>
             </ComboBox>
-            <TextBox Grid.Column="6" BorderThickness="0" Margin="3" Name="ValueTextBox" IsEnabled="{Binding ElementName=rduc, Path=Register.IsWritable}" FontFamily="Consolas" VerticalAlignment="Center" TextAlignment="Right"/>
+            <TextBox Grid.Column="6" BorderThickness="0" Margin="3" Name="ValueTextBox" IsEnabled="{Binding ElementName=rduc, Path=Register.IsWritable}" LostFocus="ValueTextBox_LostFocus" FontFamily="Consolas" VerticalAlignment="Center" TextAlignment="Right"/>
             <ComboBox Grid.Column="7" Margin="3" SelectedItem="{Binding ElementName=rduc, Path=Register.ChannelMode}" Name="ChannelModeComboBox"
               ItemsSource="{Binding Source={StaticResource ChannelModeEnumData}}" VerticalContentAlignment="Center" Padding="3,0" SelectionChanged="ChannelModeComboBox_OnSelectionChanged ">
                 <ComboBox.IsEnabled>
