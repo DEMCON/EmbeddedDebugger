@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using EmbeddedDebugger.Connectors.Serial;
 using EmbeddedDebugger.Connectors.TCP;
+using EmbeddedDebugger.Connectors.TwinCatAds;
 
 namespace EmbeddedDebugger.Connectors.Interfaces
 {
@@ -33,6 +34,7 @@ namespace EmbeddedDebugger.Connectors.Interfaces
     /// </summary>
     [XmlInclude(typeof(SerialConnector))]
     [XmlInclude(typeof(TcpConnector))]
+    [XmlInclude(typeof(TwinCatAdsConnector))]
     [Serializable]
     public abstract class Connector
     {

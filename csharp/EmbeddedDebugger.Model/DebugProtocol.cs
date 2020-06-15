@@ -18,10 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using EmbeddedDebugger.Connectors.CustomEventArgs;
 using EmbeddedDebugger.Connectors.Interfaces;
 using EmbeddedDebugger.Connectors.ProjectConnectors.Interfaces;
+using EmbeddedDebugger.Connectors.TwinCatAds;
 using EmbeddedDebugger.DebugProtocol;
 using EmbeddedDebugger.DebugProtocol.Enums;
 using EmbeddedDebugger.DebugProtocol.Messages;
 using EmbeddedDebugger.DebugProtocol.RegisterValues;
+using EmbeddedDebugger.Model.EmbeddedConfiguration;
 using EmbeddedDebugger.Model.Logging;
 using System;
 using System.Collections.Concurrent;
@@ -30,6 +32,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Timers;
+using TwinCAT.Ads;
+using TwinCAT.TypeSystem;
 using Timer = System.Timers.Timer;
 
 namespace EmbeddedDebugger.Model
@@ -98,6 +102,29 @@ namespace EmbeddedDebugger.Model
             this.Connector.HasConnected += ConnectorConnected;
             this.Connector.UnexpectedDisconnect += ConnectorDisconnected;
             bool returnable = this.Connector.Connect();
+
+            #region TESTADS
+            if (this.Connector is TwinCatAdsConnector adsConnector)
+            {
+                new Thread(() =>
+                {
+                    CpuNode node = new CpuNode(0, new Version(0, 99, 99), new Version(0, 0), adsConnector.HostName, "TWINCAT ADS");
+                    core.Nodes.Add(node);
+                    EmbeddedConfig config = new EmbeddedConfig();
+
+                    //adsConnector.Client.ReadAny(0xF00F, null, sizeof(ulong) * 6);
+                    AdsStream x = new AdsStream(30);
+                    AdsBinaryReader reader = new AdsBinaryReader(x);
+                    adsConnector.Client.Read(0xF00F, 0, x);
+                    byte[] s = reader.ReadBytes(30);
+
+                    //AddChildRegisters(config.Registers, adsConnector.SymbolLoader.Symbols.First(x => x.InstanceName == "Modules").SubSymbols, node);
+
+                    node.EmbeddedConfig = config;
+                }).Start();
+            }
+            #endregion
+
             if (!returnable)
             {
                 this.Connector.HasConnected -= ConnectorConnected;
@@ -106,6 +133,26 @@ namespace EmbeddedDebugger.Model
             return returnable;
         }
 
+        #region TESTADS
+        private int counting = 0;
+        private void AddChildRegisters(IList<Register> registers, ReadOnlySymbolCollection symbols, CpuNode node)
+        {
+            if (symbols != null && symbols.Count > 0)
+            {
+                foreach (ISymbol symbol in symbols)
+                {
+                    string name = symbol.InstanceName;
+                    Register reg = new Register() { Name = name, CpuNode = node };
+                    AddChildRegisters(reg.ChildRegisters, symbol.SubSymbols, node);
+
+                    registers.Add(reg);
+                    Console.WriteLine(this.counting++);
+                }
+                symbols = null;
+                GC.Collect();
+            }
+        }
+        #endregion
         /// <summary>
         /// Method used to disconnect the connector from the embedded system
         /// </summary>
@@ -771,7 +818,7 @@ namespace EmbeddedDebugger.Model
         private void DispatchReadChannelDataMessage(ProtocolMessage msg)
         {
             byte id = msg.ControllerID;
-            CpuNode node = core.Nodes.FirstOrDefault(x => x.Id == id);
+            CpuNode node = this.core.Nodes.FirstOrDefault(x => x.Id == id);
             if (node == null)
             {
                 throw new ArgumentException("No node found");
@@ -805,7 +852,7 @@ namespace EmbeddedDebugger.Model
         /// <returns>In case the dispatching failes, a string with explanation is returned</returns>
         private void DispatchDebugStringMessage(ProtocolMessage msg)
         {
-            if (!core.Nodes.Any(x => x.Id == msg.ControllerID) || msg.CommandData.Length == 0)
+            if (this.core.Nodes.All(x => x.Id != msg.ControllerID) || msg.CommandData.Length == 0)
             {
                 throw new ArgumentException("Empty string");
             }
