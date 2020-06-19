@@ -21,12 +21,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EmbeddedDebugger.Connectors.CustomEventArgs;
-using EmbeddedDebugger.Connectors.Interfaces;
+using EmbeddedDebugger.Connectors.BaseClasses;
 using EmbeddedDebugger.DebugProtocol;
 using EmbeddedDebugger.DebugProtocol.Enums;
 using EmbeddedDebugger.DebugProtocol.Messages;
-using EmbeddedDebugger.Model.Messages;
 
 namespace EmbeddedEmulator.Model
 {
@@ -41,16 +39,16 @@ namespace EmbeddedEmulator.Model
         private EmbeddedConfig embeddedConfig;
         private byte[] remainder;
         private bool autoRespond;
-        private Connector connector;
+        private DebugConnection connector;
         private Stopwatch stopwatch;
-        private List<Connector> connectors;
+        private List<DebugConnection> connectors;
         private System.Timers.Timer timer;
         private int timerCounter;
         private bool multipleNodes;
         private int numberOfNodesToSimulate;
 
         public bool AutoRespond { get => autoRespond; set => autoRespond = value; }
-        public Connector Connector
+        public DebugConnection Connector
         {
             get => connector;
             set

@@ -20,8 +20,6 @@ using EmbeddedDebugger.DebugProtocol.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EmbeddedDebugger.DebugProtocol
 {
@@ -31,9 +29,9 @@ namespace EmbeddedDebugger.DebugProtocol
     /// </summary>
     public static class MessageCodec
     {
-        private const byte STX = 0x55;
-        private const byte ETX = 0xAA;
-        private const byte ESC = 0x66;
+        private const byte Stx = 0x55;
+        private const byte Etx = 0xAA;
+        private const byte Esc = 0x66;
 
         /// <summary>
         /// Takes a message and turns it into a byte array
@@ -53,8 +51,8 @@ namespace EmbeddedDebugger.DebugProtocol
             data.Add(Crc.Calculate(data.ToArray()));
 
             data = AddEscapeCharacters(data);
-            data.Insert(0, STX);
-            data.Add(ETX);
+            data.Insert(0, Stx);
+            data.Add(Etx);
             return data.ToArray();
         }
 
@@ -74,31 +72,30 @@ namespace EmbeddedDebugger.DebugProtocol
             Array.Copy(remainder, 0, data, 0, remainder.Length);
             Array.Copy(inputData, 0, data, remainder.Length, inputData.Length);
 
-            int STXindex = -1;
-            int ETXindex = -1;
+            int stxIndex = -1;
+            int etxIndex = -1;
             messages = new List<ProtocolMessage>();
             remainderOutput = new byte[0];
-            ProtocolMessage msg;
-            byte[] msgBytes;
 
             while (true)
             {
                 for (int i = 0; i < data.Length; i++)
                 {
-                    if (data[i] == STX)
+                    if (data[i] == Stx)
                     {
-                        STXindex = i;
+                        stxIndex = i;
                     }
-                    else if (data[i] == ETX && STXindex != -1)
+                    else if (data[i] == Etx && stxIndex != -1)
                     {
-                        ETXindex = i;
+                        etxIndex = i;
                         break;
                     }
                 }
 
-                if (STXindex >= 0 && ETXindex >= 0 && STXindex < data.Length && ETXindex < data.Length && STXindex + 4 < ETXindex)
+                if (stxIndex >= 0 && etxIndex >= 0 && stxIndex < data.Length && etxIndex < data.Length && stxIndex + 4 < etxIndex)
                 {
-                    msgBytes = ReplaceEscapeCharacters(data.Skip(STXindex).Take(ETXindex - STXindex + 1).ToList()).ToArray();
+                    byte[] msgBytes = ReplaceEscapeCharacters(data.Skip(stxIndex).Take(etxIndex - stxIndex + 1).ToList()).ToArray();
+                    ProtocolMessage msg;
                     try
                     {
                         msg = new ProtocolMessage(msgBytes);
@@ -112,20 +109,20 @@ namespace EmbeddedDebugger.DebugProtocol
                     }
                     messages.Add(msg);
                 }
-                else if (ETXindex == -1)
+                else if (etxIndex == -1)
                 {
                     remainderOutput = data;
                     break;
                 }
 
-                if (data.Length == ETXindex + 1)
+                if (data.Length == etxIndex + 1)
                 {
                     break;
                 }
 
-                data = data.Skip(ETXindex + 1).ToArray();
-                STXindex = -1;
-                ETXindex = -1;
+                data = data.Skip(etxIndex + 1).ToArray();
+                stxIndex = -1;
+                etxIndex = -1;
             }
         }
 
@@ -141,12 +138,12 @@ namespace EmbeddedDebugger.DebugProtocol
                 return "Message too short";
             }
 
-            if (msg[0] != STX)
+            if (msg[0] != Stx)
             {
                 return "Message didn't start with STX";
             }
 
-            if (msg[msg.Length - 1] != ETX)
+            if (msg[msg.Length - 1] != Etx)
             {
                 return "Message didn't end with ETX";
             }
@@ -177,8 +174,8 @@ namespace EmbeddedDebugger.DebugProtocol
             }
             else
             {
-                var payload_data = new ArraySegment<byte>(data, 1, data.Length - 3);
-                return Crc.Calculate(payload_data.ToArray());
+                ArraySegment<byte> payloadData = new ArraySegment<byte>(data, 1, data.Length - 3);
+                return Crc.Calculate(payloadData.ToArray());
             }
         }
 
@@ -273,7 +270,8 @@ namespace EmbeddedDebugger.DebugProtocol
             if (version < new Version(0, 7, 0))
             {
                 return GetControlByteV07(readWrite, source, derefDepth);
-            } else if(version == new Version(0, 8, 0))
+            }
+            else if (version == new Version(0, 8, 0))
             {
                 return GetControlByteV08(readWrite, derefDepth);
             }
@@ -363,12 +361,12 @@ namespace EmbeddedDebugger.DebugProtocol
         {
             for (int i = input.Count - 1; i >= 0; i--)
             {
-                if (input.ElementAt(i) == ETX || input.ElementAt(i) == STX || input.ElementAt(i) == ESC)
+                if (input.ElementAt(i) == Etx || input.ElementAt(i) == Stx || input.ElementAt(i) == Esc)
                 {
                     byte value = input.ElementAt(i);
                     input.RemoveAt(i);
-                    input.Insert(i, (byte)(ESC ^ value));
-                    input.Insert(i, ESC);
+                    input.Insert(i, (byte)(Esc ^ value));
+                    input.Insert(i, Esc);
                 }
             }
             return input;
@@ -383,10 +381,10 @@ namespace EmbeddedDebugger.DebugProtocol
         {
             for (int i = 1; i < input.Count; i++)
             {
-                if (input.ElementAt(i) == ESC)
+                if (input.ElementAt(i) == Esc)
                 {
                     input.RemoveAt(i);
-                    byte value = (byte)(ESC ^ input.ElementAt(i));
+                    byte value = (byte)(Esc ^ input.ElementAt(i));
                     input.RemoveAt(i);
                     input.Insert(i, value);
                 }

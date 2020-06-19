@@ -15,26 +15,30 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-using EmbeddedDebugger.Connectors.Interfaces;
-using EmbeddedDebugger.Connectors.CustomEventArgs;
+using EmbeddedDebugger.Connectors.BaseClasses;
+using EmbeddedDebugger.Connectors.Settings;
+using EmbeddedDebugger.DebugProtocol.CustomEventArgs;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace EmbeddedDebugger.Connectors.TCP
 {
     /// <summary>
     /// This class is an interface between a TCP connection with a microcontroller or embedded system and the core of the program
     /// </summary>
-    public class TcpConnector : Connector, IDisposable
+    public class TcpConnector : BaseEmbeddedDebugProtocolConnection
     {
         // What we should name this connector
         private const string myName = "TCP";
+
+        public override List<ConnectionSetting> ConnectionSettings { get; } =
+            new List<ConnectionSetting> {
+                new ConnectionSetting{Name = "HostName"},
+                new ConnectionSetting{Name = "Port",Value = 69483}
+            };
 
         private string hostName;
         private int port;
@@ -53,11 +57,17 @@ namespace EmbeddedDebugger.Connectors.TCP
         #region IConnector Members
         public override string Name => myName;
         public override bool IsConnected => isConnected;
+        public override event EventHandler UnexpectedlyDisconnected;
         public override event EventHandler HasConnected = delegate { };
-        public override event EventHandler<BytesReceivedEventArgs> MessageReceived = delegate { };
-        public override event EventHandler UnexpectedDisconnect = delegate { };
+        public event EventHandler<BytesReceivedEventArgs> MessageReceived = delegate { };
+        public event EventHandler UnexpectedDisconnect = delegate { };
         private bool asServer;
-        public override bool AsServer { get => asServer; set => asServer = value; }
+        public bool AsServer { get => asServer; set => asServer = value; }
+
+        public override void SetConnectionSettings(List<ConnectionSetting> settings)
+        {
+            throw new NotImplementedException();
+        }
 
         public override bool Connect()
         {
@@ -184,7 +194,7 @@ namespace EmbeddedDebugger.Connectors.TCP
             }
         }
 
-        public override bool? ShowDialog()
+        public bool? ShowDialog()
         {
             // Set the current settings to the settings form
             TcpConnectorSettingsWindow tcpcs = new TcpConnectorSettingsWindow
@@ -210,7 +220,7 @@ namespace EmbeddedDebugger.Connectors.TCP
             return myName;
         }
 
-        public override void ReceiveMessage(byte[] msg)
+        public void ReceiveMessage(byte[] msg)
         {
             MessageReceived(this, new BytesReceivedEventArgs(msg));
         }

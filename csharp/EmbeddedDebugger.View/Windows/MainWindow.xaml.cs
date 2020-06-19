@@ -15,10 +15,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-using EmbeddedDebugger.Properties;
 using EmbeddedDebugger.ViewModel;
 using System;
 using System.Windows;
+using EmbeddedDebugger.View.Properties;
 
 namespace EmbeddedDebugger.View.Windows
 {

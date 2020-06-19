@@ -39,7 +39,7 @@ namespace EmbeddedDebugger.Model.RPC
         public bool IsRunning { get => isRunning; }
         #endregion
 
-        public RpcInterface(ModelManager mm, DebugProtocol dp)
+        public RpcInterface(ModelManager mm, ConnectionManager dp)
         {
             hostName = "127.0.0.1";
             // TODO Add port

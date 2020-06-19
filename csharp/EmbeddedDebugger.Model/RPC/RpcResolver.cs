@@ -32,9 +32,9 @@ namespace EmbeddedDebugger.Model.RPC
 {
     public class RpcResolver : ListenerService
     {
-        private DebugProtocol dp;
+        private ConnectionManager dp;
         private ModelManager mm;
-        public RpcResolver(ModelManager mm, DebugProtocol dp)
+        public RpcResolver(ModelManager mm, ConnectionManager dp)
         {
             this.mm = mm;
             this.dp = dp;
@@ -55,42 +55,42 @@ namespace EmbeddedDebugger.Model.RPC
         [XmlRpcMethod("ConnectTCP")]
         public void ConnectTCP(string hostname, int port)
         {
-            TcpConnector con = (TcpConnector)dp.Connectors.First(x => x is TcpConnector);
+            TcpConnector con = (TcpConnector)dp.Connections.First(x => x is TcpConnector);
             con.HostName = hostname;
             con.Port = port;
-            dp.Connector = con;
+            dp.Connection = con;
             Connect();
         }
 
         [XmlRpcMethod("ConnectSerial")]
         public void ConnectSerial(string portName, int baudRate)
         {
-            SerialConnector con = (SerialConnector)dp.Connectors.First(x => x is SerialConnector);
+            SerialConnector con = (SerialConnector)dp.Connections.First(x => x is SerialConnector);
             con.PortName = portName;
             con.BaudRate = baudRate;
             con.Parity = con.Parity <= 0 ? Parity.None : con.Parity;
             con.DataBits = con.DataBits <= 0 ? 8 : con.DataBits;
             con.StopBits = con.StopBits <= 0 ? StopBits.One : con.StopBits;
-            con.Hanshake = con.Hanshake <= 0 ? Handshake.None : con.Hanshake;
+            con.Handshake = con.Handshake <= 0 ? Handshake.None : con.Handshake;
             con.ReadTimeout = con.ReadTimeout <= 0 ? 500 : con.ReadTimeout;
             con.WriteTimeout = con.WriteTimeout <= 0 ? 500 : con.WriteTimeout;
-            dp.Connector = con;
+            dp.Connection = con;
             Connect();
         }
 
         [XmlRpcMethod("ConnectSerialExtended")]
         public void ConnectSerial(string portName, int baudRate, Parity parity, int databits, StopBits stopbits, Handshake handshake, int readTimeout, int writeTimeout)
         {
-            SerialConnector con = (SerialConnector)dp.Connectors.First(x => x is SerialConnector);
+            SerialConnector con = (SerialConnector)dp.Connections.First(x => x is SerialConnector);
             con.PortName = portName;
             con.BaudRate = baudRate;
             con.Parity = parity;
             con.DataBits = databits;
             con.StopBits = stopbits;
-            con.Hanshake = handshake;
+            con.Handshake = handshake;
             con.ReadTimeout = readTimeout;
             con.WriteTimeout = writeTimeout;
-            dp.Connector = con;
+            dp.Connection = con;
             Connect();
         }
 

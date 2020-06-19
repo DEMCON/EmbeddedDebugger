@@ -15,13 +15,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-using EmbeddedDebugger.Connectors.Interfaces;
 using EmbeddedDebugger.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using EmbeddedDebugger.Connectors.BaseClasses;
+using EmbeddedDebugger.Connectors.Settings;
+using EmbeddedDebugger.View.Windows;
 
 namespace EmbeddedDebugger.View.UserControls
 {
@@ -33,8 +35,8 @@ namespace EmbeddedDebugger.View.UserControls
         private SystemViewModel systemViewModel;
 
         #region Properties
-        private List<Connector> connectors;
-        public List<Connector> Connectors
+        private List<DebugConnection> connectors;
+        public List<DebugConnection> Connectors
         {
             get => this.connectors;
             set
@@ -53,7 +55,7 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.ConnectorChooserComboBox.SelectedItem is Connector connector)
+            if (this.ConnectorChooserComboBox.SelectedItem is DebugConnection connector)
             {
                 this.systemViewModel.ConnectConnector(connector);
             }
@@ -61,15 +63,19 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.ConnectorChooserComboBox.SelectedItem is Connector connector)
+            if (this.ConnectorChooserComboBox.SelectedItem is DebugConnection connector)
             {
-                this.systemViewModel.ShowConnectorSettings(connector);
+                List<ConnectionSetting> connectionSettings = connector.ConnectionSettings.ToList();
+                if (new ConnectionSettingsWindow {ConnectionSettings = connectionSettings}.ShowDialog() == true)
+                {
+                    this.systemViewModel.SetConnectorSettings(connector, connectionSettings);
+                }
             }
         }
 
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.ConnectorChooserComboBox.SelectedItem is Connector connector)
+            if (this.ConnectorChooserComboBox.SelectedItem is DebugConnection connector)
             {
                 this.systemViewModel.DisconnectConnector(connector);
             }
@@ -110,8 +116,8 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void ConnectorChooserUserControl_OnLoaded(object sender, RoutedEventArgs e)
         {
-            List<Connector> conn = this.systemViewModel.GetConnectors();
-            if (this.systemViewModel.FindPreviousConnector() is Connector connector)
+            List<DebugConnection> conn = this.systemViewModel.GetConnectors();
+            if (this.systemViewModel.FindPreviousConnector() is DebugConnection connector)
             {
                 conn.Remove(conn.First(x => x.GetType() == connector.GetType()));
                 conn.Add(connector);

@@ -23,7 +23,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EmbeddedDebugger.DebugProtocol.Messages;
 
-namespace EmbeddedDebugger.Model.Messages
+namespace EmbeddedDebugger.DebugProtocol.Messages
 {
     public class TraceMessage : ApplicationMessage
     {

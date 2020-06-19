@@ -15,10 +15,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-using EmbeddedDebugger.Connectors.Interfaces;
 using EmbeddedDebugger.Model.Logging;
 using EmbeddedDebugger.Model.RPC;
 using System.Collections.Generic;
+using EmbeddedDebugger.Connectors.BaseClasses;
 using EmbeddedDebugger.DebugProtocol;
 
 namespace EmbeddedDebugger.Model
@@ -31,11 +31,11 @@ namespace EmbeddedDebugger.Model
     {
         #region Properties
         public List<CpuNode> Nodes { get; }
-        public List<Connector> Connectors => this.DebugProtocol.Connectors;
+        public List<DebugConnection> Connectors => this.DebugProtocol.Connections;
         public byte Decimation { get; set; }
         public ValueLogger Logger { get; }
         public RpcInterface RpcInterface { get; }
-        public DebugProtocol DebugProtocol { get; }
+        public ConnectionManager DebugProtocol { get; }
         public Dictionary<byte, Register> DebugChannels { get; }
         #endregion
 
@@ -43,7 +43,7 @@ namespace EmbeddedDebugger.Model
         public ModelManager()
         {
             this.Logger = new ValueLogger();
-            this.DebugProtocol = new DebugProtocol(this, this.Logger);
+            this.DebugProtocol = new ConnectionManager(this);
             this.Nodes = new List<CpuNode>();
             this.RpcInterface = new RpcInterface(this, this.DebugProtocol);
             this.DebugChannels = new Dictionary<byte, Register>();
@@ -61,18 +61,6 @@ namespace EmbeddedDebugger.Model
 
         public void ResetTime(int decimationMs = 0)
         {
-            if (decimationMs > 0)
-            {
-                foreach (CpuNode n in this.Nodes)
-                {
-                    int decimation = decimationMs * 1000 / n.Sizes[EmbeddedDebugger.DebugProtocol.Enums.VariableType.TimeStamp];
-                    if (decimation < 1)
-                        decimation = 1;
-                    if (decimation > 255)
-                        decimation = 255;
-                    this.DebugProtocol.Decimation(n.Id, (byte)decimation);
-                }
-            }
             this.DebugProtocol.ResetTime();
         }
     }

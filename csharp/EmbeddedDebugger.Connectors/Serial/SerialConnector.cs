@@ -15,80 +15,162 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-using EmbeddedDebugger.Connectors.Interfaces;
-using EmbeddedDebugger.Connectors.CustomEventArgs;
+using EmbeddedDebugger.Connectors.BaseClasses;
+using EmbeddedDebugger.Connectors.Settings;
+using EmbeddedDebugger.DebugProtocol.CustomEventArgs;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace EmbeddedDebugger.Connectors.Serial
 {
     /// <summary>
     /// This class is an interface between a serial connection with a microcontroller and the core of the program
     /// </summary>
-    public class SerialConnector : Connector
+    public class SerialConnector : BaseEmbeddedDebugProtocolConnection
     {
         // What we should name this connector
-        private const string myName = "Serial";
+        private const string MyName = "Serial";
+        private const int BlockLimit = 4096;
+        // Some default baud rates to use
+        private static readonly int[] DefaultBaudRates = { 110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200, 128000, 256000 };
+        private static readonly List<string> PortNames = SerialPort.GetPortNames().ToList();
 
-        private string portName;
-        private int baudRate;
-        private Parity parity;
-        private int dataBits;
-        private StopBits stopBits;
-        private Handshake handshake;
-        private int readTimeout;
-        private int writeTimeout;
-        private bool isConnected = false;
-        private readonly int blockLimit = 4096;
+        [XmlIgnore]
+        public override List<ConnectionSetting> ConnectionSettings =>
+        new List<ConnectionSetting> {
+                new ConnectionSetting{
+                    Name = "PortName",
+                    Value = this.PortName,
+                    Possibilities = PortNames,
+                    EnforcePossibilities = true,
+                    PossibilitiesRefresher = ()=>
+                    {
+                        PortNames.Clear();
+                        PortNames.AddRange(SerialPort.GetPortNames());
+                    }
+                },
+                new ConnectionSetting
+                {
+                    Name = "Baud rate",
+                    Value = this.BaudRate == 0 ? 115200 : this.BaudRate,
+                    Possibilities = DefaultBaudRates.Cast<object>(),
+                    EnforcePossibilities = false
+                },
+                new ConnectionSetting
+                {
+                    Name = "Parity",
+                    // Here we use the baud rate == 0, because if this is 0, it was not saved, therefore generate default value
+                    Value = this.BaudRate == 0 ? Parity.None : this.Parity,
+                    Possibilities = Enum.GetValues(typeof(Parity)).Cast<object>(),
+                    EnforcePossibilities = true
+                },
+                new ConnectionSetting
+                {
+                    Name = "Data bits",
+                    Value = this.DataBits == 0 ? 8 : this.DataBits,
+                    Possibilities = new [] {5,6,7,8}.Cast<object>(),
+                    EnforcePossibilities = true
+                },
+                new ConnectionSetting
+                {
+                    Name = "Stop bits",
+                    // Here we use the baud rate == 0, because if this is 0, it was not saved, therefore generate default value
+                    Value = this.BaudRate == 0 ? StopBits.One : this.StopBits,
+                    Possibilities = Enum.GetValues(typeof(StopBits)).Cast<object>(),
+                    EnforcePossibilities = true
+                },
+                new ConnectionSetting
+                {
+                    Name = "Handshake",
+                    // Here we use the baud rate == 0, because if this is 0, it was not saved, therefore generate default value
+                    Value = this.Handshake == 0 ? Handshake.None : this.Handshake,
+                    Possibilities = Enum.GetValues(typeof(Handshake)).Cast<object>(),
+                    EnforcePossibilities = true
+                },
+                new ConnectionSetting
+                {
+                    Name = "Read timeout",
+                    Value = this.ReadTimeout == 0 ? 500 : this.ReadTimeout,
+                },
+                new ConnectionSetting
+                {
+                    Name = "Write timeout",
+                    Value = this.WriteTimeout == 0 ? 500 : this.WriteTimeout,
+                },
+            };
+
+        private bool isConnected;
         private SerialPort port;
 
+        public SerialConnector()
+        {
+        }
+
+
         #region Properties
-        public string PortName { get => portName; set => portName = value; }
-        public int BaudRate { get => baudRate; set => baudRate = value; }
-        public Parity Parity { get => parity; set => parity = value; }
-        public int DataBits { get => dataBits; set => dataBits = value; }
-        public StopBits StopBits { get => stopBits; set => stopBits = value; }
-        public Handshake Hanshake { get => handshake; set => handshake = value; }
-        public int ReadTimeout { get => readTimeout; set => readTimeout = value; }
-        public int WriteTimeout { get => writeTimeout; set => writeTimeout = value; }
+        public string PortName { get; set; }
+        public int BaudRate { get; set; }
+        public Parity Parity { get; set; }
+        public int DataBits { get; set; }
+        public StopBits StopBits { get; set; }
+        public Handshake Handshake { get; set; }
+        public int ReadTimeout { get; set; }
+        public int WriteTimeout { get; set; }
         #endregion
 
-        public SerialConnector() { }
-
         #region IConnector Members
-        public override string Name => myName;
-        public override bool AsServer { get => false; set => myName.ToString(); }
-        public override bool IsConnected => isConnected;
+        public override string Name => MyName;
+        public override bool IsConnected => this.isConnected;
+        public override event EventHandler UnexpectedlyDisconnected = delegate { };
         public override event EventHandler HasConnected = delegate { };
-        public override event EventHandler<BytesReceivedEventArgs> MessageReceived = delegate { };
-        public override event EventHandler UnexpectedDisconnect = delegate { };
+
+        public override void SetConnectionSettings(List<ConnectionSetting> settings)
+        {
+            //Add some testing for the values
+            this.PortName = (string)(settings.First(x => x.Type == typeof(string) && x.Name == "PortName")
+                                ?.Value ?? throw new ArgumentException("PortName not included in settings"));
+            this.BaudRate = (int)(settings.First(x => x.Type == typeof(int) && x.Name == "Baud rate")
+                                 .Value ?? throw new ArgumentException("BaudRate not included in settings"));
+            this.Parity = (Parity)(settings.First(x => x.Type == typeof(Parity) && x.Name == "Parity")
+                                ?.Value ?? throw new ArgumentException("Parity not included in settings"));
+            this.DataBits = (int)(settings.First(x => x.Type == typeof(int) && x.Name == "Data bits")
+                                 .Value ?? throw new ArgumentException("BaudRate not included in settings"));
+            this.StopBits = (StopBits)(settings.First(x => x.Type == typeof(StopBits) && x.Name == "Stop bits")
+                                ?.Value ?? throw new ArgumentException("StopBits not included in settings"));
+            this.Handshake = (Handshake)(settings.First(x => x.Type == typeof(Handshake) && x.Name == "Handshake")
+                                 .Value ?? throw new ArgumentException("Handshake not included in settings"));
+            this.ReadTimeout = (int)(settings.First(x => x.Type == typeof(int) && x.Name == "Read timeout")
+                                ?.Value ?? throw new ArgumentException("ReadTimeout not included in settings"));
+            this.WriteTimeout = (int)(settings.First(x => x.Type == typeof(int) && x.Name == "Write timeout")
+                                 .Value ?? throw new ArgumentException("WriteTimeout not included in settings"));
+        }
 
         public override bool Connect()
         {
             // If no portname has been defined, show the settings dialog
-            if (string.IsNullOrEmpty(portName) && ShowDialog() == false)
+            if (string.IsNullOrEmpty(this.PortName) && this.ShowDialog() == false)
             {
                 return false;
             }
-            port = new SerialPort
+
+            this.port = new SerialPort
             {
-                PortName = portName,
-                BaudRate = baudRate,
-                Parity = parity,
-                DataBits = dataBits,
-                StopBits = stopBits,
-                Handshake = handshake,
-                ReadTimeout = readTimeout,
-                WriteTimeout = writeTimeout
+                PortName = this.PortName,
+                BaudRate = this.BaudRate,
+                Parity = this.Parity,
+                DataBits = this.DataBits,
+                StopBits = this.StopBits,
+                Handshake = this.Handshake,
+                ReadTimeout = this.ReadTimeout,
+                WriteTimeout = this.WriteTimeout
             };
             try
             {
-                port.Open();
+                this.port.Open();
             }
             catch (Exception e)
             {
@@ -98,34 +180,34 @@ namespace EmbeddedDebugger.Connectors.Serial
 #endif
                 return false;
             }
-            isConnected = true;
-            this.HasConnected(this, new EventArgs());
+
+            this.isConnected = true;
             // Define an action which takes care of reading new data from the serialport
             // This uses the underlying basestream of the comport, since the original com port is not robust enough
-            byte[] buffer = new byte[blockLimit];
-            Action kickoffRead = null;
-            kickoffRead = delegate
+            byte[] buffer = new byte[BlockLimit];
+
+            void KickoffRead()
             {
-                if (!port.IsOpen) return;
-                port.BaseStream.BeginRead(buffer, 0, buffer.Length, delegate (IAsyncResult ar)
+                if (!this.port.IsOpen) return;
+                this.port.BaseStream.BeginRead(buffer, 0, buffer.Length, delegate (IAsyncResult ar)
                 {
                     try
                     {
-                        int actualLength = port.BaseStream.EndRead(ar);
+                        int actualLength = this.port.BaseStream.EndRead(ar);
                         byte[] received = new byte[actualLength];
                         Buffer.BlockCopy(buffer, 0, received, 0, actualLength);
-                        ReceiveMessage(received);
+                        this.ReceiveMessage(new BytesReceivedEventArgs(received));
                     }
                     catch (Exception exc)
                     {
 #if DEBUG
                         Console.WriteLine(exc);
 #endif
-                        isConnected = false;
-                        UnexpectedDisconnect(this, new EventArgs());
+                        this.isConnected = false;
+                        this.UnexpectedlyDisconnected(this, new EventArgs());
                         try
                         {
-                            port.Close();
+                            this.port.Close();
                         }
                         catch (IOException e)
                         {
@@ -134,78 +216,76 @@ namespace EmbeddedDebugger.Connectors.Serial
 #endif
                         }
                     }
-                    if (isConnected)
+
+                    if (this.isConnected)
                     {
                         // If still connected, read from the serial port again
-                        kickoffRead();
+                        KickoffRead();
                     }
                 }, null);
-            };
-            kickoffRead();
+            }
+
+            KickoffRead();
+            this.HasConnected(this, new EventArgs());
             return true;
         }
 
         public override void Disconnect()
         {
-            port.Close();
+            this.port.Close();
         }
 
         public override void SendMessage(byte[] msg)
         {
             try
             {
-                port.BaseStream.WriteAsync(msg, 0, msg.Length);
+                this.port.BaseStream.WriteAsync(msg, 0, msg.Length);
             }
             catch (Exception e)
             {
 #if DEBUG
                 Console.WriteLine(e);
 #endif
-                Disconnect();
-                isConnected = false;
-                UnexpectedDisconnect(this, new EventArgs());
+                this.Disconnect();
+                this.isConnected = false;
+                this.UnexpectedlyDisconnected(this, new EventArgs());
             }
         }
 
-        public override bool? ShowDialog()
+        public bool? ShowDialog()
         {
             // Write the current settings to the form
             SerialConnectorSettingsWindow scs = new SerialConnectorSettingsWindow
             {
-                PortName = portName,
-                BaudRate = baudRate,
-                Parity = parity,
-                DataBits = dataBits,
-                StopBits = stopBits,
-                Handshake = handshake,
-                ReadTimeout = readTimeout,
-                WriteTimout = writeTimeout
+                PortName = this.PortName,
+                BaudRate = this.BaudRate,
+                Parity = this.Parity,
+                DataBits = this.DataBits,
+                StopBits = this.StopBits,
+                Handshake = this.Handshake,
+                ReadTimeout = this.ReadTimeout,
+                WriteTimout = this.WriteTimeout
             };
 
             bool? dr = scs.ShowDialog();
             // Read the new settings from the form
             if (dr == true)
             {
-                portName = scs.PortName;
-                baudRate = scs.BaudRate;
-                parity = scs.Parity;
-                dataBits = scs.DataBits;
-                stopBits = scs.StopBits;
-                handshake = scs.Handshake;
-                readTimeout = scs.ReadTimeout;
-                writeTimeout = scs.WriteTimout;
+                this.PortName = scs.PortName;
+                this.BaudRate = scs.BaudRate;
+                this.Parity = scs.Parity;
+                this.DataBits = scs.DataBits;
+                this.StopBits = scs.StopBits;
+                this.Handshake = scs.Handshake;
+                this.ReadTimeout = scs.ReadTimeout;
+                this.WriteTimeout = scs.WriteTimout;
             }
             return dr;
         }
 
-        public override void ReceiveMessage(byte[] msg)
-        {
-            MessageReceived(this, new BytesReceivedEventArgs(msg));
-        }
-
         public override string ToString()
         {
-            return myName;
+            return MyName;
         }
         #endregion
     }

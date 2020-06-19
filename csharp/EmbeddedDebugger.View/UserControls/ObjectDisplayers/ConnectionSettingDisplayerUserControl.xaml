@@ -1,0 +1,27 @@
+﻿<UserControl x:Class="EmbeddedDebugger.View.UserControls.ObjectDisplayers.ConnectionSettingDisplayerUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:EmbeddedDebugger.View.UserControls.ObjectDisplayers"
+             xmlns:converters="clr-namespace:EmbeddedDebugger.View.Converters"
+             xmlns:enums="clr-namespace:EmbeddedDebugger.DebugProtocol.Enums;assembly=EmbeddedDebugger.DebugProtocol"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
+             xmlns:ViewModel="clr-namespace:EmbeddedDebugger.ViewModel;assembly=EmbeddedDebugger.ViewModel"
+             mc:Ignorable="d" 
+             d:DesignHeight="30" d:DesignWidth="300" Background="White"
+             x:Name="csd"
+             HorizontalAlignment="Stretch" DataContextChanged="ConnectionSettingDisplayerUserControl_OnDataContextChanged">
+    <Grid Name="TheGrid" Margin="3">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="30"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" Margin="3" Text="{Binding Path=Name}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+        <Button Grid.Row="0" Grid.Column="2" Margin="3" Height="22" Width="22" Content="Q" FontFamily="Wingdings 3" FontWeight="Bold" Visibility="Collapsed" Name="RefreshButton" />
+    </Grid>
+</UserControl>

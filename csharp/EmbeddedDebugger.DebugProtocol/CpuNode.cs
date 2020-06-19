@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using EmbeddedDebugger.DebugProtocol.EmbeddedConfiguration;
 using EmbeddedDebugger.DebugProtocol.Enums;
 using EmbeddedDebugger.DebugProtocol.RegisterValues;
-using EmbeddedDebugger.Model.Messages;
+using EmbeddedDebugger.DebugProtocol.Messages;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

@@ -56,7 +56,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DebugProtocol.cs" />
+    <Compile Include="ConnectionManager.cs" />
     <Compile Include="Logging\FileType.cs" />
     <Compile Include="Logging\TimeStampUsage.cs" />
     <Compile Include="Logging\ValueLogger.cs" />

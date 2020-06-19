@@ -15,8 +15,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-using EmbeddedDebugger.Connectors.Interfaces;
+using EmbeddedDebugger.Connectors.BaseClasses;
 using EmbeddedDebugger.Connectors.ProjectConnectors.Connectors;
+using EmbeddedDebugger.Connectors.Settings;
+using EmbeddedDebugger.DebugProtocol;
 using EmbeddedDebugger.DebugProtocol.Enums;
 using EmbeddedDebugger.Model;
 using NLog;
@@ -25,7 +27,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using EmbeddedDebugger.DebugProtocol;
 
 namespace EmbeddedDebugger.ViewModel
 {
@@ -34,10 +35,10 @@ namespace EmbeddedDebugger.ViewModel
         /// <summary>
         /// The logger for this class
         /// </summary>
-        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly ModelManager modelManager;
-        private readonly Model.DebugProtocol debugProtocol;
+        private readonly ConnectionManager debugProtocol;
 
         public CpuNode SelectedCpuNode { get; set; }
 
@@ -58,36 +59,37 @@ namespace EmbeddedDebugger.ViewModel
         #endregion
 
         #region Connector
-        public List<Connector> GetConnectors()
+        public List<DebugConnection> GetConnectors()
         {
             return this.modelManager.Connectors;
         }
 
-        public void ConnectConnector(Connector connector)
+        public void ConnectConnector(DebugConnection connector)
         {
-            this.debugProtocol.Connector = connector;
+            this.debugProtocol.Connection = connector;
             // If connect was successful, save this configuration to be opened on next launch
             if (this.debugProtocol.Connect())
             {
-                XmlSerializer writer = new XmlSerializer(typeof(Connector), new[] { typeof(ExampleProjectConnector) });
+                XmlSerializer writer = new XmlSerializer(typeof(DebugConnection), new[] { typeof(ExampleProjectConnector) });
 
                 string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "EmbeddedDebugger", "Config", "connection.xml");
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                Directory.CreateDirectory(Path.GetDirectoryName(path) ?? throw new InvalidOperationException());
                 FileStream file = File.Create(path);
 
-                writer.Serialize(file, this.debugProtocol.Connector);
+                writer.Serialize(file, this.debugProtocol.Connection);
                 file.Close();
             }
         }
 
-        public void DisconnectConnector(Connector connector)
+        public void DisconnectConnector(DebugConnection connector)
         {
             this.debugProtocol.Disconnect();
         }
 
-        public void ShowConnectorSettings(Connector connector)
+
+        public void SetConnectorSettings(DebugConnection connector, List<ConnectionSetting> settings)
         {
-            this.debugProtocol.ShowSettings(connector);
+            this.debugProtocol.SetConnectorSettings(connector, settings);
         }
 
         public bool ConnectorConnected()
@@ -111,12 +113,12 @@ namespace EmbeddedDebugger.ViewModel
 
         public void RequestNewValue(Register register)
         {
-            this.modelManager.DebugProtocol.QueryRegister(register.CpuId, register.CpuNode, register);
+            this.modelManager.DebugProtocol.QueryRegister(register.CpuNode, register);
         }
 
         public void WriteNewValue(Register register)
         {
-            this.modelManager.DebugProtocol.WriteToRegister(register.CpuId, register.RegisterValue.ValueByteArray, register);
+            this.modelManager.DebugProtocol.WriteToRegister(register.CpuNode, register, register.RegisterValue);
         }
 
         public bool UpdateChannelMode(Register register, ChannelMode channelMode)
@@ -129,7 +131,7 @@ namespace EmbeddedDebugger.ViewModel
                     if (!register.CpuNode.DebugChannels.ContainsKey(i))
                     {
                         register.CpuNode.DebugChannels.Add(i, register);
-                        this.modelManager.DebugProtocol.ConfigChannel(register.CpuId, i, channelMode, register);
+                        this.modelManager.DebugProtocol.SetupSignalTracing(register.CpuNode, channelMode, register);
                         result = true;
                         break;
                     }
@@ -138,26 +140,26 @@ namespace EmbeddedDebugger.ViewModel
             else if (register.CpuNode.DebugChannels.ContainsValue(register))
             {
                 int channelId = register.CpuNode.DebugChannels.FirstOrDefault(x => x.Value == register).Key;
-                this.modelManager.DebugProtocol.ConfigChannel(register.CpuId, (byte)channelId, channelMode, register);
+                this.modelManager.DebugProtocol.SetupSignalTracing(register.CpuNode, channelMode, register);
                 if (channelMode == ChannelMode.Off) this.modelManager.DebugChannels.Remove((byte)channelId);
             }
             return result;
         }
 
-        public Connector FindPreviousConnector()
+        public DebugConnection FindPreviousConnector()
         {
-            Connector returnable = null;
+            DebugConnection returnable = null;
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "EmbeddedDebugger", "Config", "connection.xml");
             if (File.Exists(path))
             {
                 try
                 {
                     XmlSerializer serializer =
-                        new XmlSerializer(typeof(Connector));
+                        new XmlSerializer(typeof(DebugConnection));
                     using (Stream reader = new FileStream(path, FileMode.Open))
                     {
                         // Call the Deserialize method to restore the object's state.
-                        returnable = (Connector)serializer.Deserialize(reader);
+                        returnable = (DebugConnection)serializer.Deserialize(reader);
                     }
                 }
                 catch (Exception e)

@@ -21,7 +21,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EmbeddedDebugger.Connectors.CustomEventArgs
+namespace EmbeddedDebugger.DebugProtocol.CustomEventArgs
 {
     /// <summary>
     /// This class is used with events, allowing for byte arrays to be passed without a lot of trouble

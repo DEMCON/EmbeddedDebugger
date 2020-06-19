@@ -1,0 +1,44 @@
+﻿<Window x:Class="EmbeddedDebugger.View.Windows.ConnectionSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EmbeddedDebugger.View.Windows"
+        xmlns:displayers="clr-namespace:EmbeddedDebugger.View.UserControls.ObjectDisplayers"
+        xmlns:settings="clr-namespace:EmbeddedDebugger.Connectors.Settings;assembly=EmbeddedDebugger.Connectors"
+        mc:Ignorable="d"
+        Title="ConnectionSettingsWindow" d:DesignHeight="200" d:DesignWidth="300" MaxHeight="400" MaxWidth="300" MinHeight="200" MinWidth="300" >
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <ListView Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Name="RegistersStackPanel" VirtualizingPanel.ScrollUnit="Pixel" BorderThickness="0">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizationMode="Recycling" ScrollUnit="Pixel"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Margin" Value="0"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="settings:ConnectionSetting">
+                    <displayers:ConnectionSettingDisplayerUserControl/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ListView>
+
+        <Button Grid.Row="1" Grid.Column="1" Content="Cancel" Margin="3" VerticalAlignment="Center" Width="100" Height="28" Name="CancelButton" Click="CancelButton_OnClick"  />
+        <Button Grid.Row="1" Grid.Column="0" Content="OK" Margin="3" VerticalAlignment="Center" Width="100" Height="28" Name="OKButton" Click="OKButton_OnClick"  />
+    </Grid>
+</Window>

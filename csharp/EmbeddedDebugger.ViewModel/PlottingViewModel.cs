@@ -29,7 +29,7 @@ namespace EmbeddedDebugger.ViewModel
     public class PlottingViewModel
     {
         private readonly ModelManager modelManager;
-        private readonly Model.DebugProtocol debugProtocol;
+        private readonly Model.ConnectionManager debugProtocol;
 
         public List<Register> RegistersToPlot;
         

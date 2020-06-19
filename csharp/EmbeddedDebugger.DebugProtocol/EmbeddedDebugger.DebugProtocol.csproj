@@ -52,6 +52,9 @@
   <ItemGroup>
     <Compile Include="CpuNode.cs" />
     <Compile Include="Crc.cs" />
+    <Compile Include="CustomEventArgs\BytesReceivedEventArgs.cs" />
+    <Compile Include="CustomEventArgs\TraceMessageReceivedEventArgs.cs" />
+    <Compile Include="CustomEventArgs\ValueReceivedEventArgs.cs" />
     <Compile Include="EmbeddedConfiguration\ElfParser.cs" />
     <Compile Include="EmbeddedConfiguration\EmbeddedConfig.cs" />
     <Compile Include="EmbeddedConfiguration\SimulinkCApiParser.cs" />
