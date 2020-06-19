@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Cortex debug",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "cwd": "${workspaceFolder}",
+            "executable": "build/BluePill.elf",
+            "svdFile": ".vscode/STM32F103xx.svd",
+            "configFiles": [
+                "C:/GNUMCUEclipse/OpenOCD/0.10.0-12-20190422-2015/scripts/interface/stlink.cfg",
+                ".vscode/stm32f1x.cfg"
+            ],
+            "preLaunchTask": "Build project"
+        },
+        {
+            "name": "Debug current Python file",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        }
+    ]
+}

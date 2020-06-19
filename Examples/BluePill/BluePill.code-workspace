@@ -1,0 +1,11 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "cortex-debug.armToolchainPath": "C:/GNUMCUEclipse/ARMEmbeddedGCC/bin",
+        "cortex-debug.openocdPath": "C:/GNUMCUEclipse/OpenOCD/0.10.0-12-20190422-2015/bin/openocd.exe"
+    }
+}

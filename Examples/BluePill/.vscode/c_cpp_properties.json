@@ -1,0 +1,87 @@
+{
+    "env": {
+        "____________________USER_FIELDS_CAN_BE_MODIFIED____________________": "",
+        "user_cSources": [],
+        "user_asmSources": [],
+        "user_ldSources": [],
+        "user_cIncludes": [],
+        "user_asmIncludes": [],
+        "user_ldIncludes": [],
+        "user_cDefines": [],
+        "user_asmDefines": [],
+        "user_cFlags": [],
+        "user_asmFlags": [],
+        "user_ldFlags": [],
+        "____________________DO_NOT_MODIFY_FIELDS_BELOW____________________": "",
+        "cubemx_sourceFiles": [
+            "Src/main.c",
+            "Src/stm32f1xx_it.c",
+            "Src/stm32f1xx_hal_msp.c",
+            "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio_ex.c",
+            "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.c",
+            "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c",
+            "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c",
+            "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.c",
+            "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c",
+            "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.c",
+            "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.c",
+            "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.c",
+            "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.c",
+            "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.c",
+            "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.c",
+            "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c",
+            "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.c",
+            "Src/system_stm32f1xx.c",
+            "startup_stm32f103xb.s"
+        ],
+        "cubemx_includes": [
+            "Inc",
+            "Drivers/STM32F1xx_HAL_Driver/Inc",
+            "Drivers/STM32F1xx_HAL_Driver/Inc/Legacy",
+            "Drivers/CMSIS/Device/ST/STM32F1xx/Include",
+            "Drivers/CMSIS/Include",
+            "Drivers/CMSIS/Include"
+        ],
+        "cubemx_defines": [
+            "USE_HAL_DRIVER",
+            "STM32F103xB"
+        ],
+        "gccExePath": "C:/GNUMCUEclipse/ARMEmbeddedGCC/bin/arm-none-eabi-gcc.exe",
+        "gccIncludePath": "C:/GNUMCUEclipse/ARMEmbeddedGCC/lib/gcc/arm-none-eabi/9.2.1/include"
+    },
+    "configurations": [
+        {
+            "name": "BluePill",
+            "intelliSenseMode": "msvc-x64",
+            "includePath": [
+                "${workspaceFolder}",
+                "${cubemx_includes}",
+                "${gccIncludePath}",
+                "${user_cIncludes}",
+                "${user_asmIncludes}",
+                "${user_ldIncludes}"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}",
+                    "${cubemx_includes}",
+                    "${gccIncludePath}",
+                    "${user_cIncludes}",
+                    "${user_asmIncludes}",
+                    "${user_ldIncludes}"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "defines": [
+                "${cubemx_defines}",
+                "${user_cDefines}",
+                "${user_asmDefines}"
+            ],
+            "forcedInclude": [],
+            "compilerPath": "${gccExePath}",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
