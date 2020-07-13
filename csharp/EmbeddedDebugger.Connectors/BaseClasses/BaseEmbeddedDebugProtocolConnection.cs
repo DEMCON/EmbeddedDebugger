@@ -7,6 +7,8 @@ using EmbeddedDebugger.DebugProtocol.Messages;
 using EmbeddedDebugger.DebugProtocol.RegisterValues;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
@@ -19,10 +21,12 @@ namespace EmbeddedDebugger.Connectors.BaseClasses
     public abstract class BaseEmbeddedDebugProtocolConnection : DebugConnection
     {
         private byte[] remainderBytes;
+        private Dictionary<CpuNode, Dictionary<byte, Register>> DebugChannels;
 
         protected BaseEmbeddedDebugProtocolConnection()
         {
             this.remainderBytes = new byte[0];
+            DebugChannels = new Dictionary<CpuNode, Dictionary<byte, Register>>();
         }
 
         public override event EventHandler<CpuNode> NewNodeFound;
@@ -78,7 +82,49 @@ namespace EmbeddedDebugger.Connectors.BaseClasses
 
         public override void SetupSignalTracing(CpuNode cpuNode, Register register, ChannelMode channelMode)
         {
-            throw new NotImplementedException();
+            // Make sure the CpuNode is present in our dictionary
+            if (DebugChannels.ContainsKey(cpuNode))
+            {
+                if (!this.DebugChannels[cpuNode].ContainsValue(register) && channelMode != ChannelMode.Off)
+                {
+                    for (byte i = 0; i < 255; i++)
+                    {
+                        if (!register.CpuNode.DebugChannels.ContainsKey(i))
+                        {
+                            this.DebugChannels[cpuNode].Add(i, register);
+                            break;
+                        }
+                    }
+                }
+                if (this.DebugChannels[cpuNode].ContainsValue(register))
+                {
+                    Version protocolVersion = cpuNode.ProtocolVersion;
+                    ConfigChannelMessage msg = new ConfigChannelMessage()
+                    {
+                        ChannelId = this.DebugChannels[cpuNode].First(x => x.Value.Id == register.Id).Key,
+                        Mode = channelMode,
+                        Offset = register.Offset,
+                        Control = MessageCodec.GetControlByte(protocolVersion, register.ReadWrite, register.Source, register.DerefDepth),
+                        Size = register.Size,
+                    };
+                    SendMessage(cpuNode.Id, msg);
+                    if (this.DebugChannels[cpuNode].ContainsValue(register) && channelMode == ChannelMode.Off)
+                    {
+                        this.DebugChannels[cpuNode].Remove(this.DebugChannels[cpuNode].First(x => x.Value.Id == register.Id).Key);
+                    }
+                }
+            }
+        }
+
+        private void SendMessage(byte nodeID, ApplicationMessage msg)
+        {
+            ProtocolMessage protocol_message = msg.ToProtocolMessage(nodeID, 0x00);
+            SendMessage(protocol_message);
+        }
+
+        private void SendMessage(ProtocolMessage msg)
+        {
+            SendMessage(MessageCodec.EncodeMessage(msg));
         }
 
         public override void ResetTime(CpuNode cpuNode)
@@ -113,6 +159,7 @@ namespace EmbeddedDebugger.Connectors.BaseClasses
                     case Command.ResetTime:
                         break;
                     case Command.ReadChannelData:
+                        DispatchReadChannelDataMessage(protocolMessage);
                         break;
                     case Command.DebugString:
                         break;
@@ -143,6 +190,7 @@ namespace EmbeddedDebugger.Connectors.BaseClasses
                         node.Name.Trim(),
                         $"cpu{id:D2}-V{node.ApplicationVersion.Major:D2}_{node.ApplicationVersion.Minor:D2}_{node.ApplicationVersion.Build:D4}.xml")))
             {
+                this.DebugChannels.Add(node, new Dictionary<byte, Register>());
                 this.NewNodeFound?.Invoke(this, node);
             }
             else
@@ -172,7 +220,35 @@ namespace EmbeddedDebugger.Connectors.BaseClasses
             {
                 throw new ArgumentException("No register found with this offset or readwrite");
             }
-            r.AddValue(RegisterValue.GetRegisterValueByVariableType(r.VariableType, response.Value));
+            NewValueReceived(this, new ValueReceivedEventArgs(RegisterValue.GetRegisterValueByVariableType(r.VariableType, response.Value), r, node));
+        }
+
+        private void DispatchReadChannelDataMessage(ProtocolMessage protocolMessage)
+        {
+            byte id = protocolMessage.ControllerID;
+            CpuNode node = this.Nodes.First(x => x.Id == protocolMessage.ControllerID);
+            if (node == null)
+            {
+                throw new ArgumentException("No node found");
+            }
+
+            ReadChannelDataMessage readChannelDataMessage = new ReadChannelDataMessage(protocolMessage);
+            List<byte> value = readChannelDataMessage.Data.ToList();
+
+            for (int i = 255; i >= 0; i--)
+            {
+                if ((readChannelDataMessage.Mask >> i & 1) == 1 && this.DebugChannels[node].ContainsKey((byte)i))
+                {
+                    byte[] myValue = value.Take(this.DebugChannels[node][(byte)i].Size).ToArray();
+                    value.RemoveRange(0, this.DebugChannels[node][(byte)i].Size);
+                    RegisterValue regVal = new RegisterValue
+                    {
+                        TimeStamp = readChannelDataMessage.TimeStamp,
+                        ValueByteArray = myValue
+                    };
+                    NewValueReceived(this, new ValueReceivedEventArgs(regVal, this.DebugChannels[node][(byte)i], node));
+                }
+            }
         }
     }
 }

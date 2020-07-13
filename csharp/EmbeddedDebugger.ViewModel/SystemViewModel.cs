@@ -121,29 +121,9 @@ namespace EmbeddedDebugger.ViewModel
             this.modelManager.DebugProtocol.WriteToRegister(register.CpuNode, register, register.RegisterValue);
         }
 
-        public bool UpdateChannelMode(Register register, ChannelMode channelMode)
+        public void UpdateChannelMode(Register register, ChannelMode channelMode)
         {
-            bool result = false;
-            if (!register.CpuNode.DebugChannels.ContainsValue(register) && channelMode != ChannelMode.Off)
-            {
-                for (byte i = 0; i < register.CpuNode.MaxNumberOfDebugChannels; i++)
-                {
-                    if (!register.CpuNode.DebugChannels.ContainsKey(i))
-                    {
-                        register.CpuNode.DebugChannels.Add(i, register);
-                        this.modelManager.DebugProtocol.SetupSignalTracing(register.CpuNode, channelMode, register);
-                        result = true;
-                        break;
-                    }
-                }
-            }
-            else if (register.CpuNode.DebugChannels.ContainsValue(register))
-            {
-                int channelId = register.CpuNode.DebugChannels.FirstOrDefault(x => x.Value == register).Key;
-                this.modelManager.DebugProtocol.SetupSignalTracing(register.CpuNode, channelMode, register);
-                if (channelMode == ChannelMode.Off) this.modelManager.DebugChannels.Remove((byte)channelId);
-            }
-            return result;
+            this.modelManager.DebugProtocol.SetupSignalTracing(register.CpuNode, channelMode, register);
         }
 
         public DebugConnection FindPreviousConnector()
