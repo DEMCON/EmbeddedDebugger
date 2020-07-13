@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using EmbeddedDebugger.Model;
 using EmbeddedDebugger.ViewModel;
 using OxyPlot;
+using OxyPlot.Axes;
 using OxyPlot.Series;
 using System;
 using System.Collections.Generic;
@@ -40,6 +41,9 @@ namespace EmbeddedDebugger.View.UserControls
         private SystemViewModel systemViewModel;
         private PlottingViewModel plottingViewModel;
 
+        private DateTimeAxis xAxis = new DateTimeAxis();
+        private LinearAxis yAxis = new LinearAxis();
+
         private Dictionary<Register, LineSeries> plotSeries;
 
         private List<Register> plotRegisters;
@@ -50,9 +54,29 @@ namespace EmbeddedDebugger.View.UserControls
             plotRegisters = new List<Register>();
             plotModel = new PlotModel { Title = "" };
             Plot.Model = plotModel;
-            AutoScaleCheckBox.IsChecked = true;
+            YAutoScaleCheckBox.IsChecked = true;
             this.plotSeries = new Dictionary<Register, LineSeries>();
+
+
+            #region initialize axis
+            //Set the number position to the correct position
+            yAxis.Position = AxisPosition.Left;
+            xAxis.Position = AxisPosition.Bottom;
+
+            //Set lines in background
+            xAxis.MajorGridlineStyle = LineStyle.Solid;
+            yAxis.MajorGridlineStyle = LineStyle.Solid;
+
+            //Disable the axis zoom
+            yAxis.IsZoomEnabled = false;
+
+            //Add axis to graph
+            plotModel.Axes.Add(xAxis);
+            plotModel.Axes.Add(yAxis);
+            #endregion
         }
+
+        
 
         //TODO Readd logging
         /*
@@ -75,32 +99,9 @@ namespace EmbeddedDebugger.View.UserControls
             PlotRegisters.Remove(register);
         }*/
 
-        private void AutoScaleCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            ManualGroupBox.IsEnabled = !(bool)AutoScaleCheckBox.IsChecked;
-            if (AutoScaleCheckBox.IsChecked.HasValue && (bool)AutoScaleCheckBox.IsChecked)
-            {
-                foreach (OxyPlot.Axes.Axis ax in plotModel.Axes)
-                {
-                    ax.AbsoluteMaximum = double.MaxValue;
-                    ax.AbsoluteMinimum = double.MinValue;
-
-                    ax.Minimum = double.NaN;
-                    ax.Maximum = double.NaN;
-                    ax.MinorStep = double.NaN;
-                    ax.MajorStep = double.NaN;
-
-                    ax.MinimumPadding = 0.01;
-                    ax.MaximumPadding = 0.01;
-                    ax.MinimumRange = 0;
-
-                    ax.Reset();
-                }
-            }
-        }
-
         private void ResetAxisButton_Click(object sender, RoutedEventArgs e)
         {
+            LastComboBox.SelectedIndex = 0;
             foreach (OxyPlot.Axes.Axis ax in plotModel.Axes)
             {
                 ax.AbsoluteMaximum = double.MaxValue;
@@ -150,50 +151,6 @@ namespace EmbeddedDebugger.View.UserControls
             }
         }
 
-        private void MinYScaleTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            if (!double.TryParse(e.Text, out double result) && !e.Text.Equals("."))
-            {
-                e.Handled = true;
-            }
-        }
-
-        private void MaxYScaleTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            if (!double.TryParse(e.Text, out double result) && !e.Text.Equals("."))
-            {
-                e.Handled = true;
-            }
-        }
-
-        private void RangeXTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            if (!double.TryParse(RangeXTextBox.Text, out double result))
-            {
-                e.Handled = true;
-            }
-        }
-
-        private void RangeXTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (plotRegisters == null || !double.TryParse(RangeXTextBox.Text, out double result)) return;
-            foreach (Register r in plotRegisters)
-            {
-                r.NumberOfSeconds = result;
-            }
-        }
-
-        private void RangeYTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (string.IsNullOrEmpty(MaxYScaleTextBox.Text)) return;
-            if (!(bool)AutoScaleCheckBox.IsChecked)
-            {
-                ElementCollection<OxyPlot.Axes.Axis> ec = plotModel.Axes;
-                plotModel.Axes[1].Maximum = Double.Parse(MaxYScaleTextBox.Text);
-                ElementCollection<OxyPlot.Axes.Axis> ec2 = plotModel.Axes;
-            }
-        }
-
         private void PlotUserControl_OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (e.OldValue is ViewModelManager vmmOld)
@@ -232,6 +189,36 @@ namespace EmbeddedDebugger.View.UserControls
                 }
 
             }
+        }
+
+        private void LastComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void ZoomFitCheckBox_CheckBoxChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void ZoomFitButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void YAutoScaleCheckBox_Checked(object sendern, RoutedEventArgs e)
+        {
+            //reset y axis
+            yAxis.Reset();
+
+            //Disable the y axis zoom
+            yAxis.IsZoomEnabled = false;
+        }
+
+        private void YAutoScaleCheckBox_Unchecked(object sendern, RoutedEventArgs e)
+        {
+            //Enable the y axis zoom
+            yAxis.IsZoomEnabled = true;
         }
     }
 }

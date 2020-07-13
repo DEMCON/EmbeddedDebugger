@@ -61,6 +61,7 @@
     <Compile Include="Logging\TimeStampUsage.cs" />
     <Compile Include="Logging\ValueLogger.cs" />
     <Compile Include="ModelManager.cs" />
+    <Compile Include="PlottingBtreeManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RPC\RpcInterface.cs" />
     <Compile Include="RPC\RpcResolver.cs" />
