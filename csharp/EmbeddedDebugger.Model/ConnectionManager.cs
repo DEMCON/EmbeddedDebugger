@@ -233,6 +233,7 @@ namespace EmbeddedDebugger.Model
         private void Connector_NewValueReceived(object sender, EmbeddedDebugger.DebugProtocol.CustomEventArgs.ValueReceivedEventArgs e)
         {
             e.Register?.AddValue(e.Value);
+            core.BTreeManager.AddValueToBTree(e.Register, Convert.ToDouble(e.Value), new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds());
         }
 
         /// <summary>

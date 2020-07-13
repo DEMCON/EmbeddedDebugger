@@ -30,16 +30,28 @@ namespace EmbeddedDebugger.ViewModel
     {
         private readonly ModelManager modelManager;
         private readonly Model.ConnectionManager debugProtocol;
+        private readonly PlottingBtreeManager plottingBtreeManager;
 
-        public List<Register> RegistersToPlot;
-        
+        public List<Register> RegistersToPlot { get; }
+
         public PlottingViewModel(ModelManager modelManager)
         {
             this.modelManager = modelManager;
             this.debugProtocol = modelManager.DebugProtocol;
+            this.plottingBtreeManager = modelManager.BTreeManager;
             this.RegistersToPlot = new List<Register>();
         }
 
-        
+        public void AddPlottingRegister(Register register)
+        {
+            this.RegistersToPlot.Add(register);
+            this.plottingBtreeManager.AddBTree(register);
+        }
+
+        public void RemovePlottingRegister(Register register)
+        {
+            this.RegistersToPlot.Remove(register);
+            this.plottingBtreeManager.RemoveBTree(register);
+        }
     }
 }

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using EmbeddedDebugger.DebugProtocol;
+using NLog;
+using NLog.Targets.Wrappers;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,12 +10,46 @@ using System.Threading.Tasks;
 
 namespace EmbeddedDebugger.Model
 {
-    class PlottingBtreeManager
+    public class PlottingBtreeManager
     {
-        List<Btree> btreeList;
+        private readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private readonly Dictionary<Register, Btree> theTrees;
+
+        public PlottingBtreeManager()
+        {
+            this.theTrees = new Dictionary<Register, Btree>();
+        }
+
+        public void AddBTree(Register register)
+        {
+            if (!theTrees.ContainsKey(register))
+            {
+                this.theTrees.Add(register, new Btree());
+                Logger.Trace($"Added BTree for register: {register}");
+            }
+        }
+
+        public void RemoveBTree(Register register)
+        {
+            if (theTrees.ContainsKey(register))
+            {
+                this.theTrees.Remove(register);
+                Logger.Trace($"Removed BTree for register: {register}");
+            }
+        }
+
+        public void AddValueToBTree(Register register, double value, double timeStamp)
+        {
+            if (theTrees.ContainsKey(register))
+            {
+                this.theTrees[register].AddPoint(timeStamp, value);
+            }
+        }
     }
 
-    class Btree
+    // TODO Please make sure the classes are in different files, preferable in one folder in the model: BTree or some other nice name 
+
+    public class Btree
     {
         Random randNum = new Random(); //test purposes
 
@@ -147,7 +184,7 @@ namespace EmbeddedDebugger.Model
     }
 
 
-    abstract class Node
+    public abstract class Node
     {
         abstract public Node AppendPoint(double timestamp, double yValue);
         abstract public void AppendNode(Node node, int rootNodeLevel);
@@ -155,7 +192,7 @@ namespace EmbeddedDebugger.Model
         abstract public NodeVariables GetValues();
     }
 
-    class NodeVariables
+    public class NodeVariables
     {
         public double yAvg;
         public double yMin;
@@ -169,7 +206,7 @@ namespace EmbeddedDebugger.Model
         public double[,] leafPoints;
     }
 
-    class IntermediateNode : Node
+    public class IntermediateNode : Node
     {
         List<Node> nodeList = new List<Node>();
 
@@ -308,7 +345,7 @@ namespace EmbeddedDebugger.Model
     /// <summary>
     /// class with the seperate points, level 0
     /// </summary>
-    class LeafNode : Node
+    public class LeafNode : Node
     {
         NodeVariables localNodeVariables = new NodeVariables();
 

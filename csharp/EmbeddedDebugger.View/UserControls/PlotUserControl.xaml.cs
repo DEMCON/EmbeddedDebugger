@@ -76,29 +76,6 @@ namespace EmbeddedDebugger.View.UserControls
             #endregion
         }
 
-        
-
-        //TODO Readd logging
-        /*
-        public void AddRegisterToPlot(Register register)
-        {
-            if (register.Line != null && plotModel.Series.Contains(register.Line)) return;
-            if (!register.Plot) register.Plot = true;
-            register.PlotModel = plotModel;
-            plotModel.Series.Add(register.Line);
-            register.NumberOfSeconds = double.Parse(RangeXTextBox.Text);
-            plotRegisters.Add(register);
-        }
-
-        public void RemoveRegisterFromPlot(Register register)
-        {
-            if (register.Line == null) return;
-            if (register.Plot) register.Plot = false;
-            register.PlotModel = null;
-            plotModel.Series.Remove(register.Line);
-            PlotRegisters.Remove(register);
-        }*/
-
         private void ResetAxisButton_Click(object sender, RoutedEventArgs e)
         {
             LastComboBox.SelectedIndex = 0;
