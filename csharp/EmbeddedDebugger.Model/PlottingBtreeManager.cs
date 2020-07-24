@@ -72,7 +72,7 @@ namespace EmbeddedDebugger.Model
             rootNode.AppendNode(new_leaf, 0);
 
             //demodata to test btree
-            FillDemoData();
+            //FillDemoData();
             bTreeReady = true;
         }
 
