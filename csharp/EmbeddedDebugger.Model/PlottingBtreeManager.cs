@@ -3,7 +3,6 @@ using NLog;
 using NLog.Targets.Wrappers;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -51,14 +50,14 @@ namespace EmbeddedDebugger.Model
 
     public class Btree
     {
-        Random randNum = new Random(); //test purposes
+        Random randNum = new Random(); 
 
-        public const int leafSize = 3; //amount of points in leafnode
-        public const int nodeSize = 3; //amount of childnodes in node
-        public const int displayPointSize = 150; //
+        public const int leafSize = 4; //amount of points in leafnode
+        public const int nodeSize = 4; //amount of childnodes in node
+        public const int displayPointSize = 150; //how many points to display at least
         int rootNodeLevel = 2; //
 
-        double testCounter = 1;
+        double testCounter = 1; //testing purposes
 
         Node rootNode;
 
@@ -67,9 +66,9 @@ namespace EmbeddedDebugger.Model
         public Btree()
         {
             //initialize btree
-            rootNode = new IntermediateNode(0);
+            rootNode = new IntermediateNode(1);
             Node new_leaf = new LeafNode();
-            rootNode.AppendNode(new_leaf, 0);
+            rootNode.AppendNode(new_leaf, 1);
 
             //demodata to test btree
             //FillDemoData();
@@ -77,6 +76,7 @@ namespace EmbeddedDebugger.Model
         }
 
         /// <summary>
+        /// testing purposes
         /// fill btree with dummy data
         /// </summary>
         private void FillDemoData()
@@ -84,7 +84,6 @@ namespace EmbeddedDebugger.Model
             DateTime dateTimeNow = DateTime.Now;
             var dateTimeOffset = new DateTimeOffset(dateTimeNow);
             var unixDateTime = dateTimeOffset.ToUnixTimeMilliseconds();
-            //long unixDateTime = 1;
 
             for (testCounter = unixDateTime; testCounter < unixDateTime + 100000; testCounter++)
             {
@@ -111,8 +110,6 @@ namespace EmbeddedDebugger.Model
             if (root_sibling != null)
             {
                 rootNodeLevel++;
-                Debug.Write("Making new rootnode on level: ");
-                Debug.WriteLine(rootNodeLevel.ToString());
                 Node new_root = new IntermediateNode(rootNodeLevel);
                 new_root.AppendNode(rootNode, rootNodeLevel - 1); //Adds old rootnode to the new rootnode as a childnode. 
                 new_root.AppendNode(root_sibling, rootNodeLevel - 1);
@@ -126,7 +123,7 @@ namespace EmbeddedDebugger.Model
         /// <returns>X min max of the current btree | 0 = Min | 1 = Max</returns>
         public double[] GetBtreeMinMax()
         {
-            NodeVariables rootNodeValues = rootNode.GetValues();
+            NodeStatistics rootNodeValues = rootNode.GetValues();
             double[] returnValues = new double[2];
             returnValues[0] = rootNodeValues.xMin;
             returnValues[1] = rootNodeValues.xMax;
@@ -139,7 +136,7 @@ namespace EmbeddedDebugger.Model
         /// <param name="minX">min display value</param>
         /// <param name="maxX">max display value</param>
         /// <returns>List of NodeVariables, this also includes leafPoint at the leafNode level</returns>
-        public List<NodeVariables> GetData(double minX, double maxX)
+        public List<NodeStatistics> GetData(double minX, double maxX)
         {
             List<Node> results = new List<Node>();
 
@@ -151,8 +148,8 @@ namespace EmbeddedDebugger.Model
                 List<Node> tempList = new List<Node>();
                 tempList.AddRange(results);
                 results.Clear();
-                NodeVariables values = tempList[0].GetValues();
-                if (values.currentNodeLevel != -1)
+                NodeStatistics values = tempList[0].GetValues();
+                if (values.currentNodeLevel != 0)
                 {
                     for (int i = 0; i < j; i++)
                     {
@@ -169,10 +166,7 @@ namespace EmbeddedDebugger.Model
                 return null;
             }
 
-            Debug.Write("Returning points: ");
-            Debug.WriteLine(results.Count.ToString());
-
-            List<NodeVariables> returnList = new List<NodeVariables>();
+            List<NodeStatistics> returnList = new List<NodeStatistics>();
             for (int i = 0; i < results.Count; i++)
             {
                 returnList.Add(results[i].GetValues());
@@ -189,10 +183,10 @@ namespace EmbeddedDebugger.Model
         abstract public Node AppendPoint(double timestamp, double yValue);
         abstract public void AppendNode(Node node, int rootNodeLevel);
         abstract public List<Node> GetChildNodesInRange(double minX, double maxX);
-        abstract public NodeVariables GetValues();
+        abstract public NodeStatistics GetValues();
     }
 
-    public class NodeVariables
+    public class NodeStatistics
     {
         public double yAvg;
         public double yMin;
@@ -201,7 +195,7 @@ namespace EmbeddedDebugger.Model
         public double xMin;
         public double xMax;
         public int currentNodeLevel;
-        public double totalPointCount; //total amount of points in this node, this includes points in childnodes
+        public int totalPointCount; //total amount of points in this node, this includes points in childnodes
         public int nodeCount; //amount of nodes or points in this node
         public double[,] leafPoints;
     }
@@ -210,7 +204,7 @@ namespace EmbeddedDebugger.Model
     {
         List<Node> nodeList = new List<Node>();
 
-        NodeVariables localNodeVariables = new NodeVariables();
+        NodeStatistics localNodeVariables = new NodeStatistics();
 
         public IntermediateNode(int nodeLevel)
         {
@@ -230,7 +224,6 @@ namespace EmbeddedDebugger.Model
             localNodeVariables.nodeCount++;
 
             CalculateAverages();
-
         }
 
         /// <summary>
@@ -265,7 +258,7 @@ namespace EmbeddedDebugger.Model
             return null;
         }
 
-        public override NodeVariables GetValues()
+        public override NodeStatistics GetValues()
         {
             return localNodeVariables;
         }
@@ -277,10 +270,10 @@ namespace EmbeddedDebugger.Model
         /// </summary>
         public void CalculateAverages()
         {
-            NodeVariables recentNodeValues = nodeList[nodeList.Count - 1].GetValues();
+            NodeStatistics recentNodeValues = nodeList[nodeList.Count - 1].GetValues();
             if (nodeList.Count == 1)
             {
-                NodeVariables values = nodeList[0].GetValues();
+                NodeStatistics values = nodeList[0].GetValues();
                 localNodeVariables.yAvg = values.yAvg;
                 localNodeVariables.yMin = values.yMin;
                 localNodeVariables.yMax = values.yMax;
@@ -306,7 +299,7 @@ namespace EmbeddedDebugger.Model
                 double tempCountX = 0;
                 for (int i = 0; i < nodeList.Count; i++)
                 {
-                    NodeVariables values = nodeList[i].GetValues();
+                    NodeStatistics values = nodeList[i].GetValues();
                     tempCountX = tempCountX + values.nodeCount;
                     tempX = tempX + (values.xAvg * values.nodeCount);
                 }
@@ -318,7 +311,7 @@ namespace EmbeddedDebugger.Model
                 double tempCountY = 0;
                 for (int i = 0; i < nodeList.Count; i++)
                 {
-                    NodeVariables values = nodeList[i].GetValues();
+                    NodeStatistics values = nodeList[i].GetValues();
                     tempCountY = tempCountY + values.nodeCount;
                     tempY = tempY + (values.yAvg * values.nodeCount);
                 }
@@ -331,7 +324,7 @@ namespace EmbeddedDebugger.Model
             List<Node> returnNode = new List<Node>();
             for (int i = 0; i < nodeList.Count; i++)
             {
-                NodeVariables tempValues = nodeList[i].GetValues();
+                NodeStatistics tempValues = nodeList[i].GetValues();
                 if (tempValues.xMin < maxX && tempValues.xMax > minX)
                 {
                     returnNode.Add(nodeList[i]);
@@ -347,7 +340,7 @@ namespace EmbeddedDebugger.Model
     /// </summary>
     public class LeafNode : Node
     {
-        NodeVariables localNodeVariables = new NodeVariables();
+        NodeStatistics localNodeVariables = new NodeStatistics();
 
         public LeafNode()
         {
@@ -362,7 +355,7 @@ namespace EmbeddedDebugger.Model
         /// <returns>Returns null when leafnode is not full, returns new leafnode when leafnode is full</returns>
         public override Node AppendPoint(double timestamp, double yValue)
         {
-            localNodeVariables.currentNodeLevel = -1;
+            localNodeVariables.currentNodeLevel = 0;
             if (localNodeVariables.nodeCount < Btree.leafSize - 1)
             {
                 //add point to array
@@ -427,11 +420,10 @@ namespace EmbeddedDebugger.Model
         public override List<Node> GetChildNodesInRange(double minX, double maxX)
         {
             //No childnodes in Leafnode
-            Debug.WriteLine("Individual points not implemented yet");
             return null;
         }
 
-        public override NodeVariables GetValues()
+        public override NodeStatistics GetValues()
         {
             return localNodeVariables;
         }

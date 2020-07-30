@@ -58,7 +58,7 @@ namespace EmbeddedDebugger.View.UserControls
             this.plotSeries = new Dictionary<Register, LineSeries>();
 
 
-            #region initialize axis
+            #region Initialize axis
             //Set the number position to the correct position
             yAxis.Position = AxisPosition.Left;
             xAxis.Position = AxisPosition.Bottom;
