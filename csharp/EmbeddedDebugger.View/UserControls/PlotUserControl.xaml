@@ -55,36 +55,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <CheckBox Name="YAutoScaleCheckBox" Checked="YAutoScaleCheckBox_Checked" Unchecked="YAutoScaleCheckBox_Unchecked" Content="Auto scale" VerticalAlignment="Center" Grid.Column="0" Margin="3 3 3 3"/>
-                        <!--<GroupBox Name="ManualGroupBox" IsEnabled="False" Header="Manual" Grid.Column="1">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="40"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="30"/>
-                                    <RowDefinition Height="30"/>
-                                </Grid.RowDefinitions>
-                                <Label Content="min" Grid.Column="0" Grid.Row="0" VerticalAlignment="center" Margin="3 3 3 3"/>
-                                <Label Content="max" Grid.Column="0" Grid.Row="1" VerticalAlignment="center" Margin="3 3 3 3"/>
-                                <TextBox PreviewTextInput="MinYScaleTextBox_PreviewTextInput"  Name="MinYScaleTextBox" Grid.Column="1" Grid.Row="1" Margin="3 3 3 3" Padding="3 3 3 3"/>
-                                <TextBox PreviewTextInput="MaxYScaleTextBox_PreviewTextInput"  Name="MaxYScaleTextBox" Grid.Column="1" Grid.Row="0" Margin="3 3 3 3" Padding="3 3 3 3"/>
-                            </Grid>
-                        </GroupBox>-->
                     </Grid>
                 </GroupBox>
                 <GroupBox Header="X-Scale">
                     <Grid>
-                        <!--<Grid.RowDefinitions>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                        </Grid.RowDefinitions>-->
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="80"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Label Content="Last..." Margin="3 3 3 3" Grid.Column="0"/>
-                        <!--<TextBox TextChanged="RangeXTextBox_TextChanged" PreviewTextInput="RangeXTextBox_PreviewTextInput"  Name="RangeXTextBox" Text="10" Margin="3 3 3 3" Grid.Column="1" Grid.Row="0" Padding="3 3 3 3" />-->
                         <ComboBox x:Name="LastComboBox" SelectionChanged="LastComboBox_SelectionChanged" Margin="3 3 3 3" Grid.Column="1" Padding="3 3 3 3">
                             <ComboBoxItem IsSelected="True">Off</ComboBoxItem>
                             <ComboBoxItem>Second</ComboBoxItem>
@@ -97,8 +76,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                             <ComboBoxItem>Year</ComboBoxItem>
                         </ComboBox>
                     </Grid>
-                    
-                    
+                </GroupBox>
+                <GroupBox Header="Plot Settings">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <CheckBox Name="DisplayMinMax" IsChecked="true" Content="Display Min/Max" VerticalAlignment="Center" Grid.Column="0" Margin="3 3 3 3"/>
+                    </Grid>
                 </GroupBox>
             </StackPanel>
         </GroupBox>

@@ -58,6 +58,20 @@ namespace EmbeddedDebugger.View.UserControls
             this.plotSeries = new Dictionary<Register, LineSeries>();
 
 
+            DateTime dateTimeNow = DateTime.Now;
+            var dateTimeOffset = new DateTimeOffset(dateTimeNow);
+            var unixDateTime = dateTimeOffset.ToUnixTimeMilliseconds();
+            var unixDateTime2 = dateTimeOffset.ToUnixTimeSeconds() + 10;
+
+
+            DateTime startdate = dateTimeNow;
+            DateTime startdate2 = dateTimeNow.AddMinutes(10);
+
+            xAxis.Minimum = DateTimeAxis.ToDouble(startdate);
+            xAxis.Maximum = DateTimeAxis.ToDouble(startdate2);
+
+            plotModel.InvalidatePlot(true);
+
             #region Initialize axis
             //Set the number position to the correct position
             yAxis.Position = AxisPosition.Left;
@@ -79,6 +93,8 @@ namespace EmbeddedDebugger.View.UserControls
         private void ResetAxisButton_Click(object sender, RoutedEventArgs e)
         {
             LastComboBox.SelectedIndex = 0;
+
+            plotModel.ResetAllAxes();
             foreach (OxyPlot.Axes.Axis ax in plotModel.Axes)
             {
                 ax.AbsoluteMaximum = double.MaxValue;
@@ -144,33 +160,119 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void Refresh(object sender, EventArgs e)
         {
-            if (this.plottingViewModel.RegistersToPlot.Count > 0)
-            {
-                foreach (Register r in this.plottingViewModel.RegistersToPlot)
-                {
-                    LineSeries ls;
-                    if (this.plotSeries.ContainsKey(r))
-                    {
-                        ls = this.plotSeries[r];
-                    }
-                    else
-                    {
-                        ls = new LineSeries();
-                        this.plotSeries.Add(r, ls);
-                        this.plotModel.Series.Add(ls);
-                    }
-                    r.MyValues.ToList().ForEach(x => ls.Points.Add(new DataPoint((uint)x.TimeStamp, Convert.ToDouble(x.Value))));
-                    r.MyValues.Clear();
-                    ls.Color = OxyColors.Blue;
-                    this.plotModel.InvalidatePlot(true);
-                }
+            LastTimeUpdate(); //set window to good size if lastXtime is not off
 
+            double xAxisWindowMinumum = ((DateTimeOffset)DateTime.FromOADate(xAxis.ActualMinimum)).ToUnixTimeMilliseconds(); //convert current x minimum in window to unixtimestamp double
+            double xAxisWindowMaximum = ((DateTimeOffset)DateTime.FromOADate(xAxis.ActualMaximum)).ToUnixTimeMilliseconds();
+            plottingViewModel.RefreshBtrees(xAxisWindowMinumum, xAxisWindowMaximum);
+
+            if (plottingViewModel.BtreesToPlot != null)
+            {
+                int i = 0;
+                foreach (KeyValuePair <Register, List<NodeStatistics>> entry in plottingViewModel.BtreesToPlot)
+                {
+                    if (entry.Value != null)
+                    {
+                        plotModel.Series.Clear(); //deletes all data points
+                        plotModel.Series.Add(new AreaSeries() { Color = OxyColors.LightBlue, Color2 = OxyColors.LightBlue });
+                        plotModel.Series.Add(new LineSeries() { Title = entry.Key.FullName, Color = OxyColors.DarkBlue, MarkerFill = OxyColors.Blue });
+
+
+
+                        foreach (NodeStatistics nodePoint in entry.Value)
+                        {
+                            if (nodePoint.currentNodeLevel != 0) //above lowest level, add average and minmax
+                            {
+                                (plotModel.Series[i + 1] as LineSeries).Points.Add(new DataPoint(DateTimeAxis.ToDouble(UnixToDateTime(nodePoint.xAvg)), nodePoint.yAvg));
+                                if (DisplayMinMax.IsChecked == true) //minmax on/off checkbox
+                                {
+                                    (plotModel.Series[i] as AreaSeries).Points.Add(new DataPoint(DateTimeAxis.ToDouble(UnixToDateTime(nodePoint.xAvg)), nodePoint.yMin));
+                                    (plotModel.Series[i] as AreaSeries).Points2.Add(new DataPoint(DateTimeAxis.ToDouble(UnixToDateTime(nodePoint.xAvg)), nodePoint.yMax));
+                                }
+                            }
+                            else //lowest level, add only seperate points
+                            {
+                                double[,] leafPoints = nodePoint.leafPoints;
+                                for (int j = 0; j < leafPoints.GetLength(0); j++)
+                                {
+                                    if (leafPoints[j, 0] != 0) //x should never be zero, if it's zero, that array point isn't filled yet
+                                    {
+                                        (plotModel.Series[i + 1] as LineSeries).Points.Add(new DataPoint(DateTimeAxis.ToDouble(UnixToDateTime(leafPoints[j, 0])), leafPoints[j, 1]));
+                                    }
+                                }
+                            }
+                        }
+
+                        i = i + 2;
+                    }
+                }
+                plotModel.InvalidatePlot(true);
             }
         }
 
         private void LastComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            
+        }
 
+        public void LastTimeUpdate ()
+        {
+            double btreeMax = plottingViewModel.xAxisMinMax[1];
+            if (LastComboBox.SelectedIndex == 0 || plottingViewModel.xAxisMinMax == null) //off
+            {
+                //do nothing
+            }
+            else
+            {
+                DateTime datetimeLast = DateTime.FromOADate(xAxis.ActualMaximum);
+                DateTime datetimeMinusXTime = DateTime.FromOADate(xAxis.ActualMinimum);
+                if (LastComboBox.SelectedIndex == 1) //1 second
+                {
+                    datetimeLast = UnixToDateTime(btreeMax);
+                    datetimeMinusXTime = datetimeLast.AddSeconds(-1);
+                }
+                else if (LastComboBox.SelectedIndex == 2) //10 seconds
+                {
+                    datetimeLast = UnixToDateTime(btreeMax);
+                    datetimeMinusXTime = datetimeLast.AddSeconds(-10);
+                }
+                else if (LastComboBox.SelectedIndex == 3) //30 seconds
+                {
+                    datetimeLast = UnixToDateTime(btreeMax);
+                    datetimeMinusXTime = datetimeLast.AddSeconds(-30);
+                }
+                else if (LastComboBox.SelectedIndex == 4) //1 minute
+                {
+                    datetimeLast = UnixToDateTime(btreeMax);
+                    datetimeMinusXTime = datetimeLast.AddMinutes(-1);
+                }
+                else if (LastComboBox.SelectedIndex == 5) //10 minutes
+                {
+                    datetimeLast = UnixToDateTime(btreeMax);
+                    datetimeMinusXTime = datetimeLast.AddMinutes(-10);
+                }
+                else if (LastComboBox.SelectedIndex == 6) //1 hour
+                {
+                    datetimeLast = UnixToDateTime(btreeMax);
+                    datetimeMinusXTime = datetimeLast.AddHours(-1);
+                }
+                else if (LastComboBox.SelectedIndex == 7) //1 day
+                {
+                    datetimeLast = UnixToDateTime(btreeMax);
+                    datetimeMinusXTime = datetimeLast.AddDays(-1);
+                }
+                else if (LastComboBox.SelectedIndex == 8) //1 month
+                {
+                    datetimeLast = UnixToDateTime(btreeMax);
+                    datetimeMinusXTime = datetimeLast.AddMonths(-1);
+                }
+
+                plotModel.ResetAllAxes();
+                //xAxis.Reset(); //comment out if you want to stop autorest wel zooming or moving
+                xAxis.Maximum = DateTimeAxis.ToDouble(datetimeLast);
+                xAxis.Minimum = DateTimeAxis.ToDouble(datetimeMinusXTime);
+                plotModel.InvalidatePlot(true); //updates plot
+            }
         }
 
         private void ZoomFitCheckBox_CheckBoxChanged(object sender, SelectionChangedEventArgs e)
@@ -197,5 +299,22 @@ namespace EmbeddedDebugger.View.UserControls
             //Enable the y axis zoom
             yAxis.IsZoomEnabled = true;
         }
+
+
+
+        /// <summary>
+        /// converts unixmillisecondstimestamp to datetime format
+        /// </summary>
+        /// <param name="unixTimestamp"></param>
+        /// <returns></returns>
+        public DateTime UnixToDateTime(double unixTimestamp)
+        {
+            long data = Convert.ToInt64(unixTimestamp);
+            TimeSpan time = TimeSpan.FromMilliseconds(Convert.ToDouble(data));
+            DateTime startdate = new DateTime(1970, 1, 1) + time;
+            return startdate.ToLocalTime();
+        }
+
+        
     }
 }

@@ -44,6 +44,42 @@ namespace EmbeddedDebugger.Model
                 this.theTrees[register].AddPoint(timeStamp, value);
             }
         }
+
+        /// <summary>
+        /// Gets min and max x value of all btree's, used to reset the plotview
+        /// </summary>
+        /// <returns>Min and max x value in all btrees</returns>
+        public double[] getMinMax ()
+        {
+            double[] returnMinMax = null;
+            foreach(Btree entry in theTrees.Values)
+            {
+                double[] temp =  entry.GetBtreeMinMax();
+                if (returnMinMax[0] > temp[0] || returnMinMax == null)
+                {
+                    returnMinMax[0] = temp[0];
+                }
+                if (returnMinMax[1] < temp[1] || returnMinMax == null)
+                {
+                    returnMinMax[1] = temp[1];
+                }
+            }
+            return returnMinMax;
+        }
+
+        public Dictionary<Register, List<NodeStatistics>> GetData (double minX, double maxX) //nope, geeft nodestatistics terug
+        {
+            Dictionary<Register, List<NodeStatistics>> returnData = new Dictionary<Register, List<NodeStatistics>>();
+            int i = 0;
+            foreach (KeyValuePair<Register, Btree> entry in theTrees)
+            {
+                i++;
+                List<NodeStatistics> templist = entry.Value.GetData(minX, maxX);
+                Register tempregister = entry.Key;
+                returnData.Add(entry.Key, templist);
+            }
+            return returnData;
+        }
     }
 
     // TODO Please make sure the classes are in different files, preferable in one folder in the model: BTree or some other nice name 
