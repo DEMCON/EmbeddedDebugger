@@ -35,7 +35,7 @@ namespace EmbeddedDebugger.ViewModel
         public Dictionary<Register, List<NodeStatistics>> BtreesToPlot;
 
         public List<Register> RegistersToPlot { get; }
-        public double[] xAxisMinMax;
+        public double[] xAxisMinMax = new double[2];
 
         public PlottingViewModel(ModelManager modelManager)
         {

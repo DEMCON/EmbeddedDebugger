@@ -49,25 +49,28 @@ namespace EmbeddedDebugger.Model
         /// Gets min and max x value of all btree's, used to reset the plotview
         /// </summary>
         /// <returns>Min and max x value in all btrees</returns>
-        public double[] getMinMax ()
+        public double[] getMinMax()
         {
-            double[] returnMinMax = null;
-            foreach(Btree entry in theTrees.Values)
+            double[] returnMinMax = new double[2];
+            int i = 0;
+            foreach (Btree entry in theTrees.Values)
             {
-                double[] temp =  entry.GetBtreeMinMax();
-                if (returnMinMax[0] > temp[0] || returnMinMax == null)
+                double[] temp = entry.GetBtreeMinMax();
+
+                if (returnMinMax[0] > temp[0] || i == 0)
                 {
                     returnMinMax[0] = temp[0];
                 }
-                if (returnMinMax[1] < temp[1] || returnMinMax == null)
+                if (returnMinMax[1] < temp[1])
                 {
                     returnMinMax[1] = temp[1];
                 }
+                i++;
             }
             return returnMinMax;
         }
 
-        public Dictionary<Register, List<NodeStatistics>> GetData (double minX, double maxX) //nope, geeft nodestatistics terug
+        public Dictionary<Register, List<NodeStatistics>> GetData(double minX, double maxX) //nope, geeft nodestatistics terug
         {
             Dictionary<Register, List<NodeStatistics>> returnData = new Dictionary<Register, List<NodeStatistics>>();
             int i = 0;
@@ -86,14 +89,10 @@ namespace EmbeddedDebugger.Model
 
     public class Btree
     {
-        Random randNum = new Random(); 
-
         public const int leafSize = 4; //amount of points in leafnode
         public const int nodeSize = 4; //amount of childnodes in node
         public const int displayPointSize = 150; //how many points to display at least
         int rootNodeLevel = 2; //
-
-        double testCounter = 1; //testing purposes
 
         Node rootNode;
 
@@ -106,27 +105,9 @@ namespace EmbeddedDebugger.Model
             Node new_leaf = new LeafNode();
             rootNode.AppendNode(new_leaf, 1);
 
-            //demodata to test btree
-            //FillDemoData();
             bTreeReady = true;
         }
 
-        /// <summary>
-        /// testing purposes
-        /// fill btree with dummy data
-        /// </summary>
-        private void FillDemoData()
-        {
-            DateTime dateTimeNow = DateTime.Now;
-            var dateTimeOffset = new DateTimeOffset(dateTimeNow);
-            var unixDateTime = dateTimeOffset.ToUnixTimeMilliseconds();
-
-            for (testCounter = unixDateTime; testCounter < unixDateTime + 100000; testCounter++)
-            {
-                AddPoint(testCounter, randNum.Next(-10, 40) + (Math.Cos(testCounter / 50) * 40) + (Math.Sin(testCounter / 1000) * 10) + 80);
-            }
-            bTreeReady = true;
-        }
 
 
         public bool BTreeReady()

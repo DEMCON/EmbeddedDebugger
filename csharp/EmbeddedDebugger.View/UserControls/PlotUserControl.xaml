@@ -83,7 +83,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                             <ColumnDefinition Width="150"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <CheckBox Name="DisplayMinMax" IsChecked="true" Content="Display Min/Max" VerticalAlignment="Center" Grid.Column="0" Margin="3 3 3 3"/>
+                        <CheckBox Name="DisplayMinMax" Checked="DisplayMinMax_Checked" Unchecked="DisplayMinMax_Unchecked" IsChecked="true" Content="Display Min/Max" VerticalAlignment="Center" Grid.Column="0" Margin="3 3 3 3"/>
                     </Grid>
                 </GroupBox>
             </StackPanel>

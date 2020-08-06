@@ -37,6 +37,7 @@ namespace EmbeddedDebugger.View.UserControls
     {
         private PlotModel plotModel;
         private bool paused;
+        private bool DisplayMinMaxOn = true;
         private bool showSettings = true;
         private SystemViewModel systemViewModel;
         private PlottingViewModel plottingViewModel;
@@ -48,6 +49,8 @@ namespace EmbeddedDebugger.View.UserControls
 
         private List<Register> plotRegisters;
         public List<Register> PlotRegisters { get => this.plottingViewModel.RegistersToPlot; }
+
+        public double[] PlotXMinMax { get => this.plottingViewModel.xAxisMinMax; }
         public PlotUserControl()
         {
             InitializeComponent();
@@ -57,7 +60,7 @@ namespace EmbeddedDebugger.View.UserControls
             YAutoScaleCheckBox.IsChecked = true;
             this.plotSeries = new Dictionary<Register, LineSeries>();
 
-
+            #region set axis to current time
             DateTime dateTimeNow = DateTime.Now;
             var dateTimeOffset = new DateTimeOffset(dateTimeNow);
             var unixDateTime = dateTimeOffset.ToUnixTimeMilliseconds();
@@ -71,6 +74,7 @@ namespace EmbeddedDebugger.View.UserControls
             xAxis.Maximum = DateTimeAxis.ToDouble(startdate2);
 
             plotModel.InvalidatePlot(true);
+            #endregion
 
             #region Initialize axis
             //Set the number position to the correct position
@@ -94,36 +98,42 @@ namespace EmbeddedDebugger.View.UserControls
         {
             LastComboBox.SelectedIndex = 0;
 
+            xAxis.Minimum = DateTimeAxis.ToDouble(UnixToDateTime(PlotXMinMax[0]));
+            xAxis.Maximum = DateTimeAxis.ToDouble(UnixToDateTime(PlotXMinMax[1] + 100));
+
+            plotModel.InvalidatePlot(true);
+
             plotModel.ResetAllAxes();
-            foreach (OxyPlot.Axes.Axis ax in plotModel.Axes)
-            {
-                ax.AbsoluteMaximum = double.MaxValue;
-                ax.AbsoluteMinimum = double.MinValue;
+            //foreach (OxyPlot.Axes.Axis ax in plotModel.Axes)
+            //{
+            //    ax.AbsoluteMaximum = double.MaxValue;
+            //    ax.AbsoluteMinimum = double.MinValue;
 
-                ax.Minimum = double.NaN;
-                ax.Maximum = double.NaN;
-                ax.MinorStep = double.NaN;
-                ax.MajorStep = double.NaN;
+            //    ax.Minimum = double.NaN;
+            //    ax.Maximum = double.NaN;
+            //    ax.MinorStep = double.NaN;
+            //    ax.MajorStep = double.NaN;
 
-                ax.MinimumPadding = 0.01;
-                ax.MaximumPadding = 0.01;
-                ax.MinimumRange = 0;
+            //    ax.MinimumPadding = 0.01;
+            //    ax.MaximumPadding = 0.01;
+            //    ax.MinimumRange = 0;
 
-                ax.Reset();
-            }
+            //    ax.Reset();
+            //}
         }
 
         private void PauseButton_Click(object sender, RoutedEventArgs e)
         {
-            paused = !paused;
-            if (paused)
-            {
-                PauseButton.Content = "▶";
-            }
-            else
-            {
-                PauseButton.Content = "❚❚";
-            }
+            //paused = !paused;
+            //if (paused)
+            //{
+            //    PauseButton.Content = "▶";
+            //}
+            //else
+            //{
+            //    PauseButton.Content = "❚❚";
+            //}
+            LastComboBox.SelectedIndex = 0; //folowing last x time off #todo fix
         }
 
         private void ShowSettingsButton_Click(object sender, RoutedEventArgs e)
@@ -160,7 +170,9 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void Refresh(object sender, EventArgs e)
         {
-            LastTimeUpdate(); //set window to good size if lastXtime is not off
+
+
+
 
             double xAxisWindowMinumum = ((DateTimeOffset)DateTime.FromOADate(xAxis.ActualMinimum)).ToUnixTimeMilliseconds(); //convert current x minimum in window to unixtimestamp double
             double xAxisWindowMaximum = ((DateTimeOffset)DateTime.FromOADate(xAxis.ActualMaximum)).ToUnixTimeMilliseconds();
@@ -168,23 +180,28 @@ namespace EmbeddedDebugger.View.UserControls
 
             if (plottingViewModel.BtreesToPlot != null)
             {
+
+
+                LastTimeUpdate(); //set window to good size if lastXtime is not off
+
                 int i = 0;
-                foreach (KeyValuePair <Register, List<NodeStatistics>> entry in plottingViewModel.BtreesToPlot)
+                //plotModel.Series.Clear(); //deletes all data points
+                foreach (KeyValuePair<Register, List<NodeStatistics>> entry in plottingViewModel.BtreesToPlot)
                 {
-                    if (entry.Value != null)
+                    if (i == 0 && entry.Value != null)
                     {
                         plotModel.Series.Clear(); //deletes all data points
-                        plotModel.Series.Add(new AreaSeries() { Color = OxyColors.LightBlue, Color2 = OxyColors.LightBlue });
-                        plotModel.Series.Add(new LineSeries() { Title = entry.Key.FullName, Color = OxyColors.DarkBlue, MarkerFill = OxyColors.Blue });
-
-
-
+                    }
+                    if (entry.Value != null)
+                    {
+                        plotModel.Series.Add(new AreaSeries() { Color = GetOxyColor(i + 1), Color2 = GetOxyColor(i + 1) });
+                        plotModel.Series.Add(new LineSeries() { Title = entry.Key.FullName, Color = GetOxyColor(i), MarkerFill = GetOxyColor(i + 1) });
                         foreach (NodeStatistics nodePoint in entry.Value)
                         {
                             if (nodePoint.currentNodeLevel != 0) //above lowest level, add average and minmax
                             {
                                 (plotModel.Series[i + 1] as LineSeries).Points.Add(new DataPoint(DateTimeAxis.ToDouble(UnixToDateTime(nodePoint.xAvg)), nodePoint.yAvg));
-                                if (DisplayMinMax.IsChecked == true) //minmax on/off checkbox
+                                if (DisplayMinMaxOn == true) //minmax on/off checkbox
                                 {
                                     (plotModel.Series[i] as AreaSeries).Points.Add(new DataPoint(DateTimeAxis.ToDouble(UnixToDateTime(nodePoint.xAvg)), nodePoint.yMin));
                                     (plotModel.Series[i] as AreaSeries).Points2.Add(new DataPoint(DateTimeAxis.ToDouble(UnixToDateTime(nodePoint.xAvg)), nodePoint.yMax));
@@ -212,67 +229,72 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void LastComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            
+
         }
 
-        public void LastTimeUpdate ()
+        public void LastTimeUpdate()
         {
-            double btreeMax = plottingViewModel.xAxisMinMax[1];
-            if (LastComboBox.SelectedIndex == 0 || plottingViewModel.xAxisMinMax == null) //off
+            this.Dispatcher.Invoke(() =>
             {
-                //do nothing
-            }
-            else
-            {
-                DateTime datetimeLast = DateTime.FromOADate(xAxis.ActualMaximum);
-                DateTime datetimeMinusXTime = DateTime.FromOADate(xAxis.ActualMinimum);
-                if (LastComboBox.SelectedIndex == 1) //1 second
+                double btreeMax = PlotXMinMax[1];
+                if (LastComboBox.SelectedIndex == 0 || PlotXMinMax == null) //off
                 {
-                    datetimeLast = UnixToDateTime(btreeMax);
-                    datetimeMinusXTime = datetimeLast.AddSeconds(-1);
+                    //do nothing
                 }
-                else if (LastComboBox.SelectedIndex == 2) //10 seconds
+                else
                 {
-                    datetimeLast = UnixToDateTime(btreeMax);
-                    datetimeMinusXTime = datetimeLast.AddSeconds(-10);
-                }
-                else if (LastComboBox.SelectedIndex == 3) //30 seconds
-                {
-                    datetimeLast = UnixToDateTime(btreeMax);
-                    datetimeMinusXTime = datetimeLast.AddSeconds(-30);
-                }
-                else if (LastComboBox.SelectedIndex == 4) //1 minute
-                {
-                    datetimeLast = UnixToDateTime(btreeMax);
-                    datetimeMinusXTime = datetimeLast.AddMinutes(-1);
-                }
-                else if (LastComboBox.SelectedIndex == 5) //10 minutes
-                {
-                    datetimeLast = UnixToDateTime(btreeMax);
-                    datetimeMinusXTime = datetimeLast.AddMinutes(-10);
-                }
-                else if (LastComboBox.SelectedIndex == 6) //1 hour
-                {
-                    datetimeLast = UnixToDateTime(btreeMax);
-                    datetimeMinusXTime = datetimeLast.AddHours(-1);
-                }
-                else if (LastComboBox.SelectedIndex == 7) //1 day
-                {
-                    datetimeLast = UnixToDateTime(btreeMax);
-                    datetimeMinusXTime = datetimeLast.AddDays(-1);
-                }
-                else if (LastComboBox.SelectedIndex == 8) //1 month
-                {
-                    datetimeLast = UnixToDateTime(btreeMax);
-                    datetimeMinusXTime = datetimeLast.AddMonths(-1);
-                }
+                    DateTime datetimeLast = DateTime.FromOADate(xAxis.ActualMaximum);
+                    DateTime datetimeMinusXTime = DateTime.FromOADate(xAxis.ActualMinimum);
+                    if (LastComboBox.SelectedIndex == 1) //1 second
+                    {
+                        datetimeLast = UnixToDateTime(btreeMax);
+                        datetimeMinusXTime = datetimeLast.AddSeconds(-1);
+                    }
+                    else if (LastComboBox.SelectedIndex == 2) //10 seconds
+                    {
+                        datetimeLast = UnixToDateTime(btreeMax);
+                        datetimeMinusXTime = datetimeLast.AddSeconds(-10);
+                    }
+                    else if (LastComboBox.SelectedIndex == 3) //30 seconds
+                    {
+                        datetimeLast = UnixToDateTime(btreeMax);
+                        datetimeMinusXTime = datetimeLast.AddSeconds(-30);
+                    }
+                    else if (LastComboBox.SelectedIndex == 4) //1 minute
+                    {
+                        datetimeLast = UnixToDateTime(btreeMax);
+                        datetimeMinusXTime = datetimeLast.AddMinutes(-1);
+                    }
+                    else if (LastComboBox.SelectedIndex == 5) //10 minutes
+                    {
+                        datetimeLast = UnixToDateTime(btreeMax);
+                        datetimeMinusXTime = datetimeLast.AddMinutes(-10);
+                    }
+                    else if (LastComboBox.SelectedIndex == 6) //1 hour
+                    {
+                        datetimeLast = UnixToDateTime(btreeMax);
+                        datetimeMinusXTime = datetimeLast.AddHours(-1);
+                    }
+                    else if (LastComboBox.SelectedIndex == 7) //1 day
+                    {
+                        datetimeLast = UnixToDateTime(btreeMax);
+                        datetimeMinusXTime = datetimeLast.AddDays(-1);
+                    }
+                    else if (LastComboBox.SelectedIndex == 8) //1 month
+                    {
+                        datetimeLast = UnixToDateTime(btreeMax);
+                        datetimeMinusXTime = datetimeLast.AddMonths(-1);
+                    }
 
-                plotModel.ResetAllAxes();
-                //xAxis.Reset(); //comment out if you want to stop autorest wel zooming or moving
-                xAxis.Maximum = DateTimeAxis.ToDouble(datetimeLast);
-                xAxis.Minimum = DateTimeAxis.ToDouble(datetimeMinusXTime);
-                plotModel.InvalidatePlot(true); //updates plot
-            }
+                    plotModel.ResetAllAxes();
+                    //xAxis.Reset(); //comment out if you want to stop autorest wel zooming or moving
+                    xAxis.Maximum = DateTimeAxis.ToDouble(datetimeLast);
+                    xAxis.Minimum = DateTimeAxis.ToDouble(datetimeMinusXTime);
+                    plotModel.InvalidatePlot(true); //updates plot
+                }
+            });
+
+
         }
 
         private void ZoomFitCheckBox_CheckBoxChanged(object sender, SelectionChangedEventArgs e)
@@ -283,6 +305,16 @@ namespace EmbeddedDebugger.View.UserControls
         private void ZoomFitButton_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void DisplayMinMax_Checked(object sendern, RoutedEventArgs e)
+        {
+            DisplayMinMaxOn = true;
+        }
+
+        private void DisplayMinMax_Unchecked(object sendern, RoutedEventArgs e)
+        {
+            DisplayMinMaxOn = false;
         }
 
         private void YAutoScaleCheckBox_Checked(object sendern, RoutedEventArgs e)
@@ -315,6 +347,57 @@ namespace EmbeddedDebugger.View.UserControls
             return startdate.ToLocalTime();
         }
 
-        
+        public OxyColor GetOxyColor(int plotCount)
+        {
+            int modulo = plotCount % 20;
+
+            switch (modulo)
+            {
+                case 0:
+                    return OxyColors.Blue;
+                case 1:
+                    return OxyColors.LightBlue;
+                case 2:
+                    return OxyColors.Green;
+                case 3:
+                    return OxyColors.LightGreen;
+                case 4:
+                    return OxyColors.Red;
+                case 5:
+                    return OxyColors.IndianRed;
+                case 6:
+                    return OxyColors.Cyan;
+                case 7:
+                    return OxyColors.LightCyan;
+                case 8:
+                    return OxyColors.HotPink;
+                case 9:
+                    return OxyColors.LightPink;
+                case 10:
+                    return OxyColors.Yellow;
+                case 11:
+                    return OxyColors.LightYellow;
+                case 12:
+                    return OxyColors.Purple;
+                case 13:
+                    return OxyColors.MediumPurple;
+                case 14:
+                    return OxyColors.Chocolate;
+                case 15:
+                    return OxyColors.BurlyWood;
+                case 16:
+                    return OxyColors.DarkOrange;
+                case 17:
+                    return OxyColors.Orange;
+                case 18:
+                    return OxyColors.MidnightBlue;
+                case 19:
+                    return OxyColors.DarkSlateBlue;
+                default:
+                    return OxyColors.Automatic;
+            }
+
+
+        }
     }
 }
