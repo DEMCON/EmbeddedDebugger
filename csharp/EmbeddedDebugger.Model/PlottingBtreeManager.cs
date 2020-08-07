@@ -79,10 +79,8 @@ namespace EmbeddedDebugger.Model
         public Dictionary<Register, List<NodeStatistics>> GetData(double minX, double maxX)
         {
             Dictionary<Register, List<NodeStatistics>> returnData = new Dictionary<Register, List<NodeStatistics>>();
-            int i = 0;
             foreach (KeyValuePair<Register, Btree> entry in theTrees)
             {
-                i++;
                 List<NodeStatistics> templist = entry.Value.GetData(minX, maxX);
                 Register tempregister = entry.Key;
                 returnData.Add(entry.Key, templist);
@@ -97,12 +95,10 @@ namespace EmbeddedDebugger.Model
     {
         public const int leafSize = 4; //amount of points in leafnode
         public const int nodeSize = 4; //amount of childnodes in node
-        public const int displayPointSize = 150; //how many points to display at least
+        public const int displayPointSize = 100; //how many points to display at least
         int rootNodeLevel = 2; //
 
         Node rootNode;
-
-        bool bTreeReady = false;
 
         public Btree()
         {
@@ -110,15 +106,6 @@ namespace EmbeddedDebugger.Model
             rootNode = new IntermediateNode(1);
             Node new_leaf = new LeafNode();
             rootNode.AppendNode(new_leaf, 1);
-
-            bTreeReady = true;
-        }
-
-
-
-        public bool BTreeReady()
-        {
-            return bTreeReady;
         }
 
         /// <summary>
@@ -286,8 +273,6 @@ namespace EmbeddedDebugger.Model
             return localNodeVariables;
         }
 
-
-
         /// <summary>
         /// calculates averages in for current node
         /// </summary>
@@ -356,7 +341,6 @@ namespace EmbeddedDebugger.Model
             return returnNode;
         }
     }
-
 
     /// <summary>
     /// class with the seperate points, level 0

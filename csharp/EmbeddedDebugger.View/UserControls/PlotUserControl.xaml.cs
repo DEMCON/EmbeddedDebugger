@@ -20,6 +20,7 @@ using EmbeddedDebugger.ViewModel;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +36,8 @@ namespace EmbeddedDebugger.View.UserControls
     /// </summary>
     public partial class PlotUserControl : UserControl
     {
+        private readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         private PlotModel plotModel;
         private bool DisplayMinMaxOn = true;
         private bool showSettings = true;
@@ -139,15 +142,25 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void Refresh(object sender, EventArgs e)
         {
-            double xAxisWindowMinumum = ((DateTimeOffset)DateTime.FromOADate(xAxis.ActualMinimum)).ToUnixTimeMilliseconds(); //convert current x minimum in window to unixtimestamp double
-            double xAxisWindowMaximum = ((DateTimeOffset)DateTime.FromOADate(xAxis.ActualMaximum)).ToUnixTimeMilliseconds();
+            double xAxisWindowMinumum = new double();
+            double xAxisWindowMaximum = new double();
+
+            try
+            {
+                xAxisWindowMinumum = ((DateTimeOffset)DateTime.FromOADate(xAxis.ActualMinimum)).ToUnixTimeMilliseconds(); //convert current x minimum in window to unixtimestamp double
+                xAxisWindowMaximum = ((DateTimeOffset)DateTime.FromOADate(xAxis.ActualMaximum)).ToUnixTimeMilliseconds();
+            } catch (ArgumentException ex)
+            {
+                return;
+            }
+
             plottingViewModel.RefreshBtrees(xAxisWindowMinumum, xAxisWindowMaximum);
 
             if (plottingViewModel.BtreesToPlot != null)
             {
                 LastTimeUpdate(); //set window to good size if lastXtime is on
 
-                int i = 0; 
+                int i = 0;
                 foreach (KeyValuePair<Register, List<NodeStatistics>> entry in plottingViewModel.BtreesToPlot)
                 {
                     if (!plotplotIntialized && entry.Value != null) //Intialize the plot to the correct window size
@@ -167,14 +180,19 @@ namespace EmbeddedDebugger.View.UserControls
                         plotplotIntialized = true;
                     }
 
-                    if (i == 0 && entry.Value != null)
-                    {
-                        plotModel.Series.Clear(); //deletes all data points
-                    }
                     if (entry.Value != null)
                     {
-                        plotModel.Series.Add(new AreaSeries() { Color = GetOxyColor(i + 1), Color2 = GetOxyColor(i + 1) });
-                        plotModel.Series.Add(new LineSeries() { Title = entry.Key.Name, Color = GetOxyColor(i), MarkerFill = GetOxyColor(i + 1) });
+                        if (plotModel.Series.Count <= i)
+                        {
+                            plotModel.Series.Add(new AreaSeries() { Color = GetOxyColor(i + 1), Color2 = GetOxyColor(i + 1) });
+                            plotModel.Series.Add(new LineSeries() { Title = entry.Key.Name, Color = GetOxyColor(i), MarkerFill = GetOxyColor(i + 1) });
+                        }
+
+                        //plotModel.Series.Clear(); //deletes all data points
+                        (plotModel.Series[i + 1] as LineSeries).Points.Clear();
+                        (plotModel.Series[i] as AreaSeries).Points.Clear();
+                        (plotModel.Series[i] as AreaSeries).Points2.Clear();
+
                         foreach (NodeStatistics nodePoint in entry.Value)
                         {
                             if (nodePoint.currentNodeLevel != 0) //above lowest level, add average and minmax
@@ -215,6 +233,9 @@ namespace EmbeddedDebugger.View.UserControls
         {
             this.Dispatcher.Invoke(() =>
             {
+                DateTime datetimeLast = new DateTime();
+                DateTime datetimeMinusXTime = new DateTime();
+
                 double btreeMax = PlotXMinMax[1];
                 if (LastComboBox.SelectedIndex == 0 || PlotXMinMax == null) //off
                 {
@@ -222,8 +243,14 @@ namespace EmbeddedDebugger.View.UserControls
                 }
                 else
                 {
-                    DateTime datetimeLast = DateTime.FromOADate(xAxis.ActualMaximum);
-                    DateTime datetimeMinusXTime = DateTime.FromOADate(xAxis.ActualMinimum);
+                    try
+                    {
+                        datetimeLast = DateTime.FromOADate(xAxis.ActualMaximum);
+                        datetimeMinusXTime = DateTime.FromOADate(xAxis.ActualMinimum);
+                    } catch (ArgumentException e)
+                    {
+                        return;
+                    }
                     if (LastComboBox.SelectedIndex == 1) //1 second
                     {
                         datetimeLast = UnixToDateTime(btreeMax);
