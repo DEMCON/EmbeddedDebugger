@@ -104,35 +104,10 @@ namespace EmbeddedDebugger.View.UserControls
             plotModel.InvalidatePlot(true);
 
             plotModel.ResetAllAxes();
-            //foreach (OxyPlot.Axes.Axis ax in plotModel.Axes)
-            //{
-            //    ax.AbsoluteMaximum = double.MaxValue;
-            //    ax.AbsoluteMinimum = double.MinValue;
-
-            //    ax.Minimum = double.NaN;
-            //    ax.Maximum = double.NaN;
-            //    ax.MinorStep = double.NaN;
-            //    ax.MajorStep = double.NaN;
-
-            //    ax.MinimumPadding = 0.01;
-            //    ax.MaximumPadding = 0.01;
-            //    ax.MinimumRange = 0;
-
-            //    ax.Reset();
-            //}
         }
 
         private void PauseButton_Click(object sender, RoutedEventArgs e)
         {
-            //paused = !paused;
-            //if (paused)
-            //{
-            //    PauseButton.Content = "▶";
-            //}
-            //else
-            //{
-            //    PauseButton.Content = "❚❚";
-            //}
             LastComboBox.SelectedIndex = 0; //folowing last x time off #todo fix
         }
 
