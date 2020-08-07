@@ -34,7 +34,6 @@ namespace EmbeddedDebugger.ViewModel
 
         public Dictionary<Register, List<NodeStatistics>> BtreesToPlot;
 
-        public List<Register> RegistersToPlot { get; }
         public double[] xAxisMinMax = new double[2];
 
         public PlottingViewModel(ModelManager modelManager)
@@ -42,7 +41,6 @@ namespace EmbeddedDebugger.ViewModel
             this.modelManager = modelManager;
             this.debugProtocol = modelManager.DebugProtocol;
             this.plottingBtreeManager = modelManager.BTreeManager;
-            this.RegistersToPlot = new List<Register>();
         }
 
         public void RefreshBtrees (double minX, double maxX)
@@ -53,13 +51,11 @@ namespace EmbeddedDebugger.ViewModel
 
         public void AddPlottingRegister(Register register)
         {
-            this.RegistersToPlot.Add(register);
             this.plottingBtreeManager.AddBTree(register);
         }
 
         public void RemovePlottingRegister(Register register)
         {
-            this.RegistersToPlot.Remove(register);
             this.plottingBtreeManager.RemoveBTree(register);
         }
     }

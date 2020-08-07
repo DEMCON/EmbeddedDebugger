@@ -70,7 +70,13 @@ namespace EmbeddedDebugger.Model
             return returnMinMax;
         }
 
-        public Dictionary<Register, List<NodeStatistics>> GetData(double minX, double maxX) //nope, geeft nodestatistics terug
+        /// <summary>
+        /// Get data of all btrees in a specific window
+        /// </summary>
+        /// <param name="minX">x axis minimum</param>
+        /// <param name="maxX">x axis maximum</param>
+        /// <returns>dictorinary of </returns>
+        public Dictionary<Register, List<NodeStatistics>> GetData(double minX, double maxX)
         {
             Dictionary<Register, List<NodeStatistics>> returnData = new Dictionary<Register, List<NodeStatistics>>();
             int i = 0;

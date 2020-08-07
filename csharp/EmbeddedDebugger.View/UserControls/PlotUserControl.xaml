@@ -41,7 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <ColumnDefinition Width="30"/>
             </Grid.ColumnDefinitions>
             <Button Name="ResetAxisButton" Click="ResetAxisButton_Click" Margin="3 3 3 3" HorizontalAlignment="Right" FontWeight="Bold" Content="↺" Width="24" Grid.Column="0"/>
-            <Button Name="PauseButton" Click="PauseButton_Click" Margin="3 3 3 3" HorizontalAlignment="Right" Content="❚❚" Width="24" Grid.Column="2" Visibility="Hidden"/>
+            <Button Name="PauseButton" Click="PauseButton_Click" Margin="3 3 3 3" HorizontalAlignment="Right" Content="❚❚" Width="24" Grid.Column="2"/>
             <Button Name="ShowSettingsButton" Click="ShowSettingsButton_Click" Margin="3 3 3 3" HorizontalAlignment="Right" FontWeight="Bold" Content=">" Width="24" Grid.Column="3" />
         </Grid>
 

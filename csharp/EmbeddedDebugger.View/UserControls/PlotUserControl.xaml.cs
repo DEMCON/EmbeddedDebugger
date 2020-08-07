@@ -36,29 +36,23 @@ namespace EmbeddedDebugger.View.UserControls
     public partial class PlotUserControl : UserControl
     {
         private PlotModel plotModel;
-        private bool paused;
         private bool DisplayMinMaxOn = true;
         private bool showSettings = true;
+        private bool plotplotIntialized = false;
         private SystemViewModel systemViewModel;
         private PlottingViewModel plottingViewModel;
 
         private DateTimeAxis xAxis = new DateTimeAxis();
         private LinearAxis yAxis = new LinearAxis();
 
-        private Dictionary<Register, LineSeries> plotSeries;
-
-        private List<Register> plotRegisters;
-        public List<Register> PlotRegisters { get => this.plottingViewModel.RegistersToPlot; }
 
         public double[] PlotXMinMax { get => this.plottingViewModel.xAxisMinMax; }
         public PlotUserControl()
         {
             InitializeComponent();
-            plotRegisters = new List<Register>();
             plotModel = new PlotModel { Title = "" };
             Plot.Model = plotModel;
             YAutoScaleCheckBox.IsChecked = true;
-            this.plotSeries = new Dictionary<Register, LineSeries>();
 
             #region set axis to current time
             DateTime dateTimeNow = DateTime.Now;
@@ -68,7 +62,7 @@ namespace EmbeddedDebugger.View.UserControls
 
 
             DateTime startdate = dateTimeNow;
-            DateTime startdate2 = dateTimeNow.AddMinutes(10);
+            DateTime startdate2 = dateTimeNow.AddHours(10);
 
             xAxis.Minimum = DateTimeAxis.ToDouble(startdate);
             xAxis.Maximum = DateTimeAxis.ToDouble(startdate2);
@@ -108,7 +102,7 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void PauseButton_Click(object sender, RoutedEventArgs e)
         {
-            LastComboBox.SelectedIndex = 0; //folowing last x time off #todo fix
+            LastComboBox.SelectedIndex = 0; 
         }
 
         private void ShowSettingsButton_Click(object sender, RoutedEventArgs e)
@@ -145,24 +139,34 @@ namespace EmbeddedDebugger.View.UserControls
 
         private void Refresh(object sender, EventArgs e)
         {
-
-
-
-
             double xAxisWindowMinumum = ((DateTimeOffset)DateTime.FromOADate(xAxis.ActualMinimum)).ToUnixTimeMilliseconds(); //convert current x minimum in window to unixtimestamp double
             double xAxisWindowMaximum = ((DateTimeOffset)DateTime.FromOADate(xAxis.ActualMaximum)).ToUnixTimeMilliseconds();
             plottingViewModel.RefreshBtrees(xAxisWindowMinumum, xAxisWindowMaximum);
 
             if (plottingViewModel.BtreesToPlot != null)
             {
+                LastTimeUpdate(); //set window to good size if lastXtime is on
 
-
-                LastTimeUpdate(); //set window to good size if lastXtime is not off
-
-                int i = 0;
-                //plotModel.Series.Clear(); //deletes all data points
+                int i = 0; 
                 foreach (KeyValuePair<Register, List<NodeStatistics>> entry in plottingViewModel.BtreesToPlot)
                 {
+                    if (!plotplotIntialized && entry.Value != null) //Intialize the plot to the correct window size
+                    {
+                        DateTime datetimeLast = DateTime.FromOADate(xAxis.ActualMaximum);
+                        DateTime datetimeMinusXTime = DateTime.FromOADate(xAxis.ActualMinimum);
+
+                        datetimeLast = UnixToDateTime(PlotXMinMax[1]).AddSeconds(100);
+                        datetimeMinusXTime = datetimeLast.AddSeconds(-110);
+
+                        plotModel.ResetAllAxes();
+
+                        xAxis.Maximum = DateTimeAxis.ToDouble(datetimeLast);
+                        xAxis.Minimum = DateTimeAxis.ToDouble(datetimeMinusXTime);
+                        plotModel.InvalidatePlot(true); //updates plot
+
+                        plotplotIntialized = true;
+                    }
+
                     if (i == 0 && entry.Value != null)
                     {
                         plotModel.Series.Clear(); //deletes all data points
@@ -170,7 +174,7 @@ namespace EmbeddedDebugger.View.UserControls
                     if (entry.Value != null)
                     {
                         plotModel.Series.Add(new AreaSeries() { Color = GetOxyColor(i + 1), Color2 = GetOxyColor(i + 1) });
-                        plotModel.Series.Add(new LineSeries() { Title = entry.Key.FullName, Color = GetOxyColor(i), MarkerFill = GetOxyColor(i + 1) });
+                        plotModel.Series.Add(new LineSeries() { Title = entry.Key.Name, Color = GetOxyColor(i), MarkerFill = GetOxyColor(i + 1) });
                         foreach (NodeStatistics nodePoint in entry.Value)
                         {
                             if (nodePoint.currentNodeLevel != 0) //above lowest level, add average and minmax
@@ -306,8 +310,6 @@ namespace EmbeddedDebugger.View.UserControls
             //Enable the y axis zoom
             yAxis.IsZoomEnabled = true;
         }
-
-
 
         /// <summary>
         /// converts unixmillisecondstimestamp to datetime format
