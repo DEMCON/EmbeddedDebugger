@@ -37,6 +37,7 @@ namespace EmbeddedDebugger.Model
         public RpcInterface RpcInterface { get; }
         public ConnectionManager DebugProtocol { get; }
         public Dictionary<byte, Register> DebugChannels { get; }
+        public PlottingBtreeManager BTreeManager { get; }
         #endregion
 
 
@@ -47,6 +48,7 @@ namespace EmbeddedDebugger.Model
             this.Nodes = new List<CpuNode>();
             this.RpcInterface = new RpcInterface(this, this.DebugProtocol);
             this.DebugChannels = new Dictionary<byte, Register>();
+            this.BTreeManager = new PlottingBtreeManager();
         }
 
         public void RequestOnce(byte nodeId)

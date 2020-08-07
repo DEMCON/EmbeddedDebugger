@@ -54,12 +54,12 @@ namespace EmbeddedDebugger.View.UserControls.ObjectDisplayers
 
         private void PlotCheckBox_OnChecked(object sender, RoutedEventArgs e)
         {
-            this.plottingViewModel.RegistersToPlot.Add(this.Register);
+            this.plottingViewModel.AddPlottingRegister(this.Register);
         }
 
         private void PlotCheckBox_OnUnchecked(object sender, RoutedEventArgs e)
         {
-            this.plottingViewModel.RegistersToPlot.Remove(this.Register);
+            this.plottingViewModel.RemovePlottingRegister(this.Register);
         }
 
         private void RefreshButton_OnClick(object sender, RoutedEventArgs e)

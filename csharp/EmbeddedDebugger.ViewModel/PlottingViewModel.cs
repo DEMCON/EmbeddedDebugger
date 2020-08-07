@@ -30,16 +30,33 @@ namespace EmbeddedDebugger.ViewModel
     {
         private readonly ModelManager modelManager;
         private readonly Model.ConnectionManager debugProtocol;
+        private readonly PlottingBtreeManager plottingBtreeManager;
 
-        public List<Register> RegistersToPlot;
-        
+        public Dictionary<Register, List<NodeStatistics>> BtreesToPlot;
+
+        public double[] xAxisMinMax = new double[2];
+
         public PlottingViewModel(ModelManager modelManager)
         {
             this.modelManager = modelManager;
             this.debugProtocol = modelManager.DebugProtocol;
-            this.RegistersToPlot = new List<Register>();
+            this.plottingBtreeManager = modelManager.BTreeManager;
         }
 
-        
+        public void RefreshBtrees (double minX, double maxX)
+        {
+            BtreesToPlot = plottingBtreeManager.GetData(minX, maxX);
+            xAxisMinMax = plottingBtreeManager.getMinMax();
+        }
+
+        public void AddPlottingRegister(Register register)
+        {
+            this.plottingBtreeManager.AddBTree(register);
+        }
+
+        public void RemovePlottingRegister(Register register)
+        {
+            this.plottingBtreeManager.RemoveBTree(register);
+        }
     }
 }
