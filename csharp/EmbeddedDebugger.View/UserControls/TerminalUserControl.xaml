@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
              xmlns:local="clr-namespace:EmbeddedDebugger.View.UserControls"
              xmlns:customcontrols="clr-namespace:EmbeddedDebugger.View.CustomControls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800" DataContextChanged="TerminalUserControl_OnDataContextChanged">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="35"/>

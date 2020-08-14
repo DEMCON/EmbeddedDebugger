@@ -41,7 +41,7 @@ namespace EmbeddedDebugger.DebugProtocol
         public string Name { get; }
         public string ProtocolVersionString => $"V {this.ProtocolVersion.Major}.{this.ProtocolVersion.Minor}.{this.ProtocolVersion.Build}";
         public Version ProtocolVersion { get; }
-        public string ApplicationVersionString => $"V {this.ApplicationVersion.Major}.{this.ApplicationVersion.Minor}.{this.ApplicationVersion.Build}";
+        public string ApplicationVersionString => this.ApplicationVersion == null ? "" : $"V {this.ApplicationVersion.Major}.{this.ApplicationVersion.Minor}.{this.ApplicationVersion.Build}";
         public Version ApplicationVersion { get; }
 
         public IList<Register> Registers => this.EmbeddedConfig?.Registers;

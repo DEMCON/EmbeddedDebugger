@@ -61,6 +61,7 @@ namespace EmbeddedDebugger.Connectors.TCP
         public override event EventHandler HasConnected = delegate { };
         public event EventHandler<BytesReceivedEventArgs> MessageReceived = delegate { };
         public event EventHandler UnexpectedDisconnect = delegate { };
+        public override event EventHandler<string> NewTerminalMessageReceived;
         private bool asServer;
         public bool AsServer { get => asServer; set => asServer = value; }
 

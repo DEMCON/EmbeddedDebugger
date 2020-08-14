@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Drawing.Text;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace EmbeddedDebugger.Connectors.BaseClasses
@@ -32,7 +33,7 @@ namespace EmbeddedDebugger.Connectors.BaseClasses
         public override event EventHandler<CpuNode> NewNodeFound;
         public override event EventHandler<ValueReceivedEventArgs> NewValueReceived;
         public override event EventHandler<TraceMessageReceivedEventArgs> NewTraceMessageReceived;
-
+        public override event EventHandler<string> NewTerminalMessageReceived;
 
         public abstract override bool Connect();
         public abstract override void Disconnect();

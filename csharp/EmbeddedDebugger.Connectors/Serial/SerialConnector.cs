@@ -127,6 +127,7 @@ namespace EmbeddedDebugger.Connectors.Serial
         public override bool IsConnected => this.isConnected;
         public override event EventHandler UnexpectedlyDisconnected = delegate { };
         public override event EventHandler HasConnected = delegate { };
+        public override event EventHandler<string> NewTerminalMessageReceived;
 
         public override void SetConnectionSettings(List<ConnectionSetting> settings)
         {

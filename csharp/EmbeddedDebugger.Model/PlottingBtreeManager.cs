@@ -37,11 +37,11 @@ namespace EmbeddedDebugger.Model
             }
         }
 
-        public void AddValueToBTree(Register register, double value, double timeStamp)
+        public void AddValueToBTree(Register register, object value, double timeStamp)
         {
-            if (theTrees.ContainsKey(register))
+            if (this.theTrees.ContainsKey(register))
             {
-                this.theTrees[register].AddPoint(timeStamp, value);
+                this.theTrees[register].AddPoint(timeStamp, Convert.ToDouble(value));
             }
         }
 

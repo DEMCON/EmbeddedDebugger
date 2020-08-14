@@ -43,6 +43,7 @@ namespace EmbeddedDebugger.DebugProtocol.Enums
         ULong = 0x0F,
         String = 0x10,
         Blob = 0x11,
+        Void = 0x12,
         Unknown = 0xFF,
     }
 }

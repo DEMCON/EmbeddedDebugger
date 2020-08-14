@@ -43,6 +43,8 @@ namespace EmbeddedDebugger.Model
         public bool IsConnected { get; private set; }
         #endregion
 
+        public event EventHandler<string> NewTerminalMessageReceived;
+
         public ConnectionManager(ModelManager core)
         {
             this.Connections = GetConnectorTypes().ToList();
@@ -172,11 +174,7 @@ namespace EmbeddedDebugger.Model
         /// <param name="debugString">The debug string</param>
         public void SendDebugString(byte nodeID, string debugString)
         {
-            DebugStringMessage debugStringMessage = new DebugStringMessage()
-            {
-                Message = debugString
-            };
-            //SendMessage(nodeID, debugStringMessage);
+            this.Connection.WriteConsole(null, debugString);
         }
         #endregion
 
@@ -194,12 +192,18 @@ namespace EmbeddedDebugger.Model
             this.Connection.NewNodeFound += this.Connector_NewNodeFound;
             this.Connection.NewValueReceived += this.Connector_NewValueReceived;
             this.Connection.NewTraceMessageReceived += this.Connector_NewTraceMessageReceived;
+            this.Connection.NewTerminalMessageReceived += this.Connection_NewTerminalMessageReceived;
 
-            //  Search for nodes on this connector
+                //  Search for nodes on this connector
             this.SearchForNodes(this.Connection);
 
             // Remove this event handler
             this.Connection.HasConnected -= this.ConnectorConnected;
+        }
+
+        private void Connection_NewTerminalMessageReceived(object sender, string e)
+        {
+            this.NewTerminalMessageReceived?.Invoke(sender, e);
         }
 
         /// <summary>
@@ -233,7 +237,7 @@ namespace EmbeddedDebugger.Model
         private void Connector_NewValueReceived(object sender, EmbeddedDebugger.DebugProtocol.CustomEventArgs.ValueReceivedEventArgs e)
         {
             e.Register?.AddValue(e.Value);
-            core.BTreeManager.AddValueToBTree(e.Register, Convert.ToDouble(e.Register.RegisterValue.Value), new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds());
+            core.BTreeManager.AddValueToBTree(e.Register, e.Register.RegisterValue.Value, new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds());
         }
 
         /// <summary>

@@ -42,11 +42,19 @@ namespace EmbeddedDebugger.ViewModel
 
         public CpuNode SelectedCpuNode { get; set; }
 
+        public event EventHandler<string> NewTerminalMessage;
+
 
         public SystemViewModel(ModelManager modelManager)
         {
             this.modelManager = modelManager;
             this.debugProtocol = modelManager.DebugProtocol;
+            this.debugProtocol.NewTerminalMessageReceived += this.DebugProtocol_NewTerminalMessageReceived;
+        }
+
+        private void DebugProtocol_NewTerminalMessageReceived(object sender, string e)
+        {
+            this.NewTerminalMessage?.Invoke(sender, e);
         }
 
         #region Nodes
@@ -153,6 +161,11 @@ namespace EmbeddedDebugger.ViewModel
         public void ReadOnceOfChannels()
         {
             this.modelManager.RequestOnce(SelectedCpuNode.Id);
+        }
+
+        public void SendConsoleMessage(string message)
+        {
+            this.debugProtocol.SendDebugString(0x00, message);
         }
     }
 }

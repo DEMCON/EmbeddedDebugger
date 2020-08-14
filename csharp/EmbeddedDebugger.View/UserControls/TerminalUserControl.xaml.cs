@@ -31,6 +31,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using EmbeddedDebugger.DebugProtocol;
+using EmbeddedDebugger.ViewModel;
 
 namespace EmbeddedDebugger.View.UserControls
 {
@@ -39,6 +40,7 @@ namespace EmbeddedDebugger.View.UserControls
     /// </summary>
     public partial class TerminalUserControl : UserControl
     {
+        private SystemViewModel systemViewModel;
         private List<CpuNode> registeredNodes;
         private bool enabled;
 
@@ -51,24 +53,12 @@ namespace EmbeddedDebugger.View.UserControls
             InitializeComponent();
             registeredNodes = new List<CpuNode>();
             enabled = true;
+            this.EmbeddedTerminal.NewMessage += this.EmbeddedTerminal_NewMessage;
         }
 
-
-
-        private void Node_NewTerminalDataAdded(CpuNode node, string s)
+        private void EmbeddedTerminal_NewMessage(object sender, string e)
         {
-            if (enabled == true)
-            {
-                if (registeredNodes.Count == 1)
-                {
-                    EmbeddedTerminal.AddResponse(s);
-                }
-                else
-                {
-                    EmbeddedTerminal.AddResponse($"({node}){s}");
-                }
-            }
-
+            this.systemViewModel.SendConsoleMessage(e);
         }
 
 
@@ -85,6 +75,20 @@ namespace EmbeddedDebugger.View.UserControls
         private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             enabled = false;
+        }
+
+        private void TerminalUserControl_OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is ViewModelManager vmm)
+            {
+                this.systemViewModel = vmm.SystemViewModel;
+                this.systemViewModel.NewTerminalMessage += this.SystemViewModel_NewTerminalMessage;
+            }
+        }
+
+        private void SystemViewModel_NewTerminalMessage(object sender, string e)
+        {
+            EmbeddedTerminal.AddResponse(e);
         }
     }
 }

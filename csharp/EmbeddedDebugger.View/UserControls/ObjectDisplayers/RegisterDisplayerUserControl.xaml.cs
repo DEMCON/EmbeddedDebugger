@@ -143,7 +143,10 @@ namespace EmbeddedDebugger.View.UserControls.ObjectDisplayers
 
         private void ChannelModeComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            this.systemViewModel?.UpdateChannelMode(this.Register, (ChannelMode)this.ChannelModeComboBox.SelectedItem);
+            if (e.RemovedItems.Count >= 1)
+            {
+                this.systemViewModel?.UpdateChannelMode(this.Register, (ChannelMode) this.ChannelModeComboBox.SelectedItem);
+            }
         }
 
         private void ValueTextBox_LostFocus(object sender, RoutedEventArgs e)
